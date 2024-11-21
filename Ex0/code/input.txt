@@ -13,6 +13,9 @@ y_1
 u_1
 1
 
+alpha
+1
+
 delta_time
 1e-3
 

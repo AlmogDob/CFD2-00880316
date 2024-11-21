@@ -15,7 +15,8 @@
 #define dprintD(expr) do{printf("%d: ", __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
 
 int create_empty_dir(char *parent_directory);
-void read_input(char *input_file, int *N, double *y_0, double *u_0, double *y_1, double *u_1, double *delta_time);
+void read_input(char *input_file, int *N, int *alpha, double *y_0, double *u_0, double *y_1, double *u_1, double *delta_time);
+void init(double *u);
 
 int main(int argc, char const *argv[])
 {
@@ -25,7 +26,7 @@ int main(int argc, char const *argv[])
     double *A, *B, *C, *D, *u,
            y_0, u_0, y_1, u_1, delta_time;
 
-    int N;
+    int N, alpha;
 
 /* getting the input file and output file */
     if (--argc != 2 && argc != 4) {
@@ -55,11 +56,12 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* reading the input */
-    read_input(input_fill, &N, &y_0, &u_0, &y_1, &u_1, &delta_time);
+    read_input(input_fill, &N, &alpha, &y_0, &u_0, &y_1, &u_1, &delta_time);
 
 /* Checking the input */
     printf("--------------------\n");
     dprintINT(N);
+    dprintINT(alpha);
     dprintD(y_0);
     dprintD(u_0);
     dprintD(y_1);
@@ -150,7 +152,7 @@ int create_empty_dir(char *parent_directory)
 /* read input parameters from input file
 argument list:
 fp - file pointer to input file */
-void read_input(char *input_file, int *N, double *y_0, double *u_0, double *y_1, double *u_1, double *delta_time)
+void read_input(char *input_file, int *N, int *alpha, double *y_0, double *u_0, double *y_1, double *u_1, double *delta_time)
 {
     char current_word[MAXWORD];
     float temp;
@@ -163,6 +165,8 @@ void read_input(char *input_file, int *N, double *y_0, double *u_0, double *y_1,
     while(fscanf(fp, "%s", current_word) != EOF) {
         if (!strcmp(current_word, "N")) {
             fscanf(fp, "%d", N);
+        } else if (!strcmp(current_word, "alpha")) {
+            fscanf(fp, "%d", alpha);
         } else if (!strcmp(current_word, "y_0")) {
             fscanf(fp, "%g", &temp);
             *y_0 = (double)temp;
@@ -180,4 +184,9 @@ void read_input(char *input_file, int *N, double *y_0, double *u_0, double *y_1,
             *delta_time = (double)temp;
         }
     }
+}
+
+void init(double *u)
+{
+
 }
