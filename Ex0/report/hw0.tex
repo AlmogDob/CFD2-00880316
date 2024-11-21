@@ -6,7 +6,7 @@
 \renewcommand\maketitlehookd{\vfill\null}
 
 \title{Computational Fluid Dynamics}
-\author{Almog Dubrescu\\\\ID 214254252}
+\author{Almog Dobrescu\\\\ID 214254252}
 
 \begin{document}
 
@@ -87,13 +87,13 @@ In matrix from:
         0 & 0 & \cdots & \cdots & 0 & A_{N-1} &B_{N-1}
     \end{pmatrix}
     \begin{pmatrix}
-        u_1\\
-        u_2\\
+        \Delta u_1\\
+        \Delta u_2\\
         \cdots\\
         \cdots\\
         \cdots\\
-        y_{N-2}\\
-        y_{N-1}
+        \Delta u_{N-2}\\
+        \Delta u_{N-1}
     \end{pmatrix}
     =
     \begin{pmatrix}
@@ -194,6 +194,47 @@ $$\Downarrow$$
 For stability:
 \begin{equation}
     |G|<1 \Rightarrow \left|1+\frac{rA}{1-\alpha rA}\right| < 1
+\end{equation}
+% \begin{equation}
+%     -1<\frac{1-4r(1-\alpha)}{1+4r\alpha}<1
+% \end{equation}
+% \begin{align}
+%     -1<\frac{1-4r(1-\alpha)}{1+4r\alpha} \hspace{0.5cm}\emph{and}&\hspace{0.5cm} \frac{1-4r(1-\alpha)}{1+4r\alpha}<1\\
+%     \frac{1-4r(r-\alpha)+1+4r\alpha}{1+4r\alpha}>0 \hspace{0.5cm}\emph{and}&\hspace{0.5cm} \frac{1-4r(1-\alpha)-1-4r\alpha}{1+4r\alpha}<0\\
+%     2-4r^2+8r\alpha = 0 \hspace{0.5cm} 1+4r\alpha\neq 0 \hspace{0.5cm}\emph{and}&\hspace{0.5cm} -4r\alpha = 0 \hspace{0.5cm} 1+4r\alpha \neq 0
+% \end{align}
+For $\alpha = 0$:
+\begin{gather}
+    G = 1+rA\\
+    \left|1-4r\right| < 1\\
+    -1< 1-4r <1\\
+    -2< -4r <0\\
+    0< 4r <2\\
+    0< r <\frac{1}{2}\\
+    \Delta t < \frac{\Delta y^2}{2\mu}
+\end{gather}
+For $\alpha = 1$:
+\begin{gather}
+    G = \frac{1}{1-rA}\\
+    \begin{matrix}
+        \displaystyle\left|\frac{1}{1-rA}\right|<1 & A \leq 0
+    \end{matrix}
+\end{gather}
+$$\Downarrow$$
+\begin{center}
+    smaller for every \emph{r} ($\Delta t$)
+\end{center}
+For every $\alpha$ and $\Delta t\rightarrow\infty$:
+\begin{equation}
+    \lim_{\Delta t\rightarrow\infty}\left|G\right|=\frac{1-\alpha}{\alpha}
+\end{equation}
+Which means that stability for infinite time step:
+\begin{equation}
+    \alpha \left\{\begin{matrix}
+        \displaystyle<\frac{1}{2} & \text{Unstable} \\\\
+        \displaystyle=\frac{1}{2} & \text{Neutrally stable} \\\\
+        \displaystyle>\frac{1}{2} & Stable
+    \end{matrix}\right.
 \end{equation}
 
 

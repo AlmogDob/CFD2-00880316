@@ -15,8 +15,11 @@
 #define dprintD(expr) do{printf("%d: ", __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
 
 int create_empty_dir(char *parent_directory);
-void read_input(char *input_file, int *N, int *alpha, double *y_0, double *u_0, double *y_1, double *u_1, double *delta_time);
-void init(double *u);
+void read_input(char *input_file, int *N, int *len, double *alpha, double *y_0, double *u_0, double *y_1, double *u_1, double *delta_time, double *delta_y, double *mu);
+void init(double *u, int len);
+void print_array(double *array, int len);
+void check_delta_time(double delta_time, double delta_y, double mu);
+void RHS(double *A, double *B, double *C, double *D, double *u, double delta_time, double delta_y);
 
 int main(int argc, char const *argv[])
 {
@@ -24,9 +27,9 @@ int main(int argc, char const *argv[])
     char input_fill[MAXDIR], output_dir[MAXDIR];
 
     double *A, *B, *C, *D, *u,
-           y_0, u_0, y_1, u_1, delta_time;
+           y_0, u_0, y_1, u_1, delta_time, alpha, delta_y, mu;
 
-    int N, alpha;
+    int N, len;
 
 /* getting the input file and output file */
     if (--argc != 2 && argc != 4) {
@@ -56,42 +59,49 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* reading the input */
-    read_input(input_fill, &N, &alpha, &y_0, &u_0, &y_1, &u_1, &delta_time);
+    read_input(input_fill, &N, &len, &alpha, &y_0, &u_0, &y_1, &u_1, &delta_time, &delta_y, &mu);
 
 /* Checking the input */
-    printf("--------------------\n");
     dprintINT(N);
-    dprintINT(alpha);
     dprintD(y_0);
     dprintD(u_0);
     dprintD(y_1);
     dprintD(u_1);
+    dprintD(mu);
+    dprintD(alpha);
     dprintD(delta_time);
+    dprintD(delta_y);
     printf("--------------------\n");
 
 /*------------------------------------------------------------*/
 /* allocating the matrices */
 
-    A = (double *)malloc(sizeof(double) * N+1);
-    for (int i = 0; i < N+1; i++) {
+    A = (double *)malloc(sizeof(double) * len);
+    for (int i = 0; i < len; i++) {
         A[i] = 0;
     }
-    B = (double *)malloc(sizeof(double) * N+1);
-    for (int i = 0; i < N+1; i++) {
+    B = (double *)malloc(sizeof(double) * len);
+    for (int i = 0; i < len; i++) {
         B[i] = 0;
     }
-    C = (double *)malloc(sizeof(double) * N+1);
-    for (int i = 0; i < N+1; i++) {
+    C = (double *)malloc(sizeof(double) * len);
+    for (int i = 0; i < len; i++) {
         C[i] = 0;
     }
-    D = (double *)malloc(sizeof(double) * N+1);
-    for (int i = 0; i < N+1; i++) {
+    D = (double *)malloc(sizeof(double) * len);
+    for (int i = 0; i < len; i++) {
         D[i] = 0;
     }
-    u = (double *)malloc(sizeof(double) * N+1);
-    for (int i = 0; i < N+1; i++) {
+    u = (double *)malloc(sizeof(double) * len);
+    for (int i = 0; i < len; i++) {
         u[i] = 0;
     }
+
+/*------------------------------------------------------------*/
+/* initializtion */
+    init(u, len);
+
+    print_array(u, len);
 
 /*------------------------------------------------------------*/
 /* the loop */
@@ -136,10 +146,7 @@ int create_empty_dir(char *parent_directory)
                 }
                 entity = readdir(dir);
             }
-
-
             closedir(dir);
-
             return 0;
         }
 
@@ -152,7 +159,7 @@ int create_empty_dir(char *parent_directory)
 /* read input parameters from input file
 argument list:
 fp - file pointer to input file */
-void read_input(char *input_file, int *N, int *alpha, double *y_0, double *u_0, double *y_1, double *u_1, double *delta_time)
+void read_input(char *input_file, int *N, int *len, double *alpha, double *y_0, double *u_0, double *y_1, double *u_1, double *delta_time, double *delta_y, double *mu)
 {
     char current_word[MAXWORD];
     float temp;
@@ -165,8 +172,7 @@ void read_input(char *input_file, int *N, int *alpha, double *y_0, double *u_0, 
     while(fscanf(fp, "%s", current_word) != EOF) {
         if (!strcmp(current_word, "N")) {
             fscanf(fp, "%d", N);
-        } else if (!strcmp(current_word, "alpha")) {
-            fscanf(fp, "%d", alpha);
+            *len = *N+1;
         } else if (!strcmp(current_word, "y_0")) {
             fscanf(fp, "%g", &temp);
             *y_0 = (double)temp;
@@ -179,14 +185,46 @@ void read_input(char *input_file, int *N, int *alpha, double *y_0, double *u_0, 
         } else if (!strcmp(current_word, "u_1")) {
             fscanf(fp, "%g", &temp);
             *u_1 = (double)temp;
+        } else if (!strcmp(current_word, "mu")) {
+            fscanf(fp, "%g", &temp);
+            *mu = (double)temp;
+        } else if (!strcmp(current_word, "alpha")) {
+            fscanf(fp, "%g", &temp);
+            *alpha = (double)temp;
         } else if (!strcmp(current_word, "delta_time")) {
             fscanf(fp, "%g", &temp);
             *delta_time = (double)temp;
         }
     }
+    *delta_y = fabs((*y_0 - *y_1) / (*N-1));
+
+    if (*alpha <= 0.5) {
+        check_delta_time(*delta_time, *delta_y, *mu);
+    }
+
+    fclose(fp);
 }
 
-void init(double *u)
+void init(double *u, int len)
 {
+    for (int i = 0; i < len; i++) {
+        u[i] = 1;
+    }
+}
 
+void print_array(double *array, int len)
+{
+    printf("--------------------\n");
+    for (int i = 0; i < len; i++) {
+        printf("%g ", array[i]);
+    }
+    printf("\n");
+    printf("--------------------\n");
+}
+
+void check_delta_time(double delta_time, double delta_y, double mu)
+{
+    if (delta_time >= delta_y * delta_y / 2 / mu) {
+        printf("%s:%d:[Warning] delta_time too big\n", __FILE__, __LINE__);
+    }
 }
