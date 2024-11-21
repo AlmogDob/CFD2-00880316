@@ -15,11 +15,13 @@
 #define dprintD(expr) do{printf("%d: ", __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
 
 int create_empty_dir(char *parent_directory);
-void read_input(char *input_file, int *N, int *len, double *alpha, double *y_0, double *u_0, double *y_1, double *u_1, double *delta_time, double *delta_y, double *mu);
+void read_input(char *input_file, int *N, int *len, double *alpha, double *y_0, double *u_0, double *y_N, double *u_N, double *delta_time, double *delta_y, double *mu);
 void init(double *u, int len);
 void print_array(double *array, int len);
 void check_delta_time(double delta_time, double delta_y, double mu);
-void RHS(double *A, double *B, double *C, double *D, double *u, double delta_time, double delta_y);
+void RHS(double *D, double *u, int N);
+void LHS(double *A, double *B, double *C, double delta_time, double delta_y, double mu, double alpha, int N);
+void BC(double *A, double *C, double *D, double u_0, double u_1, int N);
 
 int main(int argc, char const *argv[])
 {
@@ -27,7 +29,7 @@ int main(int argc, char const *argv[])
     char input_fill[MAXDIR], output_dir[MAXDIR];
 
     double *A, *B, *C, *D, *u,
-           y_0, u_0, y_1, u_1, delta_time, alpha, delta_y, mu;
+           y_0, u_0, y_N, u_N, delta_time, alpha, delta_y, mu;
 
     int N, len;
 
@@ -59,14 +61,14 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* reading the input */
-    read_input(input_fill, &N, &len, &alpha, &y_0, &u_0, &y_1, &u_1, &delta_time, &delta_y, &mu);
+    read_input(input_fill, &N, &len, &alpha, &y_0, &u_0, &y_N, &u_N, &delta_time, &delta_y, &mu);
 
 /* Checking the input */
     dprintINT(N);
     dprintD(y_0);
     dprintD(u_0);
-    dprintD(y_1);
-    dprintD(u_1);
+    dprintD(y_N);
+    dprintD(u_N);
     dprintD(mu);
     dprintD(alpha);
     dprintD(delta_time);
@@ -159,7 +161,7 @@ int create_empty_dir(char *parent_directory)
 /* read input parameters from input file
 argument list:
 fp - file pointer to input file */
-void read_input(char *input_file, int *N, int *len, double *alpha, double *y_0, double *u_0, double *y_1, double *u_1, double *delta_time, double *delta_y, double *mu)
+void read_input(char *input_file, int *N, int *len, double *alpha, double *y_0, double *u_0, double *y_N, double *u_N, double *delta_time, double *delta_y, double *mu)
 {
     char current_word[MAXWORD];
     float temp;
@@ -179,12 +181,12 @@ void read_input(char *input_file, int *N, int *len, double *alpha, double *y_0, 
         } else if (!strcmp(current_word, "u_0")) {
             fscanf(fp, "%g", &temp);
             *u_0 = (double)temp;
-        } else if (!strcmp(current_word, "y_1")) {
+        } else if (!strcmp(current_word, "y_N")) {
             fscanf(fp, "%g", &temp);
-            *y_1 = (double)temp;
-        } else if (!strcmp(current_word, "u_1")) {
+            *y_N = (double)temp;
+        } else if (!strcmp(current_word, "u_N")) {
             fscanf(fp, "%g", &temp);
-            *u_1 = (double)temp;
+            *u_N = (double)temp;
         } else if (!strcmp(current_word, "mu")) {
             fscanf(fp, "%g", &temp);
             *mu = (double)temp;
@@ -196,7 +198,7 @@ void read_input(char *input_file, int *N, int *len, double *alpha, double *y_0, 
             *delta_time = (double)temp;
         }
     }
-    *delta_y = fabs((*y_0 - *y_1) / (*N-1));
+    *delta_y = fabs((*y_0 - *y_N) / (*N-1));
 
     if (*alpha <= 0.5) {
         check_delta_time(*delta_time, *delta_y, *mu);
@@ -227,4 +229,28 @@ void check_delta_time(double delta_time, double delta_y, double mu)
     if (delta_time >= delta_y * delta_y / 2 / mu) {
         printf("%s:%d:[Warning] delta_time too big\n", __FILE__, __LINE__);
     }
+}
+
+void RHS(double *D, double *u, int N)
+{
+    for (int i = 1; i < N; i++) {
+        D[i] = u[i+1] - 2*u[i] + u[i-1];
+    }
+}
+
+void LHS(double *A, double *B, double *C, double delta_time, double delta_y, double mu, double alpha, int N)
+{
+    for (int i = 1; i < N; i++) {
+        A[i] = -alpha;
+        B[i] = delta_y * delta_y / mu / delta_time + 2*alpha;
+        C[i] = -alpha;
+    }
+}
+
+void BC(double *A, double *C, double *D, double u_0, double u_N, int N)
+{
+    D[1] = D[1] - A[1]*u_0;
+    A[1] = 0;
+
+    D[N-1] = D[N-1] - C[N-1]*u_N;
 }

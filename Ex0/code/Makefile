@@ -9,4 +9,5 @@ run_solver:
 	@./solver $(IN_FILL) $(OUT_DIR) 
 
 clean_solver:
+	@echo
 	rm solver
