@@ -117,10 +117,87 @@ After dividing by \emph{r}:
     C_i &= - \alpha\\
     D_i &= \left(u^n_{i+1} - 2u^n_{i} + u^n_{i-1}\right)
 \end{align}
-
+In our case:
+\begin{equation}
+    y_0 = 0 \hspace{1cm}
+    u_0 = 0 \hspace{1cm}
+    y_1 = 1 \hspace{1cm}
+    u_1 = 1 \hspace{1cm}
+    f_{(y)} = 1
+\end{equation}
 \newpage
 
 \section{Stability Analysis}
+According to the "von Neumann Stability Analysis", the error between the differential and numerical equation is given by:
+\begin{equation}
+    \varepsilon = N-D
+\end{equation}
+where:
+\begin{equation}
+    \varepsilon(y,t)=\sum_{m}c_m(t)e^{ik_my}
+\end{equation}
+since the analysis is linear, one can choose one element from the series. Morover, the error becomes:
+\begin{equation}
+    \varepsilon^n=Z^ne^{iky}
+\end{equation}
+The constant"\emph{k}" is the wave number theat is related to the initial error.
+\begin{equation}
+    Z=e^{\lambda\Delta t} \Rightarrow Z^n = e^{\lambda n\Delta t} = e^{\lambda t}
+\end{equation}
+Any element of the error therefore takes the form:
+\begin{equation}
+    \varepsilon^n = e^{\lambda  t}e^{iky}
+\end{equation}
+The ratio between consecutive errors is the \emph{amplification factor}, names "\emph{G}":
+\begin{equation}
+    G \triangleq \frac{\varepsilon^{n+1}}{\varepsilon^n} = e^{\lambda\Delta t}
+\end{equation}
+The condition for Stability:
+\begin{equation}
+    |G| < 1
+\end{equation}
+The error must satisfies the finite difference equation:
+\begin{equation}
+    \Delta \varepsilon^n_i - \alpha\frac{\mu\Delta t}{\Delta y^2}\left(\Delta \varepsilon^n_{i+1}-2\Delta \varepsilon^n_i + \Delta \varepsilon^n_{i-1}\right) = \frac{\mu\Delta t}{\Delta y^2}\left(\varepsilon^n_{i+1} - 2\varepsilon^n_{i} + \varepsilon^n_{i-1}\right)
+\end{equation}
+Where:
+\begin{align}
+    \Delta\varepsilon^n_i = \varepsilon^{n+1}_i - \varepsilon^n_i &=e^{\lambda\left(t+\Delta t\right)}e^{iky} - e^{\lambda t}e^{iky} = e^{\lambda t}e^{iky}\left(e^{\lambda\Delta t}-1\right)\\
+    \Delta\varepsilon^n_{i+1} = \varepsilon^{n+1}_{i+1} - \varepsilon^n_{i+1} &= e^{\lambda\left(t+\Delta t\right)}e^{ik\left(y+\Delta y\right)} - e^{\lambda t}e^{ik\left(y+\Delta y\right)} = e^{\lambda t}e^{ik\left(y+\Delta y\right)}\left(e^{\lambda\Delta t}-1\right)\\
+    \Delta\varepsilon^n_{i-1} = \varepsilon^{n+1}_{i-1} - \varepsilon^n_{i-1} &= e^{\lambda\left(t+\Delta t\right)}e^{ik\left(y-\Delta y\right)} - e^{\lambda t}e^{ik\left(y-\Delta y\right)} = e^{\lambda t}e^{ik\left(y-\Delta y\right)}\left(e^{\lambda\Delta t}-1\right)
+\end{align}
+Substitut the values:
+\begin{equation}
+    \begin{matrix}
+        \displaystyle\left(e^{\lambda t}e^{iky} - \alpha\frac{\mu\Delta t}{\Delta y^2}\left(e^{\lambda t}e^{ik\left(y+\Delta y\right)} - 2e^{\lambda t}e^{iky} + e^{\lambda t}e^{ik\left(y-\Delta y\right)}\right)\right)\left(e^{\lambda\Delta t}-1\right) =\\
+        \displaystyle= \frac{\mu\Delta t}{\Delta y^2}\left(e^{\lambda t}e^{ik\left(y+\Delta y\right)} - 2e^{\lambda t}e^{iky} + e^{\lambda t}e^{ik\left(y-\Delta y\right)}\right)
+    \end{matrix}
+\end{equation}
+Dividing by $e^{\lambda t}e^{iky}$:
+\begin{equation}
+    \left(1-\alpha\frac{\mu\Delta t}{\Delta y^2}\left(e^{ik\Delta y} -2 + e^{-ik\Delta y}\right)\right)\left(e^{\lambda t}-1\right) = \frac{\mu\Delta t}{\Delta y^2}\left(e^{ik\Delta y} -2 + e^{-ik\Delta y}\right)
+\end{equation}
+Define:
+\begin{equation}
+    \begin{matrix}
+        \displaystyle r \triangleq \frac{\mu\Delta t}{\Delta y^2}, &\displaystyle A \triangleq e^{ik\Delta y}-2+e^{ik\Delta y}=2\cos\beta-2, & \displaystyle \beta \triangleq k\Delta y
+    \end{matrix}
+\end{equation}
+After substitution and rearranging we get:
+\begin{equation}
+    e^{\lambda t}-1 = \frac{rA}{1-\alpha rA}
+\end{equation}
+$$\Downarrow$$
+\begin{equation}
+    G = e^{\lambda t} = 1+\frac{rA}{1-\alpha rA}
+\end{equation}
+For stability:
+\begin{equation}
+    |G|<1 \Rightarrow \left|1+\frac{rA}{1-\alpha rA}\right| < 1
+\end{equation}
+
+
+
 \newpage
 
 \section{The Computer Program}
@@ -133,5 +210,3 @@ After dividing by \emph{r}:
 \newpage
 
 \end{document}
-
-% -\alpha\frac{\mu\Delta t}{\Delta y^2}\cdot\Delta u^n_{i-1} + \left(1+2\alpha\frac{\mu\Delta t}{\Delta y^2}\right)\cdot\Delta u^n_i - \alpha\frac{\mu\Delta t}{\Delta y^2}\cdot\Delta u^n_{i+1} 
