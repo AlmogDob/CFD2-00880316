@@ -1,0 +1,137 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage{amsmath, amssymb, titling}
+\usepackage[margin=3cm]{geometry}
+
+\renewcommand\maketitlehooka{\null\mbox{}\vfill}
+\renewcommand\maketitlehookd{\vfill\null}
+
+\title{Computational Fluid Dynamics}
+\author{Almog Dubrescu\\\\ID 214254252}
+
+\begin{document}
+
+\maketitle
+
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+
+\tableofcontents
+\newpage
+
+\section{Mathematical Problem}
+The Burgers Equation:
+\begin{equation}
+    \frac{\partial u}{\partial t} + u\frac{\partial u}{\partial y} = \frac{\partial}{\partial y}\left(\mu\frac{\partial u}{\partial y}\right)
+\end{equation}
+By neglection the convective term, the parabolic model equation is obtained:
+\begin{align}
+    \frac{\partial u}{\partial t} &= \frac{\partial}{\partial y}\left(\mu\frac{\partial u}{\partial y}\right)\\
+    \frac{\partial u}{\partial t} &= \mu\frac{\partial^2 u}{\partial y^2}\\
+    \mu &= 1.0
+\end{align}
+Boundary and initial conditions:
+\begin{equation}
+    u_{(y_0, t)} = u_0 \hspace{1cm} u_{(y_1, t)} = u_1 \hspace{1cm} u_{(y, t=0)} = f_{(y)}
+\end{equation}
+
+\section{Numerical Scheme}
+A general explicit-implicit scheme for constant $\mu$ is given by:
+\begin{equation}
+    u^{n+1}_i = u^n_i + \frac{\mu\Delta t}{\Delta y^2}\delta_{yy}\left[\left(1-\alpha\right)u^n_i+\alpha u^{n+1}_i\right]
+\end{equation}
+where:
+\begin{equation}
+    \alpha = \left\{\begin{matrix}
+        0 & \text{Explicit}\\
+        \frac{1}{2} & \text{Crank-Nicolson}\\
+        1 & \text{Implicit}
+    \end{matrix}\right.
+\end{equation}
+and the order is:
+\begin{equation}
+    \left[\Delta x^2, \Delta\left(\frac{1}{2}-\alpha\right)\right]
+\end{equation}
+In delta form:
+\begin{equation}
+    \left(I-\alpha\frac{\mu\Delta t}{\Delta y^2}\delta_{yy}\right)\Delta u^n_i = \frac{\mu\Delta t}{\Delta y^2}\delta_{yy}u^n_i
+\end{equation}
+Applying the operators:
+\begin{align}
+    \Delta u^n_i - \alpha\frac{\mu\Delta t}{\Delta y^2}\delta_{yy}\left(\Delta u^n_i\right) &= \frac{\mu\Delta t}{\Delta y^2}\delta_{yy}\left(u^n_i\right)\\
+    \Delta u^n_i - \alpha\frac{\mu\Delta t}{\Delta y^2}\delta_{y}\left(\Delta u^n_{\left(y_i+\frac{\Delta y}{2}\right)} - \Delta u^n_{\left(y_i-\frac{\Delta y}{2}\right)}\right) &= \frac{\mu\Delta t}{\Delta y^2}\delta_{y}\left(u^n_{\left(y_i+\frac{\Delta y}{2}\right)} - u^n_{\left(y_i-\frac{\Delta y}{2}\right)}\right)\\
+    \Delta u^n_i - \alpha\frac{\mu\Delta t}{\Delta y^2}\left(\scriptstyle\Delta u^n_{\left(y_i+\Delta y\right)} - 2\Delta u^n_{\left(y_i\right)} + \Delta u^n_{\left(y_i - \Delta y\right)}\right) &= \frac{\mu\Delta t}{\Delta y^2}\left(\scriptstyle u^n_{\left(y_i+\Delta y\right)} - 2u^n_{\left(y_i\right)} + u^n_{\left(y_i-\Delta y\right)}\right)\\
+    \Delta u^n_i - \alpha\frac{\mu\Delta t}{\Delta y^2}\left(\Delta u^n_{i+1}-2\Delta u^n_i + \Delta u^n_{i-1}\right) &= \frac{\mu\Delta t}{\Delta y^2}\left(u^n_{i+1} - 2u^n_{i} + u^n_{i-1}\right)\\
+    A_i\Delta u^n_{i-1}+B_i\Delta u^n_i+C_i\Delta u^n_{i+1} &= D_i
+\end{align}
+where:
+\begin{align}
+    A_i &= - \alpha\frac{\mu\Delta t}{\Delta y^2}\\
+    B_i &= 1 + 2 \alpha\frac{\mu\Delta t}{\Delta y^2}\\
+    C_i &= - \alpha\frac{\mu\Delta t}{\Delta y^2}\\
+    D_i &= \frac{\mu\Delta t}{\Delta y^2}\left(u^n_{i+1} - 2u^n_{i} + u^n_{i-1}\right)
+\end{align}
+and
+\begin{equation}
+    u^{n+1}_i = u^n_i + \Delta u^n_i
+\end{equation}
+In matrix from:
+\begin{equation}
+    \begin{pmatrix}
+        B_1 & C_1 & 0 & \cdots & \cdots & \cdots & 0 \\
+        A_2 & B_2 & C_2 & 0 & \cdots & \cdots & 0 \\
+        0 & \ddots & \ddots & \ddots & 0 & \cdots & 0 \\
+        0 & 0 & A_i & B_i & C_i & 0 & 0 \\
+        0 & \cdots & 0 & \ddots & \ddots & \ddots & 0 \\
+        0 & \cdots & \cdots & 0 & A_{N-2} & B_{N-2} & C_{N-2} \\
+        0 & 0 & \cdots & \cdots & 0 & A_{N-1} &B_{N-1}
+    \end{pmatrix}
+    \begin{pmatrix}
+        u_1\\
+        u_2\\
+        \cdots\\
+        \cdots\\
+        \cdots\\
+        y_{N-2}\\
+        y_{N-1}
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+        D_1-A_1\cdot u_0\\
+        D_2\\
+        \cdots\\
+        \cdots\\
+        \cdots\\
+        D_{N-2}\\
+        D_{N-1}-C_{N-1}\cdot u_N
+    \end{pmatrix}
+\end{equation}
+To reduce problems of big flouting point numbers, define \emph{r}:
+\begin{equation}
+    r \triangleq \frac{\mu\Delta t}{\Delta y^2}
+\end{equation}
+After dividing by \emph{r}:
+\begin{align}
+    A_i &= - \alpha\\
+    B_i &= \frac{1}{r} + 2 \alpha\\
+    C_i &= - \alpha\\
+    D_i &= \left(u^n_{i+1} - 2u^n_{i} + u^n_{i-1}\right)
+\end{align}
+
+\newpage
+
+\section{Stability Analysis}
+\newpage
+
+\section{The Computer Program}
+\newpage
+
+\section{Results}
+\newpage
+
+\section{Conclusions}
+\newpage
+
+\end{document}
+
+% -\alpha\frac{\mu\Delta t}{\Delta y^2}\cdot\Delta u^n_{i-1} + \left(1+2\alpha\frac{\mu\Delta t}{\Delta y^2}\right)\cdot\Delta u^n_i - \alpha\frac{\mu\Delta t}{\Delta y^2}\cdot\Delta u^n_{i+1} 
