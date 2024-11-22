@@ -1,6 +1,7 @@
 \documentclass[11pt, a4paper]{article}
 \usepackage{amsmath, amssymb, titling}
-\usepackage[margin=3cm]{geometry}
+\usepackage[margin=2cm]{geometry}
+\usepackage[colorlinks=true, linkcolor=black, urlcolor=black, citecolor=black]{hyperref}
 
 \renewcommand\maketitlehooka{\null\mbox{}\vfill}
 \renewcommand\maketitlehookd{\vfill\null}
@@ -66,16 +67,34 @@ Applying the operators:
 \end{align}
 where:
 \begin{align}
-    A_i &= - \alpha\frac{\mu\Delta t}{\Delta y^2}\\
-    B_i &= 1 + 2 \alpha\frac{\mu\Delta t}{\Delta y^2}\\
-    C_i &= - \alpha\frac{\mu\Delta t}{\Delta y^2}\\
-    D_i &= \frac{\mu\Delta t}{\Delta y^2}\left(u^n_{i+1} - 2u^n_{i} + u^n_{i-1}\right)
+    A'_i &= - \alpha\frac{\mu\Delta t}{\Delta y^2}\\
+    B'_i &= 1 + 2 \alpha\frac{\mu\Delta t}{\Delta y^2}\\
+    C'_i &= - \alpha\frac{\mu\Delta t}{\Delta y^2}\\
+    D'_i &= \frac{\mu\Delta t}{\Delta y^2}\left(u^n_{i+1} - 2u^n_{i} + u^n_{i-1}\right)
 \end{align}
-and
+and advancing the solution with:
 \begin{equation}
     u^{n+1}_i = u^n_i + \Delta u^n_i
 \end{equation}
-In matrix from:
+To reduce problems of big flouting point numbers, define \emph{r}:
+\begin{equation}
+    r \triangleq \frac{\mu\Delta t}{\Delta y^2}
+\end{equation}
+After dividing by \emph{r}:
+\begin{align}
+    A_i &= - \alpha\\
+    B_i &= \frac{1}{r} + 2 \alpha\\
+    C_i &= - \alpha\\
+    D_i &= \left(u^n_{i+1} - 2u^n_{i} + u^n_{i-1}\right)
+\end{align}
+\subsection{For $\alpha = 0$}
+When $\alpha = 0$ The shceme simplifies to:
+\begin{equation}
+    \Delta u^n_i = rD_i
+\end{equation}
+
+\subsection{For $\alpha \neq 0$}
+When $\alpha \neq 0$ in order to calculate $\Delta u^n_i$ it is needed to invert matrix as follows:
 \begin{equation}
     \begin{pmatrix}
         B_1 & C_1 & 0 & \cdots & \cdots & \cdots & 0 \\
@@ -106,18 +125,7 @@ In matrix from:
         D_{N-1}-C_{N-1}\cdot u_N
     \end{pmatrix}
 \end{equation}
-To reduce problems of big flouting point numbers, define \emph{r}:
-\begin{equation}
-    r \triangleq \frac{\mu\Delta t}{\Delta y^2}
-\end{equation}
-After dividing by \emph{r}:
-\begin{align}
-    A_i &= - \alpha\\
-    B_i &= \frac{1}{r} + 2 \alpha\\
-    C_i &= - \alpha\\
-    D_i &= \left(u^n_{i+1} - 2u^n_{i} + u^n_{i-1}\right)
-\end{align}
-In our case:
+\subsection{In Our Case}
 \begin{equation}
     y_0 = 0 \hspace{1cm}
     u_0 = 0 \hspace{1cm}
@@ -184,7 +192,8 @@ Define:
         \displaystyle r \triangleq \frac{\mu\Delta t}{\Delta y^2}, &\displaystyle A \triangleq e^{ik\Delta y}-2+e^{ik\Delta y}=2\cos\beta-2, & \displaystyle \beta \triangleq k\Delta y
     \end{matrix}
 \end{equation}
-After substitution and rearranging we get:
+\newpage
+\noindent After substitution and rearranging we get:
 \begin{equation}
     e^{\lambda t}-1 = \frac{rA}{1-\alpha rA}
 \end{equation}
@@ -205,22 +214,26 @@ For stability:
 %     2-4r^2+8r\alpha = 0 \hspace{0.5cm} 1+4r\alpha\neq 0 \hspace{0.5cm}\emph{and}&\hspace{0.5cm} -4r\alpha = 0 \hspace{0.5cm} 1+4r\alpha \neq 0
 % \end{align}
 For $\alpha = 0$:
-\begin{gather}
-    G = 1+rA\\
-    \left|1-4r\right| < 1\\
-    -1< 1-4r <1\\
-    -2< -4r <0\\
-    0< 4r <2\\
-    0< r <\frac{1}{2}\\
+\begin{align*}
+        G = 1+rA\\
+        \left|1-4r\right| < 1\\
+        -1< 1-4r <1\\
+        -2< -4r <0\\
+        0< 4r <2\\
+        0< r <\frac{1}{2}
+\end{align*}
+\begin{equation}
     \Delta t < \frac{\Delta y^2}{2\mu}
-\end{gather}
+\end{equation}
 For $\alpha = 1$:
-\begin{gather}
-    G = \frac{1}{1-rA}\\
+\begin{equation*}
+    G = \frac{1}{1-rA}
+\end{equation*}
+\begin{equation}
     \begin{matrix}
         \displaystyle\left|\frac{1}{1-rA}\right|<1 & A \leq 0
     \end{matrix}
-\end{gather}
+\end{equation}
 $$\Downarrow$$
 \begin{center}
     smaller for every \emph{r} ($\Delta t$)

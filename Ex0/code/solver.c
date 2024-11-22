@@ -81,28 +81,28 @@ int main(int argc, char const *argv[])
 /*------------------------------------------------------------*/
 /* allocating the matrices */
 
-    A = (double *)malloc(sizeof(double) * N+1);
-    for (int i = 0; i < N+1; i++) {
+    A = (double *)malloc(sizeof(double) * N);
+    for (int i = 0; i < N; i++) {
         A[i] = 0;
     }
-    B = (double *)malloc(sizeof(double) * N+1);
-    for (int i = 0; i < N+1; i++) {
+    B = (double *)malloc(sizeof(double) * N);
+    for (int i = 0; i < N; i++) {
         B[i] = 0;
     }
-    C = (double *)malloc(sizeof(double) * N+1);
-    for (int i = 0; i < N+1; i++) {
+    C = (double *)malloc(sizeof(double) * N);
+    for (int i = 0; i < N; i++) {
         C[i] = 0;
     }
-    D = (double *)malloc(sizeof(double) * N+1);
-    for (int i = 0; i < N+1; i++) {
+    D = (double *)malloc(sizeof(double) * N);
+    for (int i = 0; i < N; i++) {
         D[i] = 0;
     }
-    u = (double *)malloc(sizeof(double) * N+1);
-    for (int i = 0; i < N+1; i++) {
+    u = (double *)malloc(sizeof(double) * N);
+    for (int i = 0; i < N; i++) {
         u[i] = 0;
     }
-    delta_u = (double *)malloc(sizeof(double) * N+1);
-    for (int i = 0; i < N+1; i++) {
+    delta_u = (double *)malloc(sizeof(double) * N);
+    for (int i = 0; i < N; i++) {
         delta_u[i] = 0;
     }
 
@@ -112,7 +112,7 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* the loop */
-    for (int iteration = 0; iteration < 1e4; iteration++) {
+    for (int iteration = 0; iteration < 2e3; iteration++) {
         if (iteration == 0) {
             first_L2Norm = step(A, B, C, D, u, delta_u, delta_time, delta_y, mu, alpha, u_0, u_N, N);
             current_L2Norm = first_L2Norm;
@@ -125,7 +125,7 @@ int main(int argc, char const *argv[])
         }
     }
 
-    print_array(u, N+1);
+    print_array(u, N);
 
 /*------------------------------------------------------------*/
 /* output */
@@ -193,7 +193,7 @@ void read_input(char *input_file, int *N, double *alpha, double *y_0, double *u_
     while(fscanf(fp, "%s", current_word) != EOF) {
         if (!strcmp(current_word, "N")) {
             fscanf(fp, "%d", N);
-            *N = *N-1;
+            *N = *N;
         } else if (!strcmp(current_word, "y_0")) {
             fscanf(fp, "%g", &temp);
             *y_0 = (double)temp;
@@ -217,7 +217,7 @@ void read_input(char *input_file, int *N, double *alpha, double *y_0, double *u_
             *delta_time = (double)temp;
         }
     }
-    *delta_y = fabs((*y_0 - *y_N) / (*N));
+    *delta_y = fabs((*y_0 - *y_N) / (*N-1));
 
     if (*alpha <= 0.5) {
         check_delta_time(*delta_time, *delta_y, *mu);
@@ -254,14 +254,14 @@ void check_delta_time(double delta_time, double delta_y, double mu)
 
 void RHS(double *D, double *u, int N)
 {
-    for (int i = 0; i < N+1; i++) {
+    for (int i = 1; i < N-1; i++) {
         D[i] = u[i+1] - 2*u[i] + u[i-1];
     }
 }
 
 void LHS(double *A, double *B, double *C, double delta_time, double delta_y, double mu, double alpha, int N)
 {
-    for (int i = 0; i < N+1; i++) {
+    for (int i = 1; i < N-1; i++) {
         A[i] = -alpha;
         B[i] = delta_y * delta_y / mu / delta_time + 2*alpha;
         C[i] = -alpha;
@@ -274,6 +274,7 @@ void BC(double *A, double *C, double *D, double u_0, double u_N, int N)
     A[1] = 0;
 
     D[N-1] = D[N-1] - C[N-1]*u_N;
+    C[N-1] = 0;
 }
 
 /*   a, b, c, are the vectors of the diagonal and the two off-diagonals.
@@ -336,11 +337,14 @@ double step(double *A, double *B, double *C, double *D, double *u, double *delta
     LHS(A, B, C, delta_time, delta_y, mu, alpha, N);
     BC(A, C, D, u_0, u_N, N);
 
-    tridiag(A, B, C, D, delta_u, 1, N-1);
+    double norm = calculate_norm(D, N);
+
+    tridiag(A, B, C, D, delta_u, 1, N-2);
+
 
     for (int i = 0; i < N+1; i++) {
         u[i] = u[i] + delta_u[i];
     }
 
-    return calculate_norm(delta_u, N);
+    return norm;
 }

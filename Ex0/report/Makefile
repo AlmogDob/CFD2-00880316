@@ -4,4 +4,4 @@ file: hw0.tex
 
 clean_after_vscode:
 	cp -r *.log logs/.
-	rm *.fdb_latexmk *.fls *.synctex.gz *.aux *.bbl *.log *.blg
+	rm *.fdb_latexmk *.fls *.synctex.gz *.aux *.bbl *.log *.blg *.toc *.out
