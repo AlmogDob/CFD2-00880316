@@ -1,7 +1,7 @@
 # Fdb version 3
-["pdflatex"] 1732230067 "/home/almog/projects/school/semester7/CFD2/Ex0/report/hw0.tex" "hw0.pdf" "hw0" 1732230068
+["pdflatex"] 1732234077 "/home/almog/projects/school/semester7/CFD2/Ex0/report/hw0.tex" "hw0.pdf" "hw0" 1732234077
   "/etc/texmf/web2c/texmf.cnf" 1728860475 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/almog/projects/school/semester7/CFD2/Ex0/report/hw0.tex" 1732230067 9797 e28fb32b8e7c7bb2e37804b922e30272 ""
+  "/home/almog/projects/school/semester7/CFD2/Ex0/report/hw0.tex" 1732234076 9885 a7fd7505a362b3241d10ff4f8537e3af ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex8.tfm" 1246382020 988 bdf658c3bfc2d96d3c8b02cfc1c94c20 ""
@@ -62,9 +62,9 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1644012257 39432 7155514e09a3d69036fac785183a21c2 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1728863477 4379155 98693266ff65f58d9f98aff394de12d2 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1728863522 2801416 18afc574b7a427169de4cb992576d85a ""
-  "hw0.aux" 1732230067 652 1db2fded053c342beca359b20f2b383c "pdflatex"
-  "hw0.tex" 1732230067 9797 e28fb32b8e7c7bb2e37804b922e30272 ""
-  "hw0.toc" 1732230067 374 ec29e89eb9b3cb4850e47108f2932422 "pdflatex"
+  "hw0.aux" 1732234077 652 1db2fded053c342beca359b20f2b383c "pdflatex"
+  "hw0.tex" 1732234076 9885 a7fd7505a362b3241d10ff4f8537e3af ""
+  "hw0.toc" 1732234077 374 ec29e89eb9b3cb4850e47108f2932422 "pdflatex"
   (generated)
   "hw0.aux"
   "hw0.log"
