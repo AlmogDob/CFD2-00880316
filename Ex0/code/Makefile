@@ -11,3 +11,6 @@ run_solver:
 clean_solver:
 	@echo
 	rm solver
+
+debug_build_solver: solver.c
+	@gcc -g -Wall -g -Wextra ./solver.c -lm -o solver

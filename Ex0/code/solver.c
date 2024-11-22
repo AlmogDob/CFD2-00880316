@@ -25,11 +25,12 @@ void BC(double *A, double *C, double *D, double u_0, double u_N, int N);
 int tridiag(double *a, double *b, double *c, double *d, double *u, int is, int ie);
 double calculate_norm(double *delta_u, int N);
 double step(double *A, double *B, double *C, double *D, double *u, double *delta_u, double delta_time, double delta_y, double mu, double alpha, double u_0, double u_N, int N);
+void print_array_to_file(FILE *fp, double *array, int len);
 
 int main(int argc, char const *argv[])
 {
 /* declerations */
-    char input_fill[MAXDIR], output_dir[MAXDIR];
+    char input_fill[MAXDIR], output_dir[MAXDIR], temp_word[MAXWORD];
 
     double *A, *B, *C, *D, *u, *delta_u,
            y_0, u_0, y_N, u_N, delta_time, alpha, delta_y, mu, first_L2Norm, current_L2Norm;
@@ -110,6 +111,9 @@ int main(int argc, char const *argv[])
 /* initializtion */
     init(u, u_0, u_N, N);
 
+    strcpy(temp_word, output_dir);
+    strcat(temp_word, "/output.txt");
+    FILE *output_file = fopen(temp_word, "wt");
 /*------------------------------------------------------------*/
 /* the loop */
     for (int iteration = 0; iteration < 2e3; iteration++) {
@@ -120,6 +124,7 @@ int main(int argc, char const *argv[])
             current_L2Norm = step(A, B, C, D, u, delta_u, delta_time, delta_y, mu, alpha, u_0, u_N, N);
         }
         printf("%d: %g\n", iteration, current_L2Norm);
+        print_array_to_file(output_file, u, N);
         if (current_L2Norm/first_L2Norm < 1e-6) {
             break;
         }
@@ -132,6 +137,14 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* freeing the memory */
+    free(A);
+    free(B);
+    free(C);
+    free(D);
+    free(u); 
+    free(delta_u);
+
+    fclose(output_file);
 
     return 0;
 }
@@ -228,11 +241,11 @@ void read_input(char *input_file, int *N, double *alpha, double *y_0, double *u_
 
 void init(double *u, int u_0, int u_N, int N)
 {
-    for (int i = 1; i < N; i++) {
+    for (int i = 1; i < N-1; i++) {
         u[i] = 1;
     }
     u[0] = u_0;
-    u[N] = u_N;
+    u[N-1] = u_N;
 }
 
 void print_array(double *array, int len)
@@ -307,7 +320,7 @@ int tridiag(double *a, double *b, double *c, double *d, double *u, int is, int i
 double calculate_norm(double *delta_u, int N)
 {
     double sum = 0;
-    for (int i = 0; i < N+1; i++) {
+    for (int i = 0; i < N; i++) {
         sum += delta_u[i] * delta_u[i];
     }
     return sqrt(sum);
@@ -316,7 +329,7 @@ double calculate_norm(double *delta_u, int N)
 double step(double *A, double *B, double *C, double *D, double *u, double *delta_u, double delta_time, double delta_y, double mu, double alpha, double u_0, double u_N, int N)
 {
     /* zero A, B, C, D*/
-    for (int i = 0; i < N+1; i++) {
+    for (int i = 0; i < N; i++) {
         A[i] = 0; 
         B[i] = 0; 
         C[i] = 0; 
@@ -325,10 +338,10 @@ double step(double *A, double *B, double *C, double *D, double *u, double *delta
 
     RHS(D, u, N);
     if (alpha == 0) {
-        for (int i = 0; i < N+1; i++) {
+        for (int i = 0; i < N; i++) {
             delta_u[i] = mu * delta_time / delta_y / delta_y * D[i];
         }
-        for (int i = 0; i < N+1; i++) {
+        for (int i = 0; i < N; i++) {
             u[i] = u[i] + delta_u[i];
         }
         return calculate_norm(delta_u, N);
@@ -342,9 +355,17 @@ double step(double *A, double *B, double *C, double *D, double *u, double *delta
     tridiag(A, B, C, D, delta_u, 1, N-2);
 
 
-    for (int i = 0; i < N+1; i++) {
+    for (int i = 0; i < N; i++) {
         u[i] = u[i] + delta_u[i];
     }
 
     return norm;
+}
+
+void print_array_to_file(FILE *fp, double *array, int len)
+{
+    for (int i = 0; i < len; i++) {
+        fprintf(fp, "%g ", array[i]);
+    }
+    fprintf(fp, "\n");
 }
