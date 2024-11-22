@@ -26,16 +26,16 @@ int tridiag(double *a, double *b, double *c, double *d, double *u, int is, int i
 double calculate_norm(double *delta_u, int N);
 double step(double *A, double *B, double *C, double *D, double *u, double *delta_u, double delta_time, double delta_y, double mu, double alpha, double u_0, double u_N, int N);
 void print_array_to_file(FILE *fp, double *array, int len);
+void output(char *output_dir, int N, double y_0, double u_0, double y_N, double u_N, double delta_time, double alpha, double delta_y, double mu);
 
 int main(int argc, char const *argv[])
 {
 /* declerations */
     char input_fill[MAXDIR], output_dir[MAXDIR], temp_word[MAXWORD];
-
     double *A, *B, *C, *D, *u, *delta_u,
            y_0, u_0, y_N, u_N, delta_time, alpha, delta_y, mu, first_L2Norm, current_L2Norm;
-
     int N;
+    FILE *output_file;  
 
 /* getting the input file and output file */
     if (--argc != 2 && argc != 4) {
@@ -62,6 +62,10 @@ int main(int argc, char const *argv[])
         fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
         return -1;
     }
+
+    strcpy(temp_word, output_dir);
+    strcat(temp_word, "/output.txt");
+    output_file = fopen(temp_word, "wt");
 
 /*------------------------------------------------------------*/
 /* reading the input */
@@ -111,9 +115,8 @@ int main(int argc, char const *argv[])
 /* initializtion */
     init(u, u_0, u_N, N);
 
-    strcpy(temp_word, output_dir);
-    strcat(temp_word, "/output.txt");
-    FILE *output_file = fopen(temp_word, "wt");
+    print_array_to_file(output_file, u, N);
+    
 /*------------------------------------------------------------*/
 /* the loop */
     for (int iteration = 0; iteration < 2e3; iteration++) {
@@ -134,6 +137,7 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* output */
+    output(output_dir, N, y_0, u_0, y_N, u_N, delta_time, alpha, delta_y, mu);
 
 /*------------------------------------------------------------*/
 /* freeing the memory */
@@ -368,4 +372,20 @@ void print_array_to_file(FILE *fp, double *array, int len)
         fprintf(fp, "%g ", array[i]);
     }
     fprintf(fp, "\n");
+}
+
+void output(char *output_dir, int N, double y_0, double u_0, double y_N, double u_N, double delta_time, double alpha, double delta_y, double mu)
+{
+    char temp_word[MAXWORD];
+    FILE *meta_data_file;
+
+    strcpy(temp_word, output_dir);
+    strcat(temp_word, "/mata_data.txt");
+    meta_data_file = fopen(temp_word, "wt");
+
+    fprintf(meta_data_file, "%s, %s, %s, %s\n", "N", "y_0", "u_0", "y_N");
+    fprintf(meta_data_file, "%d, %g, %g, %g", N, y_0, u_0, y_N);
+
+
+    fclose(meta_data_file);
 }
