@@ -2,6 +2,10 @@
 \usepackage{amsmath, amssymb, titling}
 \usepackage[margin=2cm]{geometry}
 \usepackage[colorlinks=true, linkcolor=black, urlcolor=black, citecolor=black]{hyperref}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
 
 \renewcommand\maketitlehooka{\null\mbox{}\vfill}
 \renewcommand\maketitlehookd{\vfill\null}
@@ -18,6 +22,8 @@
 \setcounter{page}{1}
 
 \tableofcontents
+\vfil
+\listoffigures
 \newpage
 
 \section{Mathematical Problem}
@@ -266,7 +272,36 @@ From Eq.\ref{eq45} we get the stability limit of $\Delta t$:
 \begin{equation}
     \Delta t < \frac{\Delta y^2}{2\mu} = \frac{0.1^2}{2\cdot1} = 5\cdot10^{-3}
 \end{equation}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.8\textwidth]{images/grap1.png}
+    \caption{Convergence history for $\alpha=0$ for different $\Delta t$}
+    \label{fig1}
+\end{figure}
+\noindent In Figure \ref{fig1} we see that indeed for $\Delta t>5\cdot10^{-3}$ the solution diverges.
+Moreover, the number of iterations grows linearly with respect to $\Delta t$.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap2.1.png}
+        \caption{Regular view}
+        \label{fig2A}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap2.2.png}
+        \caption{Zoomed}
+        \label{fig2B}
+    \end{subfigure}
+    \caption{Effect of $\Delta t$ on solution for $\alpha =0$}
+    \label{fig2}
+\end{figure}
+\noindent In Figure \ref{fig2} we see that when the solution converge, $\Delta t$ has a small effect on the solution. As $\Delta t$ increases, the error increases as well.\\
+\noindent The two lines in Figure \ref{fig2A} are the solutions for $\Delta t$ bigger then $5\cdot10^{-3}.$
 
+\newpage
 \subsection{$\alpha = \frac{1}{2}$ - Crank-Nicolson Scheme}
 
 
