@@ -35,7 +35,7 @@ int main(int argc, char const *argv[])
     double *A, *B, *C, *D, *u, *delta_u,
            y_0, u_0, y_N, u_N, delta_time, alpha, delta_y, mu, first_L2Norm, current_L2Norm;
     int N;
-    FILE *output_file;  
+    FILE *output_u_file, *output_iter_file;  
 
 /* getting the input file and output file */
     if (--argc != 2 && argc != 4) {
@@ -64,8 +64,12 @@ int main(int argc, char const *argv[])
     }
 
     strcpy(temp_word, output_dir);
-    strcat(temp_word, "/output.txt");
-    output_file = fopen(temp_word, "wt");
+    strcat(temp_word, "/output_u.txt");
+    output_u_file = fopen(temp_word, "wt");
+
+    strcpy(temp_word, output_dir);
+    strcat(temp_word, "/output_iter.txt");
+    output_iter_file = fopen(temp_word, "wt");
 
 /*------------------------------------------------------------*/
 /* reading the input */
@@ -115,20 +119,23 @@ int main(int argc, char const *argv[])
 /* initializtion */
     init(u, u_0, u_N, N);
 
-    print_array_to_file(output_file, u, N);
+    print_array_to_file(output_u_file, u, N);
     
 /*------------------------------------------------------------*/
 /* the loop */
-    for (int iteration = 0; iteration < 2e3; iteration++) {
+    for (int iteration = 0; iteration < 2e5; iteration++) {
         if (iteration == 0) {
             first_L2Norm = step(A, B, C, D, u, delta_u, delta_time, delta_y, mu, alpha, u_0, u_N, N);
             current_L2Norm = first_L2Norm;
         } else {
             current_L2Norm = step(A, B, C, D, u, delta_u, delta_time, delta_y, mu, alpha, u_0, u_N, N);
         }
+
         printf("%d: %g\n", iteration, current_L2Norm);
-        print_array_to_file(output_file, u, N);
-        if (current_L2Norm/first_L2Norm < 1e-6) {
+        print_array_to_file(output_u_file, u, N);
+        fprintf(output_iter_file, "%d, %g\n", iteration, current_L2Norm);
+
+        if (current_L2Norm/first_L2Norm < 1e-6 || isinf(current_L2Norm) || isnan(current_L2Norm)) {
             break;
         }
     }
@@ -148,7 +155,7 @@ int main(int argc, char const *argv[])
     free(u); 
     free(delta_u);
 
-    fclose(output_file);
+    fclose(output_u_file);
 
     return 0;
 }

@@ -17,8 +17,8 @@ mu
 1.0
 
 alpha
-0.5
+0
 
 delta_time
-1e30
+1e-2
 

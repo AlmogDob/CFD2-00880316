@@ -131,7 +131,8 @@ When $\alpha \neq 0$ in order to calculate $\Delta u^n_i$ it is needed to invert
     u_0 = 0 \hspace{1cm}
     y_1 = 1 \hspace{1cm}
     u_1 = 1 \hspace{1cm}
-    f_{(y)} = 1
+    f_{(y)} = 1 \hspace{1cm}
+    N = 11
 \end{equation}
 The scheme considered converged when the size of the RHS drops by 6 order of magnitude.
 \newpage
@@ -224,6 +225,7 @@ For $\alpha = 0$:
 \end{align*}
 \begin{equation}
     \Delta t < \frac{\Delta y^2}{2\mu}
+    \label{eq45}
 \end{equation}
 For $\alpha = 1$:
 \begin{equation*}
@@ -259,6 +261,17 @@ Which means that stability for infinite time step:
 \newpage
 
 \section{Results}
+\subsection{$\alpha = 0$ - Explicit Scheme}
+From Eq.\ref{eq45} we get the stability limit of $\Delta t$:
+\begin{equation}
+    \Delta t < \frac{\Delta y^2}{2\mu} = \frac{0.1^2}{2\cdot1} = 5\cdot10^{-3}
+\end{equation}
+
+\subsection{$\alpha = \frac{1}{2}$ - Crank-Nicolson Scheme}
+
+
+\subsection{$\alpha = 1$ - Implicit Scheme}
+
 \newpage
 
 \section{Conclusions}
