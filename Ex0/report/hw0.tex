@@ -353,8 +353,34 @@ For $\Delta t$ larger then $1\cdot10^{-1}$ that still converges, the numerical s
 Figure \ref{fig5B} showed the perferct oscillation that happens when $\Delta t=\infty$ in the Crank-Nicolson scheme and the meaning of \emph{neutrally stable}. The distance of the even iterations from the analytical solution is exactly the distance of the odd iterations from the analytical solution.
 
 \subsection{$\alpha = 1$ - Implicit Scheme}
+For the implicit scheme, the stability analysis states that the scheme is stable for every $\Delta t$.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.8\textwidth]{images/grap7.png}
+    \caption{Convergence history for $\alpha=1$ for different $\Delta t$}
+    \label{fig6}
+\end{figure}
+\noindent Figure \ref{fig6} validates the Stability analysis and shows clearly that for every $\Delta t$ the solution converges. Moreover, for $\Delta t>1\cdot10^{10}$, the solution converges immediately.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap8.1.png}
+        \caption{Regular view}
+        \label{fig7A}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap8.2.png}
+        \caption{Zoomed}
+        \label{fig7B}
+    \end{subfigure}
+    \caption{Effect of $\Delta t$ on solution for $\alpha =1$}
+    \label{fig7}
+\end{figure}
+\noindent Unlike every other scheme, the implicit solution converges for every $\Delta t$ as seen clearly in Figure \ref{fig7A}. From Figure \ref{fig7B} we can see that the smaller $\Delta t$ is, the larger the error and for $\Delta t$ bigger then $1$, the solution is exactly the analytical one. 
 
-\newpage
 
 \section{Conclusions}
 \newpage
