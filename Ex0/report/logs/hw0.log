@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.10.14)  24 NOV 2024 00:37
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.10.14)  24 NOV 2024 04:10
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -427,17 +427,17 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `math shift' on input line 270.
 
-<images/grap1.png, id=166, 574.7874pt x 362.43405pt>
+<images/grap1.png, id=172, 574.7874pt x 362.43405pt>
 File: images/grap1.png Graphic file (type png)
 <use images/grap1.png>
 Package pdftex.def Info: images/grap1.png  used on input line 277.
 (pdftex.def)             Requested size: 386.95897pt x 243.99643pt.
-<images/grap2.1.png, id=168, 560.27318pt x 359.54324pt>
+<images/grap2.1.png, id=174, 560.27318pt x 359.54324pt>
 File: images/grap2.1.png Graphic file (type png)
 <use images/grap2.1.png>
 Package pdftex.def Info: images/grap2.1.png  used on input line 287.
 (pdftex.def)             Requested size: 237.01411pt x 152.09888pt.
-<images/grap2.2.png, id=169, 584.84497pt x 359.54324pt>
+<images/grap2.2.png, id=175, 584.84497pt x 359.54324pt>
 File: images/grap2.2.png Graphic file (type png)
 <use images/grap2.2.png>
 Package pdftex.def Info: images/grap2.2.png  used on input line 294.
@@ -467,35 +467,61 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `math shift' on input line 305.
 
+<images/grap3.png, id=183, 568.524pt x 362.43405pt>
+File: images/grap3.png Graphic file (type png)
+<use images/grap3.png>
+Package pdftex.def Info: images/grap3.png  used on input line 309.
+(pdftex.def)             Requested size: 386.95897pt x 246.69522pt.
+<images/grap5.1.png, id=185, 560.27318pt x 359.54324pt>
+File: images/grap5.1.png Graphic file (type png)
+<use images/grap5.1.png>
+Package pdftex.def Info: images/grap5.1.png  used on input line 318.
+(pdftex.def)             Requested size: 237.01411pt x 152.09888pt.
+<images/grap5.2.png, id=186, 586.23015pt x 359.54324pt>
+File: images/grap5.2.png Graphic file (type png)
+<use images/grap5.2.png>
+Package pdftex.def Info: images/grap5.2.png  used on input line 325.
+(pdftex.def)             Requested size: 237.01411pt x 145.36185pt.
+<images/grap4.png, id=188, 592.01175pt x 359.54324pt>
+File: images/grap4.png Graphic file (type png)
+<use images/grap4.png>
+Package pdftex.def Info: images/grap4.png  used on input line 338.
+(pdftex.def)             Requested size: 237.01411pt x 143.94641pt.
+<images/grap6.png, id=189, 602.0091pt x 359.54324pt>
+File: images/grap6.png Graphic file (type png)
+<use images/grap6.png>
+Package pdftex.def Info: images/grap6.png  used on input line 345.
+(pdftex.def)             Requested size: 237.01411pt x 141.55443pt.
+[8 <./images/grap3.png (PNG copy)> <./images/grap5.1.png (PNG copy)> <./images/grap5.2.png (PNG copy)>]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 308.
+(hyperref)                removing `math shift' on input line 355.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\alpha' on input line 308.
+(hyperref)                removing `\alpha' on input line 355.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 308.
+(hyperref)                removing `math shift' on input line 355.
 
-[8] [9] (./hw0.aux)
+[9 <./images/grap4.png (PNG copy)> <./images/grap6.png (PNG copy)>] [10] (./hw0.aux)
 Package rerunfilecheck Info: File `hw0.out' has not changed.
 (rerunfilecheck)             Checksum: 061BED020D4C86ED4541F17911DFC8A8;1599.
  ) 
 Here is how much of TeX's memory you used:
- 11453 strings out of 478287
- 182304 string characters out of 5849288
- 487409 words of memory out of 5000000
- 29428 multiletter control sequences out of 15000+600000
- 477317 words of font info for 58 fonts, out of 8000000 for 9000
+ 11513 strings out of 478287
+ 183263 string characters out of 5849288
+ 487954 words of memory out of 5000000
+ 29477 multiletter control sequences out of 15000+600000
+ 479016 words of font info for 66 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 60i,11n,63p,411b,495s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 60i,11n,63p,469b,540s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on hw0.pdf (10 pages, 2756349 bytes).
+Output written on hw0.pdf (11 pages, 8472828 bytes).
 PDF statistics:
- 276 PDF objects out of 1000 (max. 8388607)
- 224 compressed objects within 3 object streams
- 75 named destinations out of 1000 (max. 500000)
- 112 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 296 PDF objects out of 1000 (max. 8388607)
+ 238 compressed objects within 3 object streams
+ 79 named destinations out of 1000 (max. 500000)
+ 137 words of extra memory for PDF output out of 10000 (max. 10000000)
 

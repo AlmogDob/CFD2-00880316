@@ -303,7 +303,54 @@ Moreover, the number of iterations grows linearly with respect to $\Delta t$.
 
 \newpage
 \subsection{$\alpha = \frac{1}{2}$ - Crank-Nicolson Scheme}
-
+From the stability analysis we get that for $\Delta t = \infty$, the scheme is neutrally stable and for every othre $\Delta t$, the scheme converges.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.8\textwidth]{images/grap3.png}
+    \caption{Convergence history for $\alpha=0.5$ for different $\Delta t$}
+    \label{fig3}
+\end{figure}
+\noindent In Figure \ref{fig3} that the stability analysis is correct. For $\Delta t = \infty$, the scheme is neutrally stable and for every othre $\Delta t$, the scheme converges. Furthermore, there is an optimal $\Delta t$ for Which the minimal number of iterations is obtained (between $1\cdot10^{-1}$ and $1\cdot10^{-2}$) and the number of iterations is symmetric around that value.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap5.1.png}
+        \caption{Regular view}
+        \label{fig4A}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap5.2.png}
+        \caption{Zoomed}
+        \label{fig4B}
+    \end{subfigure}
+    \caption{Effect of $\Delta t$ on solution for $\alpha =0.5$}
+    \label{fig4}
+\end{figure}
+\noindent In Figure \ref{fig2} we see that when the solution converge, $\Delta t$ has a small effect on the solution. As $\Delta t$ increases, the error increases as well.\\
+For $\Delta t$ larger then $1\cdot10^{-1}$ that still converges, the numerical solution is identical to the analytical one.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap4.png}
+        \caption{$\Delta t = 10$}
+        \label{fig5A}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap6.png}
+        \caption{$\Delta t = \infty$}
+        \label{fig5B}
+    \end{subfigure}
+    \caption{Oscillation of solution for Crank-Nicolson}
+    \label{fig5}
+\end{figure}
+\noindent In Figure \ref{fig5A} we can see the oscillation of the solution that occur when $ 10^{-2} < \Delta t < \infty$. The even iterations are above the analytical solution and the odd iterations are below.\\
+Figure \ref{fig5B} showed the perferct oscillation that happens when $\Delta t=\infty$ in the Crank-Nicolson scheme and the meaning of \emph{neutrally stable}. The distance of the even iterations from the analytical solution is exactly the distance of the odd iterations from the analytical solution.
 
 \subsection{$\alpha = 1$ - Implicit Scheme}
 
