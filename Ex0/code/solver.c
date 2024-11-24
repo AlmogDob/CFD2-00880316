@@ -203,7 +203,16 @@ int create_empty_dir(char *parent_directory)
 
 /* read input parameters from input file
 argument list:
-fp - file pointer to input file */
+input-file - file pointer to input file
+N          - int pointer
+alpha      - double pointer
+y_0        - double pointer
+u_0        - double pointer
+y_N        - double pointer
+u_N        - double pointer
+delta_time - double pointer
+delta_y    - double pointer
+mu         - double pointer */
 void read_input(char *input_file, int *N, double *alpha, double *y_0, double *u_0, double *y_N, double *u_N, double *delta_time, double *delta_y, double *mu)
 {
     char current_word[MAXWORD];
@@ -250,6 +259,12 @@ void read_input(char *input_file, int *N, double *alpha, double *y_0, double *u_
     fclose(fp);
 }
 
+/* initializing the solution vector with ones and the boundry conditions
+argument list:
+u   - pointer to the solution array
+u_0 - boundry condition at zero
+u_N - boundry condition at N
+N   - number of grid points */
 void init(double *u, int u_0, int u_N, int N)
 {
     for (int i = 1; i < N-1; i++) {
@@ -259,6 +274,10 @@ void init(double *u, int u_0, int u_N, int N)
     u[N-1] = u_N;
 }
 
+/* printing a double array with length 'len' to 'stdin'
+argument list:
+array - pointer to the array
+len   - number of elements in the array */
 void print_array(double *array, int len)
 {
     printf("--------------------\n");
@@ -269,6 +288,11 @@ void print_array(double *array, int len)
     printf("--------------------\n");
 }
 
+/* checking if the inputed delta t will result in converging solution
+arugemnt list: 
+delta_time - time step between iterations
+delta_y    - the distance between grid points
+mu         - viscosity */
 void check_delta_time(double delta_time, double delta_y, double mu)
 {
     if (delta_time >= delta_y * delta_y / 2 / mu) {
@@ -276,6 +300,11 @@ void check_delta_time(double delta_time, double delta_y, double mu)
     }
 }
 
+/* calculate the RHS (vector D) 
+argumet list:
+D - pointer to the array
+u - pointer to the flow solution
+N - number of grid points */
 void RHS(double *D, double *u, int N)
 {
     for (int i = 1; i < N-1; i++) {
@@ -283,6 +312,15 @@ void RHS(double *D, double *u, int N)
     }
 }
 
+/* calculate the LHS (vectors A, B, C)
+A          - pointer to the A array
+B          - pointer to the B array
+C          - pointer to the C array 
+delta_time - time step between iterations
+delta_y    - distance between to grid points
+mu         - viscosity
+alpha      - parameter that control the scheme
+N          - number of grid points */
 void LHS(double *A, double *B, double *C, double delta_time, double delta_y, double mu, double alpha, int N)
 {
     for (int i = 1; i < N-1; i++) {
@@ -292,6 +330,14 @@ void LHS(double *A, double *B, double *C, double delta_time, double delta_y, dou
     }
 }
 
+/* setting the boundry conditions
+A   - pointer to the A array
+B   - pointer to the B array
+C   - pointer to the C array 
+D   - pointer to the D array 
+u_0 - boundry condition at zero
+u_N - boundry condition at N
+N   - number of grid points */
 void BC(double *A, double *C, double *D, double u_0, double u_N, int N)
 {
     D[1] = D[1] - A[1]*u_0;
@@ -328,6 +374,10 @@ int tridiag(double *a, double *b, double *c, double *d, double *u, int is, int i
   return(0);
 }
 
+/* calculating the second norma of the vector 'delta_u'
+argument list:
+delta_u - pointer to the vector elements array
+N       - number of gird points */
 double calculate_norm(double *delta_u, int N)
 {
     double sum = 0;
@@ -337,6 +387,21 @@ double calculate_norm(double *delta_u, int N)
     return sqrt(sum);
 }
 
+/* preforming the step of the shceme 
+argument list:
+A          - pointer to the A array
+B          - pointer to the B array
+C          - pointer to the C array 
+D          - pointer to the D array 
+u          - pointer to the u array 
+delta_u    - pointer to the delta_u array 
+delta_time - time step between iterations
+delta_y    - distance between to grid points
+mu         - viscosity
+alpha      - parameter that control the scheme
+u_0        - boundry condition at zero
+u_N        - boundry condition at N
+N          - number of grid points */
 double step(double *A, double *B, double *C, double *D, double *u, double *delta_u, double delta_time, double delta_y, double mu, double alpha, double u_0, double u_N, int N)
 {
     /* zero A, B, C, D*/
@@ -373,6 +438,11 @@ double step(double *A, double *B, double *C, double *D, double *u, double *delta
     return norm;
 }
 
+/* printing a double array with length 'len' to file 'fp' 
+argument list:
+fp    - file pointer
+array - pointer to the array
+len   - number of elements in the array */
 void print_array_to_file(FILE *fp, double *array, int len)
 {
     for (int i = 0; i < len; i++) {
@@ -381,6 +451,16 @@ void print_array_to_file(FILE *fp, double *array, int len)
     fprintf(fp, "\n");
 }
 
+/* ouputing metadata of the solution 
+argumetn list:
+output_dir - name of the output directory
+N          - number of grid points
+y_0, u_0   - boundry condtions at zero
+y_N, u_N   - boundry condtions at N
+delta_time - time step between iterations
+alpha      - parameter that control the scheme
+delta_y    - distance between to grid points
+mu         - viscosity */
 void output(char *output_dir, int N, double y_0, double u_0, double y_N, double u_N, double delta_time, double alpha, double delta_y, double mu)
 {
     char temp_word[MAXWORD];
