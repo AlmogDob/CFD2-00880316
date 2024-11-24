@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.10.14)  24 NOV 2024 04:43
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.10.14)  24 NOV 2024 12:52
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -414,129 +414,184 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `math shift' on input line 102.
 
-[3] [4] [5] [6]
+[3] [4] [5]
+<images/flow chart.png, id=197, 536.769pt x 464.061pt>
+File: images/flow chart.png Graphic file (type png)
+<use images/flow chart.png>
+Package pdftex.def Info: images/flow chart.png  used on input line 270.
+(pdftex.def)             Requested size: 483.69687pt x 418.18921pt.
+ [6 <./images/flow chart.png>]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 270.
+(hyperref)                removing `math shift' on input line 280.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\alpha' on input line 270.
+(hyperref)                removing `\alpha' on input line 280.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 270.
+(hyperref)                removing `math shift' on input line 280.
 
-<images/grap1.png, id=176, 574.7874pt x 362.43405pt>
+<images/grap1.png, id=206, 574.7874pt x 362.43405pt>
 File: images/grap1.png Graphic file (type png)
 <use images/grap1.png>
-Package pdftex.def Info: images/grap1.png  used on input line 277.
+Package pdftex.def Info: images/grap1.png  used on input line 288.
 (pdftex.def)             Requested size: 386.95897pt x 243.99643pt.
-<images/grap2.1.png, id=178, 560.27318pt x 359.54324pt>
+<images/grap2.1.png, id=208, 560.27318pt x 359.54324pt>
 File: images/grap2.1.png Graphic file (type png)
 <use images/grap2.1.png>
-Package pdftex.def Info: images/grap2.1.png  used on input line 287.
+Package pdftex.def Info: images/grap2.1.png  used on input line 298.
 (pdftex.def)             Requested size: 237.01411pt x 152.09888pt.
-<images/grap2.2.png, id=179, 584.84497pt x 359.54324pt>
+<images/grap2.2.png, id=209, 584.84497pt x 359.54324pt>
 File: images/grap2.2.png Graphic file (type png)
 <use images/grap2.2.png>
-Package pdftex.def Info: images/grap2.2.png  used on input line 294.
+Package pdftex.def Info: images/grap2.2.png  used on input line 305.
 (pdftex.def)             Requested size: 237.01411pt x 145.70747pt.
 [7 <./images/grap1.png (PNG copy)> <./images/grap2.1.png (PNG copy)> <./images/grap2.2.png (PNG copy)>]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 305.
+(hyperref)                removing `math shift' on input line 316.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\alpha' on input line 305.
+(hyperref)                removing `\alpha' on input line 316.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\begingroup' on input line 305.
+(hyperref)                removing `\begingroup' on input line 316.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\endgroup' on input line 305.
+(hyperref)                removing `\endgroup' on input line 316.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\@@over' on input line 305.
+(hyperref)                removing `\@@over' on input line 316.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 305.
+(hyperref)                removing `math shift' on input line 316.
 
-<images/grap3.png, id=187, 568.524pt x 362.43405pt>
+<images/grap3.png, id=217, 568.524pt x 362.43405pt>
 File: images/grap3.png Graphic file (type png)
 <use images/grap3.png>
-Package pdftex.def Info: images/grap3.png  used on input line 309.
+Package pdftex.def Info: images/grap3.png  used on input line 320.
 (pdftex.def)             Requested size: 386.95897pt x 246.69522pt.
-<images/grap5.1.png, id=189, 560.27318pt x 359.54324pt>
+<images/grap5.1.png, id=219, 560.27318pt x 359.54324pt>
 File: images/grap5.1.png Graphic file (type png)
 <use images/grap5.1.png>
-Package pdftex.def Info: images/grap5.1.png  used on input line 318.
+Package pdftex.def Info: images/grap5.1.png  used on input line 329.
 (pdftex.def)             Requested size: 237.01411pt x 152.09888pt.
-<images/grap5.2.png, id=190, 586.23015pt x 359.54324pt>
+<images/grap5.2.png, id=220, 586.23015pt x 359.54324pt>
 File: images/grap5.2.png Graphic file (type png)
 <use images/grap5.2.png>
-Package pdftex.def Info: images/grap5.2.png  used on input line 325.
+Package pdftex.def Info: images/grap5.2.png  used on input line 336.
 (pdftex.def)             Requested size: 237.01411pt x 145.36185pt.
-<images/grap4.png, id=192, 592.01175pt x 359.54324pt>
+<images/grap4.png, id=222, 592.01175pt x 359.54324pt>
 File: images/grap4.png Graphic file (type png)
 <use images/grap4.png>
-Package pdftex.def Info: images/grap4.png  used on input line 338.
+Package pdftex.def Info: images/grap4.png  used on input line 349.
 (pdftex.def)             Requested size: 237.01411pt x 143.94641pt.
-<images/grap6.png, id=193, 602.0091pt x 359.54324pt>
+<images/grap6.png, id=223, 602.0091pt x 359.54324pt>
 File: images/grap6.png Graphic file (type png)
 <use images/grap6.png>
-Package pdftex.def Info: images/grap6.png  used on input line 345.
+Package pdftex.def Info: images/grap6.png  used on input line 356.
 (pdftex.def)             Requested size: 237.01411pt x 141.55443pt.
 [8 <./images/grap3.png (PNG copy)> <./images/grap5.1.png (PNG copy)> <./images/grap5.2.png (PNG copy)>]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 355.
+(hyperref)                removing `math shift' on input line 366.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\alpha' on input line 355.
+(hyperref)                removing `\alpha' on input line 366.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 355.
+(hyperref)                removing `math shift' on input line 366.
 
-<images/grap7.png, id=200, 566.115pt x 362.43405pt>
+<images/grap7.png, id=230, 566.115pt x 362.43405pt>
 File: images/grap7.png Graphic file (type png)
 <use images/grap7.png>
-Package pdftex.def Info: images/grap7.png  used on input line 359.
+Package pdftex.def Info: images/grap7.png  used on input line 370.
 (pdftex.def)             Requested size: 386.95897pt x 247.74043pt.
-<images/grap8.1.png, id=202, 560.27318pt x 359.54324pt>
+<images/grap8.1.png, id=232, 560.27318pt x 359.54324pt>
 File: images/grap8.1.png Graphic file (type png)
 <use images/grap8.1.png>
-Package pdftex.def Info: images/grap8.1.png  used on input line 368.
+Package pdftex.def Info: images/grap8.1.png  used on input line 379.
 (pdftex.def)             Requested size: 237.01411pt x 152.09888pt.
-<images/grap8.2.png, id=203, 584.84497pt x 359.54324pt>
+<images/grap8.2.png, id=233, 584.84497pt x 359.54324pt>
 File: images/grap8.2.png Graphic file (type png)
 <use images/grap8.2.png>
-Package pdftex.def Info: images/grap8.2.png  used on input line 375.
+Package pdftex.def Info: images/grap8.2.png  used on input line 386.
 (pdftex.def)             Requested size: 237.01411pt x 145.70747pt.
-[9 <./images/grap4.png (PNG copy)> <./images/grap6.png (PNG copy)> <./images/grap7.png (PNG copy)>] [10 <./images/grap8.1.png (PNG copy)> <./images/grap8.2.png (PNG copy)>] (./hw0.aux)
+[9 <./images/grap4.png (PNG copy)> <./images/grap6.png (PNG copy)> <./images/grap7.png (PNG copy)>]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 397.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\alpha' on input line 397.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 397.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 403.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\alpha' on input line 403.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\begingroup' on input line 403.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\endgroup' on input line 403.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@@over' on input line 403.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 403.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 413.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\alpha' on input line 413.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 413.
+
+[10 <./images/grap8.1.png (PNG copy)> <./images/grap8.2.png (PNG copy)>] (./hw0.aux)
 Package rerunfilecheck Info: File `hw0.out' has not changed.
-(rerunfilecheck)             Checksum: 061BED020D4C86ED4541F17911DFC8A8;1599.
+(rerunfilecheck)             Checksum: F6FD745871048D7EB26E03F7CC579031;2480.
  ) 
 Here is how much of TeX's memory you used:
- 11542 strings out of 478287
- 183779 string characters out of 5849288
- 488267 words of memory out of 5000000
- 29501 multiletter control sequences out of 15000+600000
- 479016 words of font info for 66 fonts, out of 8000000 for 9000
+ 11566 strings out of 478287
+ 184198 string characters out of 5849288
+ 488386 words of memory out of 5000000
+ 29516 multiletter control sequences out of 15000+600000
+ 479357 words of font info for 67 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  60i,11n,63p,469b,540s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on hw0.pdf (11 pages, 11194152 bytes).
+{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-ts1.enc}</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1095.pfb>
+Output written on hw0.pdf (11 pages, 11369052 bytes).
 PDF statistics:
- 306 PDF objects out of 1000 (max. 8388607)
- 245 compressed objects within 3 object streams
- 81 named destinations out of 1000 (max. 500000)
- 152 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 351 PDF objects out of 1000 (max. 8388607)
+ 286 compressed objects within 3 object streams
+ 88 named destinations out of 1000 (max. 500000)
+ 197 words of extra memory for PDF output out of 10000 (max. 10000000)
 

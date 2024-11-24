@@ -264,6 +264,16 @@ Which means that stability for infinite time step:
 \newpage
 
 \section{The Computer Program}
+\subsection{Flow Chart}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/flow chart.png}
+    \caption{Flow Chart of the program}
+    \label{fig:fl_ch}
+\end{figure}
+\subsection{The Functions in the Program}
+The functions that are included in the program and explanations about them are included in the code itself.
+
 \newpage
 
 \section{Results}
@@ -271,6 +281,7 @@ Which means that stability for infinite time step:
 From Eq.\ref{eq45} we get the stability limit of $\Delta t$:
 \begin{equation}
     \Delta t < \frac{\Delta y^2}{2\mu} = \frac{0.1^2}{2\cdot1} = 5\cdot10^{-3}
+    \label{eq:clc_delta_t}
 \end{equation}
 \begin{figure}[H]
     \centering
@@ -383,6 +394,27 @@ For the implicit scheme, the stability analysis states that the scheme is stable
 
 
 \section{Conclusions}
-\newpage
+\subsection{$\alpha = 0$ - Explicit Scheme}
+\begin{itemize}
+    \item As seen in Figure \ref{fig1}, the $\Delta t$ derived from Eq.\ref{eq:clc_delta_t} is indeed the stability limit for the \emph{Explicit Scheme}.
+    \item The number of iterations increases linearly with respect to $\Delta t$ for $\Delta t$ smaller then the limit in Eq.\ref{eq45}.
+    \item The deviation from the analytical solution increases as $\Delta t$ decreases.
+\end{itemize}
+\subsection{$\alpha = \frac{1}{2}$ - Crank-Nicolson Scheme}
+\begin{itemize}
+    \item The oscillation around the analytical solution for $\Delta t= \infty$ happens because:
+    \begin{equation}
+         - \underbrace{\alpha}_\frac{1}{2}\delta_{yy}\left(\Delta u^n_i\right) = \delta_{yy}\left(u^n_i\right)
+    \end{equation}
+    Which means that the correction is exactly twice the distance to the analytical solution.
+    \item In Figure \ref{fig3} we see that indeed for every finite $\Delta t$ the solution converges.
+    \item Unlike the implicit scheme, for $\Delta t > 1\cdot10^{-1}$ the number of iterations until convergence increases.
+\end{itemize}
+\subsection{$\alpha = 1$ - Implicit Scheme}
+\begin{itemize}
+    \item Figure \ref{fig6} verifies that, as the stability analysis states, the \emph{implicit scheme} is stable for every $\Delta t$.
+    \item From Figure \ref{fig6} we can determt that the number of iterations increases as $\Delta t$ increases and when $\Delta t > 10^{10}$ the solution converges immediately.
+    \item In Figure \ref{fig7B} we see that the error increases as $\Delta t$ decreases.
+\end{itemize}
 
 \end{document}
