@@ -20,15 +20,71 @@
 \begin{document}
 
 \maketitle
-
 \thispagestyle{empty}
 \newpage
-\setcounter{page}{1}
 
+\setcounter{page}{1}
 \tableofcontents
 \vfil
 \listoffigures
 \newpage
+
+\section{Inviscid Burgers Equation}
+The Inviscid Burgers equation, in conservation law form, is given by:
+\begin{equation}
+    \begin{array}{cc}
+        \displaystyle\frac{\partial u}{\partial t} + \frac{\partial F}{\partial x} = 0 & F = \displaystyle F_{(u)} = \frac{u^2}{2}
+    \end{array}
+\end{equation} 
+In non-conservation law form, is given by:
+\begin{equation}
+    \begin{array}{cc}
+        \displaystyle\frac{\partial u}{\partial t} + A\frac{\partial u}{\partial x} = 0 & A = \displaystyle \frac{\partial F}{\partial u} = u
+    \end{array}
+\end{equation}
+The equation is obtained by neglecting the viscous term from the viscous Burger equation.
+
+\subsection{Boundary and Initial Conditions}
+\begin{equation}
+    \begin{array}{lcl}
+        u_{(x=0,t)} & = & 1.0 \\
+        u_{(x=1,t)} & = & u_1 \\
+        u_{(x,t=0)} & = & 1-(1-u_1)\cdot x
+    \end{array}
+\end{equation}
+
+\subsection{First Order Roe Method $(u_1 = 0.0)$}
+Roe scheme is based on the solution of the linear problem:
+\begin{equation}
+        \displaystyle\frac{\partial u}{\partial t} + \bar{A}\frac{\partial u}{\partial x} = 0 
+\end{equation}
+Where $\bar{A}$ is a constant matrix that is dependent on local conditions. The matrix is constructed in a way to guarantee unifrom validity across discontinuities: 
+\begin{enumerate}
+    \item For any $u_i$, $u_{i+1}$:\begin{equation*}
+        F_{i+1}-F_{i} = \bar{A}\cdot\left(u_{i+1}-u_i\right)
+    \end{equation*}
+    \item When $u=u_i=u_{i+1}$ then:\begin{equation*}
+        \bar{A}_{\left(u_i,u_{i+1}\right)}=\bar{A}_{\left(u,u\right)}=\frac{\partial F}{\partial u}=u
+    \end{equation*}
+\end{enumerate}
+In case of the Burgers equation, the matrix $\bar{A}$ is a scalar, namely, $\bar{A}=\bar{u}$. The equation becomes:
+\begin{equation}
+        \displaystyle\frac{\partial u}{\partial t} + \bar{u}\frac{\partial u}{\partial x} = 0 
+\end{equation}
+The value of $\bar{u}$ for the cell face between \emph{i} and \emph{i+1} is determined from the first conditions:
+\begin{equation}
+    \bar{u}=\bar{u}_{i+\frac{1}{2}}=\frac{F_{i+1}-F_i}{u_{i+1}-u_i}=\frac{\displaystyle\frac{1}{2}u_{i+1}^2-\frac{1}{2}u_i^2}{u_{i+1}-u_i}=
+\end{equation}
+
+
+\subsection{Second Order Roe $(u_1 = 0.5)$}
+\subsubsection{With Limiters}
+
+\subsubsection{Without Limiters}
+
+\newpage
+\section{Generalized Burgers Equation}
+
 
 
 \end{document}
