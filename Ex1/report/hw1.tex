@@ -73,7 +73,30 @@ In case of the Burgers equation, the matrix $\bar{A}$ is a scalar, namely, $\bar
 \end{equation}
 The value of $\bar{u}$ for the cell face between \emph{i} and \emph{i+1} is determined from the first conditions:
 \begin{equation}
-    \bar{u}=\bar{u}_{i+\frac{1}{2}}=\frac{F_{i+1}-F_i}{u_{i+1}-u_i}=\frac{\displaystyle\frac{1}{2}u_{i+1}^2-\frac{1}{2}u_i^2}{u_{i+1}-u_i}=
+    \bar{u}=\bar{u}_{i+\frac{1}{2}}=\frac{F_{i+1}-F_i}{u_{i+1}-u_i}=\frac{\displaystyle\frac{1}{2}u_{i+1}^2-\frac{1}{2}u_i^2}{u_{i+1}-u_i}=\left\{\begin{array}{cc}
+        \displaystyle\frac{u_i+u_{i+1}}{2} & u_i\neq u_{i+1} \\
+        u_i & u_i=u_{i+1} 
+    \end{array}\right.
+\end{equation}
+The single wave that emanates from the cell interface travels either in the positive or negative direction, depending upon the sighn of $\bar{u}_{i+\frac{1}{2}}$. Define:
+\begin{equation}
+    \left\{\begin{array}{cc}
+        \begin{array}{c}
+            \bar{u}_{i+\frac{1}{2}}^+\triangleq\displaystyle\frac{1}{2}\left(\bar{u}_{i+\frac{1}{2}}+\left|\bar{u}_{i+\frac{1}{2}}\right|\right)\geq0 \\\\
+            \bar{u}_{i+\frac{1}{2}}^-\triangleq\displaystyle\frac{1}{2}\left(\bar{u}_{i+\frac{1}{2}}-\left|\bar{u}_{i+\frac{1}{2}}\right|\right)\leq0 \\
+        \end{array} & \bar{u}_{i+\frac{1}{2}}=\bar{u}_{i+\frac{1}{2}}^++\bar{u}_{i+\frac{1}{2}}^-
+    \end{array}\right.
+\end{equation}
+Using the jump relation, the numerical flux at the cell interface can be evaluated by one of the following:
+\begin{equation}
+    \left\{\begin{array}{l}
+        f_{i+\frac{1}{2}}-F_i = \bar{u}_{i+\frac{1}{2}}^-\cdot\left(u_{i+1}-u_i\right) \\\\
+        F_{i+1}-f_{i+\frac{1}{2}}=\bar{u}_{i+\frac{1}{2}}^+\cdot\left(u_{i+1}-u_i\right)
+    \end{array}\right.
+\end{equation}
+The numerical flux may then be written in the following symmetric from:
+\begin{equation}
+    f_{i+\frac{1}{2}}=\frac{F_i+F_{i+1}}{2}+\frac{1}{2}\left(\bar{u}_{i+\frac{1}{2}}^+-\bar{u}_{i+\frac{1}{2}}^-\right)\left(u_{i+1}-u_i\right)
 \end{equation}
 
 
