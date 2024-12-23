@@ -98,6 +98,18 @@ The numerical flux may then be written in the following symmetric from:
 \begin{equation}
     f_{i+\frac{1}{2}}=\frac{F_i+F_{i+1}}{2}+\frac{1}{2}\left(\bar{u}_{i+\frac{1}{2}}^+-\bar{u}_{i+\frac{1}{2}}^-\right)\left(u_{i+1}-u_i\right)
 \end{equation}
+Since Roe's scheme can't distinguish between the types of discontinuity, it may result in an expansion shock where the analytical solution is an expansion wave. To guarantee a physical solution the scheme will be modified like so:\\
+Define 
+\begin{equation*}
+    \varepsilon=\max\left(0,\frac{u_{i+1}-u_i}{2}\right)
+\end{equation*}
+The interface wave speed becomes
+\begin{equation}
+    \bar{u}_{i+\frac{1}{2}}=\left\{\begin{array}{ccc}
+        \bar{u}_{i+\frac{1}{2}} & \bar{u}_{i+\frac{1}{2}}\geq\varepsilon & \mathrm{compression} \\
+        \varepsilon & \bar{u}_{i+\frac{1}{2}}<\varepsilon & \mathrm{expansion}
+    \end{array}\right.
+\end{equation}
 
 
 \subsection{Second Order Roe $(u_1 = 0.5)$}
