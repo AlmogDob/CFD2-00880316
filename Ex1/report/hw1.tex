@@ -53,6 +53,15 @@ The equation is obtained by neglecting the viscous term from the viscous Burger 
     \end{array}
 \end{equation}
 
+\subsection{Finite Volume Formulation}
+\begin{equation}
+    u_i^{n+1}=u_i^n-\frac{\Delta t}{\Delta x}\left(f_{i+\frac{1}{2}}^n-f_{i-\frac{1}{2}}^n\right)
+\end{equation}
+\begin{itemize}
+    \item For first-order schemes, there is no variation within a cell, and the value there is constant.
+    \item For second-order schemes, the variation within the cell is linear.  \end{itemize}
+
+
 \subsection{First Order Roe Method $(u_1 = 0.0)$}
 Roe scheme is based on the solution of the linear problem:
 \begin{equation}
@@ -96,7 +105,11 @@ Using the jump relation, the numerical flux at the cell interface can be evaluat
 \end{equation}
 The numerical flux may then be written in the following symmetric from:
 \begin{equation}
-    f_{i+\frac{1}{2}}=\frac{F_i+F_{i+1}}{2}+\frac{1}{2}\left(\bar{u}_{i+\frac{1}{2}}^+-\bar{u}_{i+\frac{1}{2}}^-\right)\left(u_{i+1}-u_i\right)
+    \begin{array}{l}
+        \displaystyle f_{i+\frac{1}{2}}=\frac{F_i+F_{i+1}}{2}-\frac{1}{2}\left(\bar{u}_{i+\frac{1}{2}}^+-\bar{u}_{i+\frac{1}{2}}^-\right)\left(u_{i+1}-u_i\right) \\
+        \mathrm{OR:} \\
+        \displaystyle f_{i+\frac{1}{2}}=\frac{F_i+F_{i+1}}{2}-\frac{1}{2}\left|\bar{u}_{i+\frac{1}{2}}\right|\left(u_{i+1}-u_i\right)
+    \end{array}
 \end{equation}
 Since Roe's scheme can't distinguish between the types of discontinuity, it may result in an expansion shock where the analytical solution is an expansion wave. To guarantee a physical solution the scheme will be modified like so:\\
 Define 
@@ -113,9 +126,50 @@ The interface wave speed becomes
 
 
 \subsection{Second Order Roe $(u_1 = 0.5)$}
-\subsubsection{With Limiters}
+The first-order accurate Roe method interface flux function will be denoted like this:
+\begin{equation*}
+    f_{i+\frac{1}{2}}^{\mathrm{Roe},1}=f_{\left(u_i, u_{i+1}\right)}
+\end{equation*}
+The second order accurate Roe takes the form:
+\begin{equation*}
+    f_{i+\frac{1}{2}}^{\mathrm{Roe},2}=f_{\left(u_{i+1}^l, u_{i+1}^r\right)}
+\end{equation*}
+Hence:
+\begin{equation}
+    \begin{matrix}
+        \displaystyle f_{i+\frac{1}{2}}^{\mathrm{Roe},2}=\frac{1}{2}\left(F_{\left(u_{1+\frac{1}{2}}^l\right)}+F_{\left(u_{1+\frac{1}{2}}^r\right)}-\left|\bar{u}_{i+\frac{1}{2}}\right|\left(u_{1+\frac{1}{2}}^r-u_{1+\frac{1}{2}}^l\right)\right) \\\\
+        \displaystyle \bar{u}_{1+\frac{1}{2}}=\frac{F_{\left(u_{1+\frac{1}{2}}^r\right)}-F_{\left(u_{1+\frac{1}{2}}^l\right)}}{u_{1+\frac{1}{2}}^r-u_{1+\frac{1}{2}}^l}
+    \end{matrix}
+\end{equation}
 
 \subsubsection{Without Limiters}
+The interface values without limiters are evaluated as:
+\begin{equation}
+    \begin{matrix}
+        \left\{\begin{array}{lcl}
+            u_{i+\frac{1}{2}}^l & = & u_i+\frac{1-k}{4}\delta u_{i-\frac{1}{2}}+\frac{1+k}{4}\delta u_{i+\frac{1}{2}} \\
+            u_{i+\frac{1}{2}}^r & = & u_{i+1}-\frac{1+k}{4}\delta u_{i+\frac{1}{2}}-\frac{1-k}{4}\delta u_{i+\frac{3}{2}}
+        \end{array}\right. && \delta u_i\triangleq u_{i+\frac{1}{2}} - u_{i-\frac{1}{2}}
+    \end{matrix}
+\end{equation}
+The parameter \emph{k} determines the scheme:
+\begin{equation*}
+    k = \left\{\begin{array}{cr}
+        -1 & \mathrm{upwind} \\
+        1 & \mathrm{central}
+    \end{array}\right.
+\end{equation*}
+
+\subsubsection{With Limiters}
+The interface values with limiters are evaluated as:
+\begin{equation}
+    \begin{matrix}
+        \left\{\begin{array}{lcl}
+            u_{i+\frac{1}{2}}^l & = & u_i+\frac{1-k}{4}\overline{\delta^+} u_{i-\frac{1}{2}}+\frac{1+k}{4}\overline{\delta^-} u_{i+\frac{1}{2}} \\
+            u_{i+\frac{1}{2}}^r & = & u_{i+1}-\frac{1+k}{4}\overline{\delta^+} u_{i+\frac{1}{2}}-\frac{1-k}{4}\overline{\delta^-} u_{i+\frac{3}{2}}
+        \end{array}\right. && {\overline{\delta^\pm}} u\text{ are limited slopes}
+    \end{matrix}
+\end{equation}
 
 \newpage
 \section{Generalized Burgers Equation}

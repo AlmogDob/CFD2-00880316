@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <errno.h>
+#include <limits.h>
 
 #define MAXDIR 1000
 #define MAXWORD MAXDIR
@@ -15,26 +16,25 @@
 #define dprintD(expr) do{printf("%d: ", __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
 
 int create_empty_dir(char *parent_directory);
-void read_input(char *input_file, int *N, double *alpha, double *y_0, double *u_0, double *y_N, double *u_N, double *delta_time, double *delta_y, double *mu);
-void init(double *u, int u_0, int u_N, int N);
-void print_array(double *array, int len);
-void check_delta_time(double delta_time, double delta_y, double mu);
-void RHS(double *D, double *u, int N);
-void LHS(double *A, double *B, double *C, double delta_time, double delta_y, double mu, double alpha, int N);
-void BC(double *A, double *C, double *D, double u_0, double u_N, int N);
-int tridiag(double *a, double *b, double *c, double *d, double *u, int is, int ie);
-double calculate_norm(double *delta_u, int N);
-double step(double *A, double *B, double *C, double *D, double *u, double *delta_u, double delta_time, double delta_y, double mu, double alpha, double u_0, double u_N, int N);
-void print_array_to_file(FILE *fp, double *array, int len);
-void output(char *output_dir, int N, double y_0, double u_0, double y_N, double u_N, double delta_time, double alpha, double delta_y, double mu);
+void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, int *Roe_first, int *Roe_second, double *CFL, double *delta_x, int *iterations);
+void init(double *u, int u1, double delta_x, int N);
+void print_array(double *array, int start, int end);
+void print_array_to_file(FILE *fp, double *array, int start, int end);
+double claculate_f_i_plus_half(double u_i, double u_i_plus_1);
+void calculate_vec_f(double *f, double *u, int N);
+double calculate_delta_time(double *u, double delta_x, double CFL, int N);
+void make_u_physical(double *u_i_plus_half, double u_i, double u_i_plus_1);
+void calculate_delta_u(double *f, double *delta_u, double delta_time, double delta_x, int N);
+void update_u(double *u, double *delta_u, int N);
+double calculate_norm(double *delta_u, int start, int end);
+void output(char *output_dir, int N, double u1, double x_max, double x_min, int Roe_first, int Roe_second, double CFL, double delta_x);
 
 int main(int argc, char const *argv[])
 {
 /* declerations */
-    char input_fill[MAXDIR], output_dir[MAXDIR], temp_word[MAXWORD];
-    double *A, *B, *C, *D, *u, *delta_u,
-           y_0, u_0, y_N, u_N, delta_time, alpha, delta_y, mu, first_L2Norm, current_L2Norm;
-    int N;
+    char input_file[MAXDIR], output_dir[MAXDIR], temp_word[MAXWORD];
+    double *u, *f, *delta_u, u1, x_max, x_min, CFL, delta_x, delta_time, first_delta_u_norm, current_delta_u_norm;
+    int N, Roe_first, Roe_second, iterations;
     FILE *output_u_file, *output_iter_file;  
 
 /* getting the input file and output file */
@@ -43,9 +43,9 @@ int main(int argc, char const *argv[])
         return -1;
     }
 
-    strncpy(input_fill, (*(++argv)), MAXDIR);
+    strncpy(input_file, (*(++argv)), MAXDIR);
 
-    if (input_fill[MAXDIR-1] != '\0') {
+    if (input_file[MAXDIR-1] != '\0') {
         fprintf(stderr, "%s:%d: [Error] input too long\n", __FILE__, __LINE__);
         return -1;
     }
@@ -73,87 +73,77 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* reading the input */
-    read_input(input_fill, &N, &alpha, &y_0, &u_0, &y_N, &u_N, &delta_time, &delta_y, &mu);
+    read_input(input_file, &N, &u1, &x_max, &x_min, &Roe_first, &Roe_second, &CFL, &delta_x, &iterations);
 
 /* Checking the input */
     dprintINT(N);
-    dprintD(y_0);
-    dprintD(u_0);
-    dprintD(y_N);
-    dprintD(u_N);
-    dprintD(mu);
-    dprintD(alpha);
-    dprintD(delta_time);
-    dprintD(delta_y);
+    dprintD(u1);
+    dprintD(x_max);
+    dprintD(x_min);
+    dprintD(delta_x);
+    dprintINT(Roe_first);
+    dprintINT(Roe_second);
+    dprintD(CFL);
+    dprintINT(iterations);
     printf("--------------------\n");
 
 /*------------------------------------------------------------*/
 /* allocating the matrices */
 
-    A = (double *)malloc(sizeof(double) * N);
-    for (int i = 0; i < N; i++) {
-        A[i] = 0;
-    }
-    B = (double *)malloc(sizeof(double) * N);
-    for (int i = 0; i < N; i++) {
-        B[i] = 0;
-    }
-    C = (double *)malloc(sizeof(double) * N);
-    for (int i = 0; i < N; i++) {
-        C[i] = 0;
-    }
-    D = (double *)malloc(sizeof(double) * N);
-    for (int i = 0; i < N; i++) {
-        D[i] = 0;
-    }
-    u = (double *)malloc(sizeof(double) * N);
-    for (int i = 0; i < N; i++) {
+    u = (double *)malloc(sizeof(double) * (N+2));
+    for (int i = 0; i < N+2; i++) {
         u[i] = 0;
     }
-    delta_u = (double *)malloc(sizeof(double) * N);
-    for (int i = 0; i < N; i++) {
+    delta_u = (double *)malloc(sizeof(double) * (N+2));
+    for (int i = 0; i < N+2; i++) {
         delta_u[i] = 0;
+    }
+    f = (double *)malloc(sizeof(double) * (N+1));
+    for (int i = 0; i < N+1; i++) {
+        f[i] = 0;
     }
 
 /*------------------------------------------------------------*/
 /* initializtion */
-    init(u, u_0, u_N, N);
-
-    print_array_to_file(output_u_file, u, N);
-    
+    init(u, u1, delta_x, N);
+    print_array(u, 0, N+1);
+    print_array_to_file(output_u_file, u, 1, N);
 /*------------------------------------------------------------*/
 /* the loop */
-    for (int iteration = 0; iteration < 2e5; iteration++) {
-        if (iteration == 0) {
-            first_L2Norm = step(A, B, C, D, u, delta_u, delta_time, delta_y, mu, alpha, u_0, u_N, N);
-            current_L2Norm = first_L2Norm;
-        } else {
-            current_L2Norm = step(A, B, C, D, u, delta_u, delta_time, delta_y, mu, alpha, u_0, u_N, N);
+
+    for (int iter = 0; iter < iterations; iter++) {
+        calculate_vec_f(f, u, N);
+        delta_time = calculate_delta_time(u, delta_x, CFL, N);
+        calculate_delta_u(f, delta_u, delta_time, delta_x, N);
+        if (iter == 0) {
+            first_delta_u_norm = calculate_norm(delta_u, 1, N);
         }
+        current_delta_u_norm = calculate_norm(delta_u, 1, N);
 
-        printf("%d: %g\n", iteration, current_L2Norm);
-        print_array_to_file(output_u_file, u, N);
-        fprintf(output_iter_file, "%d, %g\n", iteration, current_L2Norm);
+        print_array(delta_u, 1, N);
 
-        if (current_L2Norm/first_L2Norm < 1e-6 || isinf(current_L2Norm) || isnan(current_L2Norm)) {
+        update_u(u, delta_u, N);
+        print_array_to_file(output_u_file, u, 1, N);
+        fprintf(output_iter_file, "%d, %g\n", iter, current_delta_u_norm);
+
+        printf("%d: %g\n", iter, current_delta_u_norm);
+
+        if (current_delta_u_norm/first_delta_u_norm < 1e-6 || isinf(current_delta_u_norm) || isnan(current_delta_u_norm)) {
             break;
         }
     }
 
-    print_array(u, N);
+    // print_array_to_file(output_u_file, u, 1, N);
+    // fprintf(output_iter_file, "%d, %g\n", iteration, current_L2Norm);
+
 
 /*------------------------------------------------------------*/
 /* output */
-    output(output_dir, N, y_0, u_0, y_N, u_N, delta_time, alpha, delta_y, mu);
+    output(output_dir, N, u1, x_max, x_min, Roe_first, Roe_second, CFL, delta_x);
 
 /*------------------------------------------------------------*/
 /* freeing the memory */
-    free(A);
-    free(B);
-    free(C);
-    free(D);
     free(u); 
-    free(delta_u);
 
     fclose(output_u_file);
 
@@ -205,15 +195,15 @@ int create_empty_dir(char *parent_directory)
 argument list:
 input-file - file pointer to input file
 N          - int pointer
-alpha      - double pointer
-y_0        - double pointer
-u_0        - double pointer
-y_N        - double pointer
-u_N        - double pointer
-delta_time - double pointer
-delta_y    - double pointer
-mu         - double pointer */
-void read_input(char *input_file, int *N, double *alpha, double *y_0, double *u_0, double *y_N, double *u_N, double *delta_time, double *delta_y, double *mu)
+u1         - double pointer
+x_max      - double pointer
+x_min      - double pointer
+Roe_first  - int pointer
+Roe_second - int pointer
+CFL        - double pointer
+delta_x    - double pointer 
+iterations - max number of desierd iterations */
+void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, int *Roe_first, int *Roe_second, double *CFL, double *delta_x, int *iterations)
 {
     char current_word[MAXWORD];
     float temp;
@@ -227,61 +217,57 @@ void read_input(char *input_file, int *N, double *alpha, double *y_0, double *u_
         if (!strcmp(current_word, "N")) {
             fscanf(fp, "%d", N);
             *N = *N;
-        } else if (!strcmp(current_word, "y_0")) {
+        } else if (!strcmp(current_word, "u1")) {
             fscanf(fp, "%g", &temp);
-            *y_0 = (double)temp;
-        } else if (!strcmp(current_word, "u_0")) {
+            *u1 = (double)temp;
+        } else if (!strcmp(current_word, "x_max")) {
             fscanf(fp, "%g", &temp);
-            *u_0 = (double)temp;
-        } else if (!strcmp(current_word, "y_N")) {
+            *x_max = (double)temp;
+        } else if (!strcmp(current_word, "x_min")) {
             fscanf(fp, "%g", &temp);
-            *y_N = (double)temp;
-        } else if (!strcmp(current_word, "u_N")) {
+            *x_min = (double)temp;
+        } else if (!strcmp(current_word, "Roe_first")) {
+            fscanf(fp, "%d", Roe_first);
+        } else if (!strcmp(current_word, "Roe_second")) {
+            fscanf(fp, "%d", Roe_second);
+        } else if (!strcmp(current_word, "CFL")) {
             fscanf(fp, "%g", &temp);
-            *u_N = (double)temp;
-        } else if (!strcmp(current_word, "mu")) {
+            *CFL = (double)temp;
+        } else if (!strcmp(current_word, "iterations")) {
             fscanf(fp, "%g", &temp);
-            *mu = (double)temp;
-        } else if (!strcmp(current_word, "alpha")) {
-            fscanf(fp, "%g", &temp);
-            *alpha = (double)temp;
-        } else if (!strcmp(current_word, "delta_time")) {
-            fscanf(fp, "%g", &temp);
-            *delta_time = (double)temp;
+            *iterations = (int)temp;
         }
     }
-    *delta_y = fabs((*y_0 - *y_N) / (*N-1));
 
-    if (*alpha <= 0.5) {
-        check_delta_time(*delta_time, *delta_y, *mu);
-    }
+    *delta_x = (double)(*x_max-*x_min)/(double)(*N-1);
 
     fclose(fp);
 }
 
 /* initializing the solution vector with ones and the boundry conditions
 argument list:
-u   - pointer to the solution array
-u_0 - boundry condition at zero
-u_N - boundry condition at N
-N   - number of grid points */
-void init(double *u, int u_0, int u_N, int N)
+u       - pointer to the solution array
+u1      - boundry condition at x_max
+delta_x - double value of delta_x
+N       - number of grid points */
+void init(double *u, int u1, double delta_x, int N)
 {
-    for (int i = 1; i < N-1; i++) {
-        u[i] = 1;
+    for (int i = 1; i <= N; i++) {
+        u[i] = 1 - (1 - u1) * delta_x * (i-1);
     }
-    u[0] = u_0;
-    u[N-1] = u_N;
+    u[0] = 1;
+    u[N+1] = u1;
 }
 
 /* printing a double array with length 'len' to 'stdin'
 argument list:
 array - pointer to the array
-len   - number of elements in the array */
-void print_array(double *array, int len)
+start - start index in the array
+end   - end index in the array */
+void print_array(double *array, int start, int end)
 {
     printf("--------------------\n");
-    for (int i = 0; i < len; i++) {
+    for (int i = start; i <= end; i++) {
         printf("%g ", array[i]);
     }
     printf("\n");
@@ -291,177 +277,115 @@ void print_array(double *array, int len)
 /* checking if the inputed delta t will result in converging solution
 arugemnt list: 
 delta_time - time step between iterations
-delta_y    - the distance between grid points
-mu         - viscosity */
-void check_delta_time(double delta_time, double delta_y, double mu)
+delta_x    - the distance between grid points */
+void check_delta_time(double delta_time, double delta_x)
 {
-    if (delta_time >= delta_y * delta_y / 2 / mu) {
+    if (delta_time/delta_x > 1) {
         printf("%s:%d:[Warning] delta_time too big\n", __FILE__, __LINE__);
     }
-}
-
-/* calculate the RHS (vector D) 
-argumet list:
-D - pointer to the array
-u - pointer to the flow solution
-N - number of grid points */
-void RHS(double *D, double *u, int N)
-{
-    for (int i = 1; i < N-1; i++) {
-        D[i] = u[i+1] - 2*u[i] + u[i-1];
-    }
-}
-
-/* calculate the LHS (vectors A, B, C)
-A          - pointer to the A array
-B          - pointer to the B array
-C          - pointer to the C array 
-delta_time - time step between iterations
-delta_y    - distance between to grid points
-mu         - viscosity
-alpha      - parameter that control the scheme
-N          - number of grid points */
-void LHS(double *A, double *B, double *C, double delta_time, double delta_y, double mu, double alpha, int N)
-{
-    for (int i = 1; i < N-1; i++) {
-        A[i] = -alpha;
-        B[i] = delta_y * delta_y / mu / delta_time + 2*alpha;
-        C[i] = -alpha;
-    }
-}
-
-/* setting the boundry conditions
-A   - pointer to the A array
-B   - pointer to the B array
-C   - pointer to the C array 
-D   - pointer to the D array 
-u_0 - boundry condition at zero
-u_N - boundry condition at N
-N   - number of grid points */
-void BC(double *A, double *C, double *D, double u_0, double u_N, int N)
-{
-    D[1] = D[1] - A[1]*u_0;
-    A[1] = 0;
-
-    D[N-1] = D[N-1] - C[N-1]*u_N;
-    C[N-1] = 0;
-}
-
-/*   a, b, c, are the vectors of the diagonal and the two off-diagonals.
-The vector d is the RHS vector, the vector u is the solution
-vector, "is" is the starting point, and ie is
-the last point.
-*/
-int tridiag(double *a, double *b, double *c, double *d, double *u, int is, int ie)
-{
-
-  int i;
-  double beta;
-
-  for (i = is + 1; i <= ie; i++)
-    {
-      if(b[i-1] == 0.) return(1);
-      beta = a[i] / b[i-1];
-      b[i] = b[i] - c[i-1] * beta;
-      d[i] = d[i] - d[i-1] * beta;
-    }
-
-  u[ie] = d[ie] / b[ie];
-  for (i = ie - 1; i >= is; i--)
-    {
-      u[i] = (d[i] - c[i] * u[i+1]) / b[i];
-    }
-  return(0);
-}
-
-/* calculating the second norma of the vector 'delta_u'
-argument list:
-delta_u - pointer to the vector elements array
-N       - number of gird points */
-double calculate_norm(double *delta_u, int N)
-{
-    double sum = 0;
-    for (int i = 0; i < N; i++) {
-        sum += delta_u[i] * delta_u[i];
-    }
-    return sqrt(sum);
-}
-
-/* preforming the step of the shceme 
-argument list:
-A          - pointer to the A array
-B          - pointer to the B array
-C          - pointer to the C array 
-D          - pointer to the D array 
-u          - pointer to the u array 
-delta_u    - pointer to the delta_u array 
-delta_time - time step between iterations
-delta_y    - distance between to grid points
-mu         - viscosity
-alpha      - parameter that control the scheme
-u_0        - boundry condition at zero
-u_N        - boundry condition at N
-N          - number of grid points */
-double step(double *A, double *B, double *C, double *D, double *u, double *delta_u, double delta_time, double delta_y, double mu, double alpha, double u_0, double u_N, int N)
-{
-    /* zero A, B, C, D*/
-    for (int i = 0; i < N; i++) {
-        A[i] = 0; 
-        B[i] = 0; 
-        C[i] = 0; 
-        D[i] = 0; 
-    }
-
-    RHS(D, u, N);
-    if (alpha == 0) {
-        for (int i = 0; i < N; i++) {
-            delta_u[i] = mu * delta_time / delta_y / delta_y * D[i];
-        }
-        for (int i = 0; i < N; i++) {
-            u[i] = u[i] + delta_u[i];
-        }
-        return calculate_norm(delta_u, N);
-    }
-
-    LHS(A, B, C, delta_time, delta_y, mu, alpha, N);
-    BC(A, C, D, u_0, u_N, N);
-
-    double norm = calculate_norm(D, N);
-
-    tridiag(A, B, C, D, delta_u, 1, N-2);
-
-
-    for (int i = 0; i < N; i++) {
-        u[i] = u[i] + delta_u[i];
-    }
-
-    return norm;
 }
 
 /* printing a double array with length 'len' to file 'fp' 
 argument list:
 fp    - file pointer
 array - pointer to the array
-len   - number of elements in the array */
-void print_array_to_file(FILE *fp, double *array, int len)
+start - start index in the array
+end   - end index in the array */
+void print_array_to_file(FILE *fp, double *array, int start, int end)
 {
-    for (int i = 0; i < len; i++) {
+    for (int i = start; i <= end; i++) {
         fprintf(fp, "%g ", array[i]);
     }
     fprintf(fp, "\n");
+}
+
+void make_u_physical(double *u_i_plus_half, double u_i, double u_i_plus_1)
+{
+    double epsilon = fmax(0, (u_i_plus_1 - u_i) / 2); 
+
+    if (*u_i_plus_half < epsilon) {
+        *u_i_plus_half = epsilon;
+    }
+}
+
+/* calculating the flax for a face
+argument list:*/
+double claculate_f_i_plus_half(double u_i, double u_i_plus_1)
+{
+    double u_bar_i_plus_half = (u_i + u_i_plus_1) / 2;
+    make_u_physical(&u_bar_i_plus_half, u_i, u_i_plus_1);
+
+    double u_bar_i_plus_half_plus = (u_bar_i_plus_half + fabs(u_bar_i_plus_half)) / 2;
+    double u_bar_i_plus_half_minus = (u_bar_i_plus_half - fabs(u_bar_i_plus_half)) / 2;
+    
+    double F_i = u_i * u_i / 2;
+    double F_i_plus_1 = u_i_plus_1 * u_i_plus_1 / 2;
+
+    double f_i_plus_half = (F_i + F_i_plus_1) / 2 - 0.5 * (u_bar_i_plus_half_plus - u_bar_i_plus_half_minus) * ( u_i_plus_1 - u_i);
+
+    return f_i_plus_half;
+}
+
+/* calculating the flax vector
+argument list:
+f - pointer to the flax array
+u - pointer to the u array
+N - number of grid points */
+void calculate_vec_f(double *f, double *u, int N)
+{
+    for (int i = 0; i < N+1; i++) {
+        f[i] = claculate_f_i_plus_half(u[i], u[i+1]);
+    }
+}
+
+/* calculating the delta time according to the CFL number argument list:
+*/
+double calculate_delta_time(double *u, double delta_x, double CFL, int N)
+{
+    double delta_time = __DBL_MAX__;
+    for (int i = 1; i < N+1; i++) {
+        if (delta_time > CFL / u[i] * delta_x) {
+            delta_time = CFL / u[i] * delta_x;
+        }
+    }
+
+    return delta_time;
+}
+
+void calculate_delta_u(double *f, double *delta_u, double delta_time, double delta_x, int N)
+{
+    for (int i = 1; i < N+1; i++) {
+        delta_u[i] = delta_time / delta_x * (f[i] - f[i-1]);
+    }
+}
+
+void update_u(double *u, double *delta_u, int N)
+{
+    for (int i = 1; i < N+1; i++) {
+        u[i] = u[i] - delta_u[i];
+    }
+}
+
+/* calculating the second norma of the vector 'delta_u'
+argument list:
+delta_u - pointer to the vector elements array
+start   - start index in the array
+end     - end index in the array */
+double calculate_norm(double *delta_u, int start, int end)
+{
+    double sum = 0;
+    for (int i = start; i <= end; i++) {
+        sum += delta_u[i] * delta_u[i];
+    }
+    return sqrt(sum);
 }
 
 /* ouputing metadata of the solution 
 argumetn list:
 output_dir - name of the output directory
 N          - number of grid points
-y_0, u_0   - boundry condtions at zero
-y_N, u_N   - boundry condtions at N
-delta_time - time step between iterations
-alpha      - parameter that control the scheme
-delta_y    - distance between to grid points
-mu         - viscosity */
-void output(char *output_dir, int N, double y_0, double u_0, double y_N, double u_N, double delta_time, double alpha, double delta_y, double mu)
+*/
+void output(char *output_dir, int N, double u1, double x_max, double x_min, int Roe_first, int Roe_second, double CFL, double delta_x)
 {
     char temp_word[MAXWORD];
     FILE *meta_data_file;
@@ -470,8 +394,8 @@ void output(char *output_dir, int N, double y_0, double u_0, double y_N, double 
     strcat(temp_word, "/mata_data.txt");
     meta_data_file = fopen(temp_word, "wt");
 
-    fprintf(meta_data_file, "%s, %s, %s, %s\n", "N", "y_0", "u_0", "y_N");
-    fprintf(meta_data_file, "%d, %g, %g, %g", N, y_0, u_0, y_N);
+    fprintf(meta_data_file, "%s, %s, %s, %s, %s, %s, %s, %s\n", "N", "u1", "x_max", "x_min", "Roe_first", "Roe_second", "CFL", "delta_x");
+    fprintf(meta_data_file, "%d, %g, %g, %g, %d, %d, %g, %g", N, u1, x_max, x_min, Roe_first, Roe_second, CFL, delta_x);
 
 
     fclose(meta_data_file);

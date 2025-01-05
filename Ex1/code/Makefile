@@ -6,7 +6,7 @@ build_solver: solver.c
 
 run_solver:
 	@echo
-	@./solver $(IN_FILL) $(OUT_DIR) 
+	@./solver $(IN_FILE) $(OUT_DIR) 
 
 clean_solver:
 	@echo
