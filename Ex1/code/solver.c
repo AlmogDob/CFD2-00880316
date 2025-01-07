@@ -15,31 +15,37 @@
 #define dprintF(expr) do{printf("%d: ", __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
 #define dprintD(expr) do{printf("%d: ", __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
 
+typedef enum {
+    ROE_FIRST  = (1 << 0),
+    ROE_SECOND = (1 << 1),
+} t_flag;
+
 #ifdef __linux__
 #define ON_LINUX 1
 int create_empty_dir(char *parent_directory);
 #endif
 
-void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, int *Roe_first, int *Roe_second, double *CFL, double *delta_x, int *iterations);
-void init(double *u, int u1, double delta_x, int N);
+void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, t_flag *flags, double *CFL, double *delta_x, int *iterations);
+void init(double *u, double u1, double delta_x, int N);
 void print_array(double *array, int start, int end);
 void print_array_to_file(FILE *fp, double *array, int start, int end);
 double claculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1);
-void calculate_vec_f(double *f, double *u, int N);
+void calculate_vec_f(double *f, double *u, int N, t_flag flags);
 double calculate_delta_time(double *u, double delta_x, double CFL, int N);
 void make_u_physical(double *u_i_plus_half, double u_i, double u_i_plus_1);
 void calculate_delta_u(double *f, double *delta_u, double delta_time, double delta_x, int N);
 void update_u(double *u, double *delta_u, int N);
 double calculate_norm(double *delta_u, int start, int end);
-void output(char *output_dir, int N, double u1, double x_max, double x_min, int Roe_first, int Roe_second, double CFL, double delta_x);
+void output(char *output_dir, int N, double u1, double x_max, double x_min, t_flag flags, double CFL, double delta_x);
 
 int main(int argc, char const *argv[])
 {
 /* declerations */
     char input_file[MAXDIR], output_dir[MAXDIR], temp_word[MAXWORD];
     double *u, *f, *delta_u, u1, x_max, x_min, CFL, delta_x, delta_time, first_delta_u_norm, current_delta_u_norm;
-    int N, Roe_first, Roe_second, iterations;
+    int N, iterations;
     FILE *output_u_file, *output_iter_file;  
+    t_flag flags = 0;
 
 /* getting the input file and output file */
     if (--argc != 2 && argc != 4) {
@@ -63,7 +69,7 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* reading the input */
-    read_input(input_file, &N, &u1, &x_max, &x_min, &Roe_first, &Roe_second, &CFL, &delta_x, &iterations);
+    read_input(input_file, &N, &u1, &x_max, &x_min, &flags, &CFL, &delta_x, &iterations);
 
 /* Checking the input */
     dprintINT(N);
@@ -71,15 +77,14 @@ int main(int argc, char const *argv[])
     dprintD(x_max);
     dprintD(x_min);
     dprintD(delta_x);
-    dprintINT(Roe_first);
-    dprintINT(Roe_second);
     dprintD(CFL);
     dprintINT(iterations);
+    dprintINT(flags);
     printf("--------------------\n");
 
     if (ON_LINUX) {
     /* creating output directory */
-        if (Roe_first) {
+        if (flags & ROE_FIRST) {
             strcat(output_dir, "_Roe_first");
         }
         if (create_empty_dir(output_dir) != 0) {
@@ -116,12 +121,12 @@ int main(int argc, char const *argv[])
 /* initializtion */
     init(u, u1, delta_x, N);
     print_array(u, 0, N+1);
-    print_array_to_file(output_u_file, u, 1, N);
+    print_array_to_file(output_u_file, u, 0, N+1);
 /*------------------------------------------------------------*/
 /* the loop */
 
     for (int iter = 0; iter < iterations; iter++) {
-        calculate_vec_f(f, u, N);
+        calculate_vec_f(f, u, N, flags);
         delta_time = calculate_delta_time(u, delta_x, CFL, N);
         calculate_delta_u(f, delta_u, delta_time, delta_x, N);
         if (iter == 0) {
@@ -132,7 +137,7 @@ int main(int argc, char const *argv[])
         // print_array(delta_u, 1, N);
 
         update_u(u, delta_u, N);
-        print_array_to_file(output_u_file, u, 1, N);
+        print_array_to_file(output_u_file, u, 0, N+1);
         fprintf(output_iter_file, "%d, %g\n", iter, current_delta_u_norm);
 
         printf("%d: %g\n", iter, current_delta_u_norm);
@@ -145,10 +150,9 @@ int main(int argc, char const *argv[])
     // print_array_to_file(output_u_file, u, 1, N);
     // fprintf(output_iter_file, "%d, %g\n", iteration, current_L2Norm);
 
-
 /*------------------------------------------------------------*/
 /* output */
-    output(output_dir, N, u1, x_max, x_min, Roe_first, Roe_second, CFL, delta_x);
+    output(output_dir, N, u1, x_max, x_min, flags, CFL, delta_x);
 
 /*------------------------------------------------------------*/
 /* freeing the memory */
@@ -209,15 +213,15 @@ N          - int pointer
 u1         - double pointer
 x_max      - double pointer
 x_min      - double pointer
-Roe_first  - int pointer
-Roe_second - int pointer
+flags      - bit flags
 CFL        - double pointer
 delta_x    - double pointer 
 iterations - max number of desierd iterations */
-void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, int *Roe_first, int *Roe_second, double *CFL, double *delta_x, int *iterations)
+void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, t_flag *flags, double *CFL, double *delta_x, int *iterations)
 {
     char current_word[MAXWORD];
-    float temp;
+    float temp_f;
+    int temp_i;
     FILE *fp = fopen(input_file, "rt");
     if (fp == NULL) {
         fprintf(stderr, "%s:%d:[Error] problem opening input file: %s\n", __FILE__, __LINE__, strerror(errno));
@@ -229,24 +233,28 @@ void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_m
             fscanf(fp, "%d", N);
             *N = *N;
         } else if (!strcmp(current_word, "u1")) {
-            fscanf(fp, "%g", &temp);
-            *u1 = (double)temp;
+            fscanf(fp, "%g", &temp_f);
+            *u1 = (double)temp_f;
         } else if (!strcmp(current_word, "x_max")) {
-            fscanf(fp, "%g", &temp);
-            *x_max = (double)temp;
+            fscanf(fp, "%g", &temp_f);
+            *x_max = (double)temp_f;
         } else if (!strcmp(current_word, "x_min")) {
-            fscanf(fp, "%g", &temp);
-            *x_min = (double)temp;
+            fscanf(fp, "%g", &temp_f);
+            *x_min = (double)temp_f;
         } else if (!strcmp(current_word, "Roe_first")) {
-            fscanf(fp, "%d", Roe_first);
+            fscanf(fp, "%d", &temp_i);
+            if (temp_i)
+                *flags |= ROE_FIRST;
         } else if (!strcmp(current_word, "Roe_second")) {
-            fscanf(fp, "%d", Roe_second);
+            fscanf(fp, "%d", &temp_i);
+            if (temp_i)
+                *flags |= ROE_SECOND;
         } else if (!strcmp(current_word, "CFL")) {
-            fscanf(fp, "%g", &temp);
-            *CFL = (double)temp;
+            fscanf(fp, "%g", &temp_f);
+            *CFL = (double)temp_f;
         } else if (!strcmp(current_word, "iterations")) {
-            fscanf(fp, "%g", &temp);
-            *iterations = (int)temp;
+            fscanf(fp, "%g", &temp_f);
+            *iterations = (int)temp_f;
         }
     }
 
@@ -261,7 +269,7 @@ u       - pointer to the solution array
 u1      - boundry condition at x_max
 delta_x - double value of delta_x
 N       - number of grid points */
-void init(double *u, int u1, double delta_x, int N)
+void init(double *u, double u1, double delta_x, int N)
 {
     for (int i = 1; i <= N; i++) {
         u[i] = 1 - (1 - u1) * delta_x * (i-1);
@@ -339,13 +347,16 @@ double claculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1)
 
 /* calculating the flax vector
 argument list:
-f - pointer to the flax array
-u - pointer to the u array
-N - number of grid points */
-void calculate_vec_f(double *f, double *u, int N)
+f     - pointer to the flax array
+u     - pointer to the u array
+N     - number of grid points
+flags - bit flags */
+void calculate_vec_f(double *f, double *u, int N, t_flag flags)
 {
-    for (int i = 0; i < N+1; i++) {
-        f[i] = claculate_Roe_first_f_i_plus_half(u[i], u[i+1]);
+    if (flags & ROE_FIRST) {
+        for (int i = 0; i < N+1; i++) {
+            f[i] = claculate_Roe_first_f_i_plus_half(u[i], u[i+1]);
+        }
     }
 }
 
@@ -396,7 +407,7 @@ argumetn list:
 output_dir - name of the output directory
 N          - number of grid points
 */
-void output(char *output_dir, int N, double u1, double x_max, double x_min, int Roe_first, int Roe_second, double CFL, double delta_x)
+void output(char *output_dir, int N, double u1, double x_max, double x_min, t_flag flags, double CFL, double delta_x)
 {
     char temp_word[MAXWORD];
     FILE *meta_data_file;
@@ -406,7 +417,7 @@ void output(char *output_dir, int N, double u1, double x_max, double x_min, int 
     meta_data_file = fopen(temp_word, "wt");
 
     fprintf(meta_data_file, "%s, %s, %s, %s, %s, %s, %s, %s\n", "N", "u1", "x_max", "x_min", "Roe_first", "Roe_second", "CFL", "delta_x");
-    fprintf(meta_data_file, "%d, %g, %g, %g, %d, %d, %g, %g", N, u1, x_max, x_min, Roe_first, Roe_second, CFL, delta_x);
+    fprintf(meta_data_file, "%d, %g, %g, %g, %d, %d, %g, %g", N, u1, x_max, x_min, flags & ROE_FIRST, flags & ROE_SECOND, CFL, delta_x);
 
 
     fclose(meta_data_file);

@@ -124,6 +124,15 @@ The interface wave speed becomes
     \end{array}\right.
 \end{equation}
 
+\subsubsection{CFL number}
+For the Roe method, the CFL number is defined as:
+\begin{equation}
+    \mathrm{CFL}=\frac{u\Delta t}{\Delta x}
+\end{equation}
+We will want to set the maximal value of the \emph{CFL} number. We will find the $\Delta t$ at each cell and $\left(\Delta t_i\right)$ and set the $\Delta t$ of the current step as:
+\begin{equation}
+    \Delta t=\min\left(\Delta t_i\right)\ \forall i
+\end{equation}
 
 \subsection{Second Order Roe $(u_1 = 0.5)$}
 The first-order accurate Roe method interface flux function will be denoted like this:
@@ -169,6 +178,17 @@ The interface values with limiters are evaluated as:
             u_{i+\frac{1}{2}}^r & = & u_{i+1}-\frac{1+k}{4}\overline{\delta^+} u_{i+\frac{1}{2}}-\frac{1-k}{4}\overline{\delta^-} u_{i+\frac{3}{2}}
         \end{array}\right. && {\overline{\delta^\pm}} u\text{ are limited slopes}
     \end{matrix}
+\end{equation}
+$\overline{\delta}$ is an operator such that $\overline{\delta}u_i=\psi\delta u_i$, where $\psi\left(r\right)$ is a limiter function and:
+\begin{equation}
+    r^\pm=\left\{\begin{array}{ccc}
+        r_{1+\frac{1}{2}}^+ & \triangleq & \displaystyle\frac{u_{i+2}-u_{i+1}}{u_{i+1}-u_i}=\frac{\Delta u_{i+1}}{\Delta u_i} \\
+        r_{1+\frac{1}{2}}^- & \triangleq & \displaystyle\frac{u_{i}-u_{i-1}}{u_{i+1}-u_i}=\frac{\nabla u_{i}}{\nabla u_{i+1}}
+    \end{array}\right.
+\end{equation}
+There are many types of limiters. For example, the van Albada limiter:
+\begin{equation}
+    \psi\left(r\right)=\frac{r+r^2}{1+r^2}
 \end{equation}
 
 \newpage
