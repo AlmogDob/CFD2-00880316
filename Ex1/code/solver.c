@@ -15,12 +15,16 @@
 #define dprintF(expr) do{printf("%d: ", __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
 #define dprintD(expr) do{printf("%d: ", __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
 
+#ifdef __linux__
+#define ON_LINUX 1
 int create_empty_dir(char *parent_directory);
+#endif
+
 void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, int *Roe_first, int *Roe_second, double *CFL, double *delta_x, int *iterations);
 void init(double *u, int u1, double delta_x, int N);
 void print_array(double *array, int start, int end);
 void print_array_to_file(FILE *fp, double *array, int start, int end);
-double claculate_f_i_plus_half(double u_i, double u_i_plus_1);
+double claculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1);
 void calculate_vec_f(double *f, double *u, int N);
 double calculate_delta_time(double *u, double delta_x, double CFL, int N);
 void make_u_physical(double *u_i_plus_half, double u_i, double u_i_plus_1);
@@ -57,20 +61,6 @@ int main(int argc, char const *argv[])
         return -1;
     }
 
-/* creating output directory */
-    if (create_empty_dir(output_dir) != 0) {
-        fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
-        return -1;
-    }
-
-    strcpy(temp_word, output_dir);
-    strcat(temp_word, "/output_u.txt");
-    output_u_file = fopen(temp_word, "wt");
-
-    strcpy(temp_word, output_dir);
-    strcat(temp_word, "/output_iter.txt");
-    output_iter_file = fopen(temp_word, "wt");
-
 /*------------------------------------------------------------*/
 /* reading the input */
     read_input(input_file, &N, &u1, &x_max, &x_min, &Roe_first, &Roe_second, &CFL, &delta_x, &iterations);
@@ -86,6 +76,25 @@ int main(int argc, char const *argv[])
     dprintD(CFL);
     dprintINT(iterations);
     printf("--------------------\n");
+
+    if (ON_LINUX) {
+    /* creating output directory */
+        if (Roe_first) {
+            strcat(output_dir, "_Roe_first");
+        }
+        if (create_empty_dir(output_dir) != 0) {
+            fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
+            return -1;
+        }
+
+        strcpy(temp_word, output_dir);
+        strcat(temp_word, "/output_u.txt");
+        output_u_file = fopen(temp_word, "wt");
+
+        strcpy(temp_word, output_dir);
+        strcat(temp_word, "/output_iter.txt");
+        output_iter_file = fopen(temp_word, "wt");
+    }
 
 /*------------------------------------------------------------*/
 /* allocating the matrices */
@@ -120,7 +129,7 @@ int main(int argc, char const *argv[])
         }
         current_delta_u_norm = calculate_norm(delta_u, 1, N);
 
-        print_array(delta_u, 1, N);
+        // print_array(delta_u, 1, N);
 
         update_u(u, delta_u, N);
         print_array_to_file(output_u_file, u, 1, N);
@@ -150,6 +159,7 @@ int main(int argc, char const *argv[])
     return 0;
 }
 
+#if ON_LINUX
 /* create empty dir at 'parent directory'.
 if allready exisest, delet all the files inside
 returns 0 on success
@@ -190,6 +200,7 @@ int create_empty_dir(char *parent_directory)
     }
     return 0;
 }
+#endif
 
 /* read input parameters from input file
 argument list:
@@ -310,18 +321,18 @@ void make_u_physical(double *u_i_plus_half, double u_i, double u_i_plus_1)
 
 /* calculating the flax for a face
 argument list:*/
-double claculate_f_i_plus_half(double u_i, double u_i_plus_1)
+double claculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1)
 {
-    double u_bar_i_plus_half = (u_i + u_i_plus_1) / 2;
-    make_u_physical(&u_bar_i_plus_half, u_i, u_i_plus_1);
+    double u_bar_i_plus_half = (u_i + u_i_plus_1) * 0.5;
+    // make_u_physical(&u_bar_i_plus_half, u_i, u_i_plus_1);
 
-    double u_bar_i_plus_half_plus = (u_bar_i_plus_half + fabs(u_bar_i_plus_half)) / 2;
-    double u_bar_i_plus_half_minus = (u_bar_i_plus_half - fabs(u_bar_i_plus_half)) / 2;
+    double u_bar_i_plus_half_plus = (u_bar_i_plus_half + fabs(u_bar_i_plus_half)) * 0.5;
+    double u_bar_i_plus_half_minus = (u_bar_i_plus_half - fabs(u_bar_i_plus_half)) * 0.5;
     
-    double F_i = u_i * u_i / 2;
-    double F_i_plus_1 = u_i_plus_1 * u_i_plus_1 / 2;
+    double F_i = u_i * u_i * 0.5;
+    double F_i_plus_1 = u_i_plus_1 * u_i_plus_1 * 0.5;
 
-    double f_i_plus_half = (F_i + F_i_plus_1) / 2 - 0.5 * (u_bar_i_plus_half_plus - u_bar_i_plus_half_minus) * ( u_i_plus_1 - u_i);
+    double f_i_plus_half = (F_i + F_i_plus_1) * 0.5 - 0.5 * (u_bar_i_plus_half_plus - u_bar_i_plus_half_minus) * ( u_i_plus_1 - u_i);
 
     return f_i_plus_half;
 }
@@ -334,7 +345,7 @@ N - number of grid points */
 void calculate_vec_f(double *f, double *u, int N)
 {
     for (int i = 0; i < N+1; i++) {
-        f[i] = claculate_f_i_plus_half(u[i], u[i+1]);
+        f[i] = claculate_Roe_first_f_i_plus_half(u[i], u[i+1]);
     }
 }
 
@@ -344,8 +355,8 @@ double calculate_delta_time(double *u, double delta_x, double CFL, int N)
 {
     double delta_time = __DBL_MAX__;
     for (int i = 1; i < N+1; i++) {
-        if (delta_time > CFL / u[i] * delta_x) {
-            delta_time = CFL / u[i] * delta_x;
+        if (delta_time > CFL / fabs(u[i]) * delta_x) {
+            delta_time = CFL / fabs(u[i]) * delta_x;
         }
     }
 

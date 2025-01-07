@@ -20,4 +20,4 @@ CFL
 0.5
 
 iterations
-1e3
+1e5
