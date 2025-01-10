@@ -2,8 +2,6 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
-#include <sys/stat.h>
-#include <dirent.h>
 #include <errno.h>
 #include <limits.h>
 
@@ -21,18 +19,22 @@ typedef enum {
 } t_flag;
 
 #ifdef __linux__
-#define ON_LINUX 1
-int create_empty_dir(char *parent_directory);
+    #include <sys/stat.h>
+    #include <dirent.h>
+    #define ON_LINUX 1
+    int create_empty_dir(char *parent_directory);
 #endif
 
-void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, t_flag *flags, double *CFL, double *delta_x, int *iterations);
+void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, double *k, t_flag *flags, double *CFL, double *delta_x, int *iterations);
 void init(double *u, double u1, double delta_x, int N);
 void print_array(double *array, int start, int end);
 void print_array_to_file(FILE *fp, double *array, int start, int end);
-double claculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1);
-void calculate_vec_f(double *f, double *u, int N, t_flag flags);
+void make_u_physical(double *u_bar_i_plus_half, double u_i, double u_bar_i_plus_1);
+double calculate_F(double u);
+double calculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1);
+double calculate_Roe_second_f_i_plus_half(double u_i_minus_1, double u_i, double u_i_plus_1, double u_i_plus_2, double k);
+void calculate_vec_f(double *f, double *u, int N, double k, t_flag flags);
 double calculate_delta_time(double *u, double delta_x, double CFL, int N);
-void make_u_physical(double *u_i_plus_half, double u_i, double u_i_plus_1);
 void calculate_delta_u(double *f, double *delta_u, double delta_time, double delta_x, int N);
 void update_u(double *u, double *delta_u, int N);
 double calculate_norm(double *delta_u, int start, int end);
@@ -42,7 +44,7 @@ int main(int argc, char const *argv[])
 {
 /* declerations */
     char input_file[MAXDIR], output_dir[MAXDIR], temp_word[MAXWORD];
-    double *u, *f, *delta_u, u1, x_max, x_min, CFL, delta_x, delta_time, first_delta_u_norm, current_delta_u_norm;
+    double *u, *f, *delta_u, u1, x_max, x_min, CFL, delta_x, delta_time, first_delta_u_norm, current_delta_u_norm, k;
     int N, iterations;
     FILE *output_u_file, *output_iter_file;  
     t_flag flags = 0;
@@ -69,13 +71,14 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* reading the input */
-    read_input(input_file, &N, &u1, &x_max, &x_min, &flags, &CFL, &delta_x, &iterations);
+    read_input(input_file, &N, &u1, &x_max, &x_min, &k, &flags, &CFL, &delta_x, &iterations);
 
 /* Checking the input */
     dprintINT(N);
     dprintD(u1);
     dprintD(x_max);
     dprintD(x_min);
+    dprintD(k);
     dprintD(delta_x);
     dprintD(CFL);
     dprintINT(iterations);
@@ -86,6 +89,9 @@ int main(int argc, char const *argv[])
     /* creating output directory */
         if (flags & ROE_FIRST) {
             strcat(output_dir, "_Roe_first");
+        }
+        if (flags & ROE_SECOND) {
+            strcat(output_dir, "_Roe_second");
         }
         if (create_empty_dir(output_dir) != 0) {
             fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
@@ -125,8 +131,9 @@ int main(int argc, char const *argv[])
 /*------------------------------------------------------------*/
 /* the loop */
 
+
     for (int iter = 0; iter < iterations; iter++) {
-        calculate_vec_f(f, u, N, flags);
+        calculate_vec_f(f, u, N, k, flags);
         delta_time = calculate_delta_time(u, delta_x, CFL, N);
         calculate_delta_u(f, delta_u, delta_time, delta_x, N);
         if (iter == 0) {
@@ -217,7 +224,7 @@ flags      - bit flags
 CFL        - double pointer
 delta_x    - double pointer 
 iterations - max number of desierd iterations */
-void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, t_flag *flags, double *CFL, double *delta_x, int *iterations)
+void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, double *k, t_flag *flags, double *CFL, double *delta_x, int *iterations)
 {
     char current_word[MAXWORD];
     float temp_f;
@@ -241,6 +248,9 @@ void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_m
         } else if (!strcmp(current_word, "x_min")) {
             fscanf(fp, "%g", &temp_f);
             *x_min = (double)temp_f;
+        } else if (!strcmp(current_word, "k")) {
+            fscanf(fp, "%g", &temp_f);
+            *k = (double)temp_f;
         } else if (!strcmp(current_word, "Roe_first")) {
             fscanf(fp, "%d", &temp_i);
             if (temp_i)
@@ -318,18 +328,25 @@ void print_array_to_file(FILE *fp, double *array, int start, int end)
     fprintf(fp, "\n");
 }
 
-void make_u_physical(double *u_i_plus_half, double u_i, double u_i_plus_1)
+void make_u_physical(double *u_bar_i_plus_half, double u_i, double u_i_plus_1)
 {
     double epsilon = fmax(0, (u_i_plus_1 - u_i) / 2); 
 
-    if (*u_i_plus_half < epsilon) {
-        *u_i_plus_half = epsilon;
+    if (*u_bar_i_plus_half < epsilon) {
+        *u_bar_i_plus_half = epsilon;
     }
 }
 
+/* calculating F
+argument list: */
+double calculate_F(double u)
+{
+    return u * u / 2;
+}
+
 /* calculating the flax for a face
-argument list:*/
-double claculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1)
+argument list: */
+double calculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1)
 {
     double u_bar_i_plus_half = (u_i + u_i_plus_1) * 0.5;
     // make_u_physical(&u_bar_i_plus_half, u_i, u_i_plus_1);
@@ -337,11 +354,31 @@ double claculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1)
     double u_bar_i_plus_half_plus = (u_bar_i_plus_half + fabs(u_bar_i_plus_half)) * 0.5;
     double u_bar_i_plus_half_minus = (u_bar_i_plus_half - fabs(u_bar_i_plus_half)) * 0.5;
     
-    double F_i = u_i * u_i * 0.5;
-    double F_i_plus_1 = u_i_plus_1 * u_i_plus_1 * 0.5;
+    double F_i = calculate_F(u_i);
+    double F_i_plus_1 = calculate_F(u_i_plus_1);
 
     double f_i_plus_half = (F_i + F_i_plus_1) * 0.5 - 0.5 * (u_bar_i_plus_half_plus - u_bar_i_plus_half_minus) * ( u_i_plus_1 - u_i);
 
+    return f_i_plus_half;
+}
+
+/* calculating the flax for a face
+argument list:*/
+double calculate_Roe_second_f_i_plus_half(double u_i_minus_1, double u_i, double u_i_plus_1, double u_i_plus_2, double k)
+{
+    double delta_u_i_minus_half = u_i - u_i_minus_1;
+    double delta_u_i_plus_half = u_i_plus_1 - u_i;
+    double delta_u_i_plus_three_half = u_i_plus_2 - u_i_plus_1;
+    double u_left_i_plus_half = u_i + (1-k)/4 * delta_u_i_minus_half + (1+k)/4 * delta_u_i_plus_half;
+    double u_right_i_plus_half = u_i_plus_1 - (1+k)/4 * delta_u_i_plus_half - (1-k)/4 * delta_u_i_plus_three_half;
+    double F_left = calculate_F(u_left_i_plus_half);
+    double F_right = calculate_F(u_right_i_plus_half);
+    double u_bar_i_plus_half = (u_left_i_plus_half + u_right_i_plus_half) * 0.5;
+    // make_u_physical(&u_bar_i_plus_half, u_i, u_i_plus_1);
+    double u_bar_plus_i_plus_half = 0.5 * (u_bar_i_plus_half + fabs(u_bar_i_plus_half));
+    double u_bar_minus_i_plus_half = 0.5 * (u_bar_i_plus_half - fabs(u_bar_i_plus_half));
+
+    double f_i_plus_half = 0.5 * (F_left + F_right - (u_bar_plus_i_plus_half - u_bar_minus_i_plus_half) * ( u_right_i_plus_half - u_left_i_plus_half));
     return f_i_plus_half;
 }
 
@@ -351,12 +388,19 @@ f     - pointer to the flax array
 u     - pointer to the u array
 N     - number of grid points
 flags - bit flags */
-void calculate_vec_f(double *f, double *u, int N, t_flag flags)
+void calculate_vec_f(double *f, double *u, int N, double k, t_flag flags)
 {
     if (flags & ROE_FIRST) {
         for (int i = 0; i < N+1; i++) {
-            f[i] = claculate_Roe_first_f_i_plus_half(u[i], u[i+1]);
+            f[i] = calculate_Roe_first_f_i_plus_half(u[i], u[i+1]);
         }
+    }
+    if (flags & ROE_SECOND) {
+        for (int i = 1; i < N; i++) {
+            f[i] = calculate_Roe_second_f_i_plus_half(u[i-1], u[i], u[i+1], u[i+2], k);
+        }
+        f[0] = calculate_Roe_second_f_i_plus_half(u[0], u[0], u[1], u[2], k);
+        f[N] = calculate_Roe_second_f_i_plus_half(u[N-1], u[N], u[N+1], u[N+1], k);
     }
 }
 

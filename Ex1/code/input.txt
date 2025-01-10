@@ -10,11 +10,14 @@ x_max
 x_min
 0
 
+k
+-1
+
 Roe_first
-1
+0
 
 Roe_second
-0
+1
 
 CFL
 0.5
