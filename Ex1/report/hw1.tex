@@ -193,7 +193,20 @@ There are many types of limiters. For example, the van Albada limiter:
 
 \newpage
 \section{Generalized Burgers Equation}
-
+The generalized Burgers equation is given by:
+\begin{equation}
+    \frac{\partial u}{\partial t}+\left(c+bu\right)\frac{\partial u}{\partial x}=\mu\frac{\partial^2u}{\partial x^2}
+\end{equation}
+\subsection{Boundary and Initial Conditions}
+\subsubsection{Initial Conditions}
+\begin{equation}
+    u_{x,t=0}=\frac{1}{2}\left(1+\tanh\left(250\left(x-20\right)\right)\right)
+\end{equation}
+\subsubsection{Boundary Conditions}
+Using Dirichlet boundary conditions:
+\begin{equation}
+    u_{x=0,t}=
+\end{equation}
 
 
 \end{document}

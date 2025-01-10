@@ -16,6 +16,11 @@
 typedef enum {
     ROE_FIRST  = (1 << 0),
     ROE_SECOND = (1 << 1),
+    NO_LIMITER = (1 << 2),
+    VAN_ALBADA = (1 << 3),
+    SUPERBEE   = (1 << 4),
+    VAN_LEER   = (1 << 5),
+    MINMOD     = (1 << 6),
 } t_flag;
 
 #ifdef __linux__
@@ -32,7 +37,8 @@ void print_array_to_file(FILE *fp, double *array, int start, int end);
 void make_u_physical(double *u_bar_i_plus_half, double u_i, double u_bar_i_plus_1);
 double calculate_F(double u);
 double calculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1);
-double calculate_Roe_second_f_i_plus_half(double u_i_minus_1, double u_i, double u_i_plus_1, double u_i_plus_2, double k);
+double limiter(double r, t_flag flags);
+double calculate_Roe_second_f_i_plus_half(double u_i_minus_1, double u_i, double u_i_plus_1, double u_i_plus_2, double k, t_flag flags);
 void calculate_vec_f(double *f, double *u, int N, double k, t_flag flags);
 double calculate_delta_time(double *u, double delta_x, double CFL, int N);
 void calculate_delta_u(double *f, double *delta_u, double delta_time, double delta_x, int N);
@@ -87,12 +93,32 @@ int main(int argc, char const *argv[])
 
     if (ON_LINUX) {
     /* creating output directory */
+        if (create_empty_dir(output_dir) != 0) {
+            fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
+            return -1;
+        }
+        sprintf(temp_word, "_CFL%g", CFL);
         if (flags & ROE_FIRST) {
-            strcat(output_dir, "_Roe_first");
+            strcat(output_dir, "/Roe_first");
         }
         if (flags & ROE_SECOND) {
-            strcat(output_dir, "_Roe_second");
+            if (flags & NO_LIMITER) {
+                strcat(output_dir, "/Roe_second_no_limiter");
+            }
+            if (flags & VAN_ALBADA) {
+                strcat(output_dir, "/Roe_second_van_Albada");
+            }
+            if (flags & SUPERBEE) {
+                strcat(output_dir, "/Roe_second_superbee");
+            }
+            if (flags & VAN_LEER) {
+                strcat(output_dir, "/Roe_second_van_Leer");
+            }
+            if (flags & MINMOD) {
+                strcat(output_dir, "/Roe_second_minmod");
+            }
         }
+        strcat(output_dir, temp_word);
         if (create_empty_dir(output_dir) != 0) {
             fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
             return -1;
@@ -128,6 +154,7 @@ int main(int argc, char const *argv[])
     init(u, u1, delta_x, N);
     print_array(u, 0, N+1);
     print_array_to_file(output_u_file, u, 0, N+1);
+    fprintf(output_iter_file, "%s, %s, %s\n", "No", "norm", "delta_time");
 /*------------------------------------------------------------*/
 /* the loop */
 
@@ -144,8 +171,11 @@ int main(int argc, char const *argv[])
         // print_array(delta_u, 1, N);
 
         update_u(u, delta_u, N);
+
+        // print_array(u, 0, N+1);
+
         print_array_to_file(output_u_file, u, 0, N+1);
-        fprintf(output_iter_file, "%d, %g\n", iter, current_delta_u_norm);
+        fprintf(output_iter_file, "%d, %g, %g\n", iter, current_delta_u_norm+1, delta_time);
 
         printf("%d: %g\n", iter, current_delta_u_norm);
 
@@ -154,9 +184,7 @@ int main(int argc, char const *argv[])
         }
     }
 
-    // print_array_to_file(output_u_file, u, 1, N);
-    // fprintf(output_iter_file, "%d, %g\n", iteration, current_L2Norm);
-
+    
 /*------------------------------------------------------------*/
 /* output */
     output(output_dir, N, u1, x_max, x_min, flags, CFL, delta_x);
@@ -235,6 +263,8 @@ void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_m
         exit(1);
     }
 
+    *flags |= NO_LIMITER;
+
     while(fscanf(fp, "%s", current_word) != EOF) {
         if (!strcmp(current_word, "N")) {
             fscanf(fp, "%d", N);
@@ -259,6 +289,21 @@ void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_m
             fscanf(fp, "%d", &temp_i);
             if (temp_i)
                 *flags |= ROE_SECOND;
+        } else if (!strcmp(current_word, "Limiter")) {
+            fscanf(fp, "%s", current_word);
+                if (!strcmp(current_word, "van_Albada")) {
+                    *flags &= ~ NO_LIMITER;
+                    *flags |= VAN_ALBADA;
+                } else if (!strcmp(current_word, "superbee")) {
+                    *flags &= ~ NO_LIMITER;
+                    *flags |= SUPERBEE;
+                } else if (!strcmp(current_word, "van_Leer")) {
+                    *flags &= ~ NO_LIMITER;
+                    *flags |= VAN_LEER;
+                } else if (!strcmp(current_word, "minmod")) {
+                    *flags &= ~ NO_LIMITER;
+                    *flags |= MINMOD;
+                }
         } else if (!strcmp(current_word, "CFL")) {
             fscanf(fp, "%g", &temp_f);
             *CFL = (double)temp_f;
@@ -268,7 +313,12 @@ void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_m
         }
     }
 
-    *delta_x = (double)(*x_max-*x_min)/(double)(*N-1);
+    if (*flags & ROE_SECOND || *flags & ROE_FIRST) { 
+        *delta_x = (double)(*x_max-*x_min)/(double)(*N-1);
+    }
+    if (*flags & ROE_FIRST && *flags & ROE_SECOND) {
+        exit(1);
+    }
 
     fclose(fp);
 }
@@ -362,17 +412,54 @@ double calculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1)
     return f_i_plus_half;
 }
 
+/* calculating the van Albada limiter
+argument list:*/
+double limiter(double r, t_flag flags)
+{
+    if (isnan(r) || isinf(r)) {
+        return 1;
+    } else if (flags & NO_LIMITER) {
+        return 1;
+    } else if (flags & VAN_ALBADA) {
+        return (r + r * r) / (1 + r * r);
+    } else if (flags & SUPERBEE) {
+        return fmax(fmax(0,fmin(2*r,1)),fmin(r,2));
+    } else if (flags & VAN_LEER) {
+        return (r + fabs(r)) / (1 + r * r);
+    } else if (flags & MINMOD) {
+        if (1 * r > 0) {
+            return 1 > fabs(r)?r:1;
+        } else {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 /* calculating the flax for a face
 argument list:*/
-double calculate_Roe_second_f_i_plus_half(double u_i_minus_1, double u_i, double u_i_plus_1, double u_i_plus_2, double k)
+double calculate_Roe_second_f_i_plus_half(double u_i_minus_1, double u_i, double u_i_plus_1, double u_i_plus_2, double k, t_flag flags)
 {
+    double r_plus = (u_i_plus_2 - u_i_plus_1) / (u_i_plus_1 - u_i);
+    double r_minus = (u_i - u_i_minus_1) / (u_i_plus_1 - u_i);
+    double psi_plus = limiter(r_plus, flags);
+    double psi_minus = limiter(r_minus, flags);
+
+    // printf("%g, %g, %g, %g\n", r_plus, r_minus, psi_plus, psi_minus);
+
     double delta_u_i_minus_half = u_i - u_i_minus_1;
     double delta_u_i_plus_half = u_i_plus_1 - u_i;
     double delta_u_i_plus_three_half = u_i_plus_2 - u_i_plus_1;
-    double u_left_i_plus_half = u_i + (1-k)/4 * delta_u_i_minus_half + (1+k)/4 * delta_u_i_plus_half;
-    double u_right_i_plus_half = u_i_plus_1 - (1+k)/4 * delta_u_i_plus_half - (1-k)/4 * delta_u_i_plus_three_half;
+
+    double u_left_i_plus_half = u_i + (1-k)/4 * psi_minus * delta_u_i_minus_half + (1+k)/4 * psi_plus * delta_u_i_plus_half;
+    double u_right_i_plus_half = u_i_plus_1 - (1+k)/4 * psi_plus * delta_u_i_plus_half - (1-k)/4 * psi_minus * delta_u_i_plus_three_half;
+
+    // double u_left_i_plus_half = u_i + (1-k)/4 * psi_plus * delta_u_i_minus_half;
+    // double u_right_i_plus_half = u_i_plus_1 - (1-k)/4 * psi_minus * delta_u_i_plus_three_half;
+
     double F_left = calculate_F(u_left_i_plus_half);
     double F_right = calculate_F(u_right_i_plus_half);
+    
     double u_bar_i_plus_half = (u_left_i_plus_half + u_right_i_plus_half) * 0.5;
     // make_u_physical(&u_bar_i_plus_half, u_i, u_i_plus_1);
     double u_bar_plus_i_plus_half = 0.5 * (u_bar_i_plus_half + fabs(u_bar_i_plus_half));
@@ -396,11 +483,14 @@ void calculate_vec_f(double *f, double *u, int N, double k, t_flag flags)
         }
     }
     if (flags & ROE_SECOND) {
-        for (int i = 1; i < N; i++) {
-            f[i] = calculate_Roe_second_f_i_plus_half(u[i-1], u[i], u[i+1], u[i+2], k);
+        for (int i = 1; i <= N-1; i++) {
+            f[i] = calculate_Roe_second_f_i_plus_half(u[i-1], u[i], u[i+1], u[i+2], k, flags);
         }
-        f[0] = calculate_Roe_second_f_i_plus_half(u[0], u[0], u[1], u[2], k);
-        f[N] = calculate_Roe_second_f_i_plus_half(u[N-1], u[N], u[N+1], u[N+1], k);
+        f[0] = calculate_Roe_second_f_i_plus_half(u[0], u[0], u[1], u[2], k, flags);
+        f[N] = calculate_Roe_second_f_i_plus_half(u[N-1], u[N], u[N+1], u[N+1], k, flags);
+
+        // f[0] = u[0];
+        // f[N] = u[N+1];
     }
 }
 
@@ -409,7 +499,7 @@ void calculate_vec_f(double *f, double *u, int N, double k, t_flag flags)
 double calculate_delta_time(double *u, double delta_x, double CFL, int N)
 {
     double delta_time = __DBL_MAX__;
-    for (int i = 1; i < N+1; i++) {
+    for (int i = 1; i <= N+2; i++) {
         if (delta_time > CFL / fabs(u[i]) * delta_x) {
             delta_time = CFL / fabs(u[i]) * delta_x;
         }
@@ -420,7 +510,7 @@ double calculate_delta_time(double *u, double delta_x, double CFL, int N)
 
 void calculate_delta_u(double *f, double *delta_u, double delta_time, double delta_x, int N)
 {
-    for (int i = 1; i < N+1; i++) {
+    for (int i = 1; i <= N; i++) {
         delta_u[i] = delta_time / delta_x * (f[i] - f[i-1]);
     }
 }

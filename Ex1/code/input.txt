@@ -2,7 +2,7 @@ N
 41
 
 u1
--1
+0.5
 
 x_max
 1
@@ -19,8 +19,11 @@ Roe_first
 Roe_second
 1
 
+Limiter
+van_Albada
+
 CFL
-0.5
+0.6
 
 iterations
 1e3
