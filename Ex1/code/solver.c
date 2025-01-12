@@ -97,7 +97,19 @@ int main(int argc, char const *argv[])
             fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
             return -1;
         }
-        sprintf(temp_word, "_CFL%g", CFL);
+        sprintf(temp_word, "/CFL%g", CFL);
+        strcat(output_dir, temp_word);
+        if (create_empty_dir(output_dir) != 0) {
+            fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
+            return -1;
+        }
+        sprintf(temp_word, "/u1_%g", u1);
+        strcat(output_dir, temp_word);
+        if (create_empty_dir(output_dir) != 0) {
+            fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
+            return -1;
+        }
+
         if (flags & ROE_FIRST) {
             strcat(output_dir, "/Roe_first");
         }
@@ -118,6 +130,8 @@ int main(int argc, char const *argv[])
                 strcat(output_dir, "/Roe_second_minmod");
             }
         }
+
+        sprintf(temp_word, "_CFL%g", CFL);
         strcat(output_dir, temp_word);
         if (create_empty_dir(output_dir) != 0) {
             fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
@@ -165,6 +179,7 @@ int main(int argc, char const *argv[])
         calculate_delta_u(f, delta_u, delta_time, delta_x, N);
         if (iter == 0) {
             first_delta_u_norm = calculate_norm(delta_u, 1, N);
+            current_delta_u_norm = calculate_norm(delta_u, 1, N);
         }
         current_delta_u_norm = calculate_norm(delta_u, 1, N);
 
@@ -175,7 +190,7 @@ int main(int argc, char const *argv[])
         // print_array(u, 0, N+1);
 
         print_array_to_file(output_u_file, u, 0, N+1);
-        fprintf(output_iter_file, "%d, %g, %g\n", iter, current_delta_u_norm+1, delta_time);
+        fprintf(output_iter_file, "%d, %g, %g\n", iter+1, current_delta_u_norm, delta_time);
 
         printf("%d: %g\n", iter, current_delta_u_norm);
 

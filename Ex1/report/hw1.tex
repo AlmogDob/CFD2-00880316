@@ -59,72 +59,10 @@ The equation is obtained by neglecting the viscous term from the viscous Burger 
 \end{equation}
 \begin{itemize}
     \item For first-order schemes, there is no variation within a cell, and the value there is constant.
-    \item For second-order schemes, the variation within the cell is linear.  \end{itemize}
+    \item For second-order schemes, the variation within the cell is linear. 
+\end{itemize}
 
-
-\subsection{First Order Roe Method $(u_1 = 0.0)$}
-Roe scheme is based on the solution of the linear problem:
-\begin{equation}
-        \displaystyle\frac{\partial u}{\partial t} + \bar{A}\frac{\partial u}{\partial x} = 0 
-\end{equation}
-Where $\bar{A}$ is a constant matrix that is dependent on local conditions. The matrix is constructed in a way to guarantee unifrom validity across discontinuities: 
-\begin{enumerate}
-    \item For any $u_i$, $u_{i+1}$:\begin{equation*}
-        F_{i+1}-F_{i} = \bar{A}\cdot\left(u_{i+1}-u_i\right)
-    \end{equation*}
-    \item When $u=u_i=u_{i+1}$ then:\begin{equation*}
-        \bar{A}_{\left(u_i,u_{i+1}\right)}=\bar{A}_{\left(u,u\right)}=\frac{\partial F}{\partial u}=u
-    \end{equation*}
-\end{enumerate}
-In case of the Burgers equation, the matrix $\bar{A}$ is a scalar, namely, $\bar{A}=\bar{u}$. The equation becomes:
-\begin{equation}
-        \displaystyle\frac{\partial u}{\partial t} + \bar{u}\frac{\partial u}{\partial x} = 0 
-\end{equation}
-The value of $\bar{u}$ for the cell face between \emph{i} and \emph{i+1} is determined from the first conditions:
-\begin{equation}
-    \bar{u}=\bar{u}_{i+\frac{1}{2}}=\frac{F_{i+1}-F_i}{u_{i+1}-u_i}=\frac{\displaystyle\frac{1}{2}u_{i+1}^2-\frac{1}{2}u_i^2}{u_{i+1}-u_i}=\left\{\begin{array}{cc}
-        \displaystyle\frac{u_i+u_{i+1}}{2} & u_i\neq u_{i+1} \\
-        u_i & u_i=u_{i+1} 
-    \end{array}\right.
-\end{equation}
-The single wave that emanates from the cell interface travels either in the positive or negative direction, depending upon the sighn of $\bar{u}_{i+\frac{1}{2}}$. Define:
-\begin{equation}
-    \left\{\begin{array}{cc}
-        \begin{array}{c}
-            \bar{u}_{i+\frac{1}{2}}^+\triangleq\displaystyle\frac{1}{2}\left(\bar{u}_{i+\frac{1}{2}}+\left|\bar{u}_{i+\frac{1}{2}}\right|\right)\geq0 \\\\
-            \bar{u}_{i+\frac{1}{2}}^-\triangleq\displaystyle\frac{1}{2}\left(\bar{u}_{i+\frac{1}{2}}-\left|\bar{u}_{i+\frac{1}{2}}\right|\right)\leq0 \\
-        \end{array} & \bar{u}_{i+\frac{1}{2}}=\bar{u}_{i+\frac{1}{2}}^++\bar{u}_{i+\frac{1}{2}}^-
-    \end{array}\right.
-\end{equation}
-Using the jump relation, the numerical flux at the cell interface can be evaluated by one of the following:
-\begin{equation}
-    \left\{\begin{array}{l}
-        f_{i+\frac{1}{2}}-F_i = \bar{u}_{i+\frac{1}{2}}^-\cdot\left(u_{i+1}-u_i\right) \\\\
-        F_{i+1}-f_{i+\frac{1}{2}}=\bar{u}_{i+\frac{1}{2}}^+\cdot\left(u_{i+1}-u_i\right)
-    \end{array}\right.
-\end{equation}
-The numerical flux may then be written in the following symmetric from:
-\begin{equation}
-    \begin{array}{l}
-        \displaystyle f_{i+\frac{1}{2}}=\frac{F_i+F_{i+1}}{2}-\frac{1}{2}\left(\bar{u}_{i+\frac{1}{2}}^+-\bar{u}_{i+\frac{1}{2}}^-\right)\left(u_{i+1}-u_i\right) \\
-        \mathrm{OR:} \\
-        \displaystyle f_{i+\frac{1}{2}}=\frac{F_i+F_{i+1}}{2}-\frac{1}{2}\left|\bar{u}_{i+\frac{1}{2}}\right|\left(u_{i+1}-u_i\right)
-    \end{array}
-\end{equation}
-Since Roe's scheme can't distinguish between the types of discontinuity, it may result in an expansion shock where the analytical solution is an expansion wave. To guarantee a physical solution the scheme will be modified like so:\\
-Define 
-\begin{equation*}
-    \varepsilon=\max\left(0,\frac{u_{i+1}-u_i}{2}\right)
-\end{equation*}
-The interface wave speed becomes
-\begin{equation}
-    \bar{u}_{i+\frac{1}{2}}=\left\{\begin{array}{ccc}
-        \bar{u}_{i+\frac{1}{2}} & \bar{u}_{i+\frac{1}{2}}\geq\varepsilon & \mathrm{compression} \\
-        \varepsilon & \bar{u}_{i+\frac{1}{2}}<\varepsilon & \mathrm{expansion}
-    \end{array}\right.
-\end{equation}
-
-\subsubsection{CFL number}
+\subsection{CFL number}
 For the Roe method, the CFL number is defined as:
 \begin{equation}
     \mathrm{CFL}=\frac{u\Delta t}{\Delta x}
@@ -133,6 +71,69 @@ We will want to set the maximal value of the \emph{CFL} number. We will find the
 \begin{equation}
     \Delta t=\min\left(\Delta t_i\right)\ \forall i
 \end{equation}
+
+\subsection{First Order Roe Method $(u_1 = 0.0)$}
+\label{Roe_first}
+Roe scheme is based on the solution of the linear problem:
+\begin{equation}
+        \displaystyle\frac{\partial u}{\partial t} + \bar{A}\frac{\partial u}{\partial x} = 0 
+\end{equation}
+Where $\bar{A}$ is a constant matrix that is dependent on local conditions. The matrix is constructed in a way that guarantees uniform validity across discontinuities: 
+\begin{enumerate}
+    \item For any $u_i$, $u_{i+1}$:\begin{equation*}
+        F_{i+1}-F_{i} = \bar{A}\cdot\left(u_{i+1}-u_i\right)
+    \end{equation*}
+    \item When $u=u_i=u_{i+1}$ then:\begin{equation*}
+        \bar{A}{\left(u_i,u{i+1}\right)}=\bar{A}_{\left(u,u\right)}=\frac{\partial F}{\partial u}=u
+    \end{equation*}
+\end{enumerate}
+In the case of the Burgers equation, the matrix $\bar{A}$ is a scalar, namely, $\bar{A}=\bar{u}$. The equation becomes:
+\begin{equation}
+        \displaystyle\frac{\partial u}{\partial t} + \bar{u}\frac{\partial u}{\partial x} = 0 
+\end{equation}
+The value of $\bar{u}$ for the cell face between \emph{i} and \emph{i+1} is determined from the first conditions:
+\begin{equation}
+    \bar{u}=\bar{u}{i+\frac{1}{2}}=\frac{F{i+1}-F_i}{u_{i+1}-u_i}=\frac{\displaystyle\frac{1}{2}u_{i+1}^2-\frac{1}{2}u_i^2}{u_{i+1}-u_i}=\left\{\begin{array}{cc}
+        \displaystyle\frac{u_i+u_{i+1}}{2} & u_i\neq u_{i+1} \\
+        u_i & u_i=u_{i+1} 
+    \end{array}\right.
+\end{equation}
+The single wave that emanates from the cell interface travels either in the positive or negative direction, depending upon the sign of $\bar{u}_{i+\frac{1}{2}}$. Define:
+\begin{equation}
+    \left\{\begin{array}{cc}
+        \begin{array}{c}
+            \bar{u}{i+\frac{1}{2}}^+\triangleq\displaystyle\frac{1}{2}\left(\bar{u}{i+\frac{1}{2}}+\left|\bar{u}_{i+\frac{1}{2}}\right|\right)\geq0 \\\\
+            \bar{u}{i+\frac{1}{2}}^-\triangleq\displaystyle\frac{1}{2}\left(\bar{u}{i+\frac{1}{2}}-\left|\bar{u}_{i+\frac{1}{2}}\right|\right)\leq0 \\
+        \end{array} & \bar{u}{i+\frac{1}{2}}=\bar{u}{i+\frac{1}{2}}^++\bar{u}_{i+\frac{1}{2}}^-
+    \end{array}\right.
+\end{equation}
+Using the jump relation, the numerical flux at the cell interface can be evaluated by one of the following:
+\begin{equation}
+    \left\{\begin{array}{l}
+        f_{i+\frac{1}{2}}-F_i = \bar{u}{i+\frac{1}{2}}^-\cdot\left(u{i+1}-u_i\right) \\\\
+        F_{i+1}-f_{i+\frac{1}{2}}=\bar{u}{i+\frac{1}{2}}^+\cdot\left(u{i+1}-u_i\right)
+    \end{array}\right.
+\end{equation}
+The numerical flux may then be written in the following symmetric form:
+\begin{equation}
+    \begin{array}{l}
+        \displaystyle f_{i+\frac{1}{2}}=\frac{F_i+F_{i+1}}{2}-\frac{1}{2}\left(\bar{u}{i+\frac{1}{2}}^+-\bar{u}{i+\frac{1}{2}}^-\right)\left(u_{i+1}-u_i\right) \\
+        \mathrm{OR:} \\
+        \displaystyle f_{i+\frac{1}{2}}=\frac{F_i+F_{i+1}}{2}-\frac{1}{2}\left|\bar{u}{i+\frac{1}{2}}\right|\left(u{i+1}-u_i\right)
+    \end{array}
+\end{equation}
+% Since Roe's scheme can't distinguish between the types of discontinuity, it may result in an expansion shock where the analytical solution is an expansion wave. To guarantee a physical solution the scheme will be modified like so:\\
+% Define 
+% \begin{equation*}
+%     \varepsilon=\max\left(0,\frac{u_{i+1}-u_i}{2}\right)
+% \end{equation*}
+% The interface wave speed becomes
+% \begin{equation}
+%     \bar{u}_{i+\frac{1}{2}}=\left\{\begin{array}{ccc}
+%         \bar{u}{i+\frac{1}{2}} & \bar{u}{i+\frac{1}{2}}\geq\varepsilon & \mathrm{compression} \\
+%         \varepsilon & \bar{u}_{i+\frac{1}{2}}<\varepsilon & \mathrm{expansion}
+%     \end{array}\right.
+% \end{equation}
 
 \subsection{Second Order Roe $(u_1 = 0.5)$}
 The first-order accurate Roe method interface flux function will be denoted like this:
@@ -146,8 +147,8 @@ The second order accurate Roe takes the form:
 Hence:
 \begin{equation}
     \begin{matrix}
-        \displaystyle f_{i+\frac{1}{2}}^{\mathrm{Roe},2}=\frac{1}{2}\left(F_{\left(u_{1+\frac{1}{2}}^l\right)}+F_{\left(u_{1+\frac{1}{2}}^r\right)}-\left|\bar{u}_{i+\frac{1}{2}}\right|\left(u_{1+\frac{1}{2}}^r-u_{1+\frac{1}{2}}^l\right)\right) \\\\
-        \displaystyle \bar{u}_{1+\frac{1}{2}}=\frac{F_{\left(u_{1+\frac{1}{2}}^r\right)}-F_{\left(u_{1+\frac{1}{2}}^l\right)}}{u_{1+\frac{1}{2}}^r-u_{1+\frac{1}{2}}^l} = \frac{u_{i+\frac{1}{2}}^l+u_{i+\frac{1}{2}}^r}{2}
+        \displaystyle f_{i+\frac{1}{2}}^{\mathrm{Roe},2}=\frac{1}{2}\left(F_{\left(u_{1+\frac{1}{2}}^l\right)}+F_{\left(u_{1+\frac{1}{2}}^r\right)}-\left|\bar{u}{i+\frac{1}{2}}\right|\left(u{1+\frac{1}{2}}^r-u_{1+\frac{1}{2}}^l\right)\right) \\\\
+        \displaystyle \bar{u}{1+\frac{1}{2}}=\frac{F{\left(u_{1+\frac{1}{2}}^r\right)}-F_{\left(u_{1+\frac{1}{2}}^l\right)}}{u_{1+\frac{1}{2}}^r-u_{1+\frac{1}{2}}^l} = \frac{u_{i+\frac{1}{2}}^l+u_{i+\frac{1}{2}}^r}{2}
     \end{matrix}
 \end{equation}
 
@@ -197,16 +198,127 @@ The generalized Burgers equation is given by:
 \begin{equation}
     \frac{\partial u}{\partial t}+\left(c+bu\right)\frac{\partial u}{\partial x}=\mu\frac{\partial^2u}{\partial x^2}
 \end{equation}
+Where:
+\begin{equation*}
+    \begin{matrix}
+        c=\frac{1}{2} && b=-1 && \mu=\left[0.001, 0.25\right]
+    \end{matrix}
+\end{equation*}
+The equation can also be presented as:
+\begin{equation}
+    \begin{matrix}
+        \displaystyle\frac{\partial u}{\partial t}+\frac{\partial\bar{F}}{\partial x}=0 && \bar{F}=\underbrace{cu+\frac{bu^2}{2}}F-\underbrace{\mu\frac{\partial u}{\partial x}}{F_\nu}
+    \end{matrix}
+\end{equation}
+In non-conservation law form, is given by:
+\begin{equation}
+    \begin{matrix}
+        \displaystyle\frac{\partial u}{\partial t}+A\frac{\partial u}{\partial x}=0 && \displaystyle A=\frac{\partial\bar{F}}{\partial u}=c+bu-\mu\frac{\partial}{\partial u}\left(\frac{\partial u}{\partial x}\right)
+    \end{matrix}
+\end{equation}
+The generalized Burgers equation has a stationary solution:
+\begin{equation}
+    u=-\frac{c}{b}\left(1+\tanh{\left(\displaystyle\frac{c\left(x-x_0\right)}{2\mu}\right)}\right)
+\end{equation}
+
+\subsection{Domain and Computational Mesh}
+Using 41 grid points with $\Delta x=1$ and computing until $t=18.0$. $\Delta t=\left[0.5, 1.0\right]$.
+
 \subsection{Boundary and Initial Conditions}
 \subsubsection{Initial Conditions}
 \begin{equation}
-    u_{x,t=0}=\frac{1}{2}\left(1+\tanh\left(250\left(x-20\right)\right)\right)
+    u_{\left(x,t=0\right)}=\frac{1}{2}\left(1+\tanh\left(250\left(x-20\right)\right)\right)
 \end{equation}
 \subsubsection{Boundary Conditions}
 Using Dirichlet boundary conditions:
 \begin{equation}
-    u_{x=0,t}=
+    \begin{matrix}
+        \displaystyle u_{\left(x=0,t\right)}=0 && \displaystyle u_{\left(x=40,t\right)}=1
+    \end{matrix}
 \end{equation}
 
+\subsection{First Order Roe Method (explicit)}
+As written above for the inviscid Burgers equation (\ref{Roe_first}), Roes scheme is based on the solution of the linear problem:
+\begin{equation}
+    \begin{matrix}
+        \displaystyle\frac{\partial u}{\partial t} + \bar{A}\frac{\partial u}{\partial x} = \mu\frac{\partial^2u}{\partial x^2} && \displaystyle \bar{A}=\frac{\partial F}{\partial u}=cu+\frac{bu^2}{2}
+    \end{matrix}         
+\end{equation}
+The value of $\bar{A}$ for the cell face between \emph{i} and \emph{i+1} is determined from the first conditions:
+\begin{equation}
+     \bar{A}=\bar{A}{i+\frac{1}{2}}=\displaystyle\frac{F{i+1}-F_i}{u_{i+1}-u_i}=\frac{\displaystyle c\left(u_{i+1}-u_i\right)+\frac{b}{2}\left(u_{i+1}^2-u_{i}^2\right)}{u_{i+1}-u_i}
+\end{equation}
+The numerical flux at the cell interface:
+\begin{equation}
+    \displaystyle \bar{f}{i+\frac{1}{2}}=\frac{\bar{F}_i+\bar{F}{i+1}}{2}-\frac{1}{2}\left(\bar{A}{i+\frac{1}{2}}^+-\bar{A}{i+\frac{1}{2}}^-\right)\left(u_{i+1}-u_i\right)
+\end{equation}
+Where:
+\begin{equation}
+    \left\{\begin{array}{cc}
+        \begin{array}{c}
+            \bar{A}{i+\frac{1}{2}}^+\triangleq\displaystyle\frac{1}{2}\left(\bar{A}{i+\frac{1}{2}}+\left|\bar{A}_{i+\frac{1}{2}}\right|\right)\geq0 \\\\
+            \bar{A}{i+\frac{1}{2}}^-\triangleq\displaystyle\frac{1}{2}\left(\bar{A}{i+\frac{1}{2}}-\left|\bar{A}_{i+\frac{1}{2}}\right|\right)\leq0 \\
+        \end{array} & \bar{A}{i+\frac{1}{2}}=\bar{A}{i+\frac{1}{2}}^++\bar{A}_{i+\frac{1}{2}}^-
+    \end{array}\right.
+\end{equation}
+And finally:
+\begin{equation}
+    u_i^{n+1}=u_i^n-\frac{\Delta t}{\Delta x}\left(\bar{f}{i+\frac{1}{2}}^n-\bar{f}{i-\frac{1}{2}}^n\right)
+\end{equation}
+
+
+% MY WAY
+
+% As written above for the inviscid Burgers equation (\ref{Roe_first}), Roes scheme is based on the solution of the linear problem:
+% \begin{equation}
+%         \displaystyle\frac{\partial u}{\partial t} + \bar{A}\frac{\partial u}{\partial x} = 0 
+% \end{equation}
+% Where $\bar{A}$ is a constant matrix that is dependent on local conditions. The matrix is constructed in a way that guarantees uniform validity across discontinuities: 
+% \begin{enumerate}
+%     \item For any $u_i$, $u_{i+1}$:\begin{equation*}
+%         \bar{F}{i+1}-\bar{F}{i} = \bar{A}\cdot\left(u_{i+1}-u_i\right)
+%     \end{equation*}
+%     \item When $u=u_i=u_{i+1}$ then:\begin{equation*}
+%         \bar{A}{\left(u_i,u{i+1}\right)}=\bar{A}_{\left(u,u\right)}=\frac{\partial \bar{F}}{\partial u}
+%     \end{equation*}
+% \end{enumerate}
+% In the case of the Burgers equation, the matrix $\bar{A}$ is a scalar. The value of $\bar{A}$ for the cell face between \emph{i} and \emph{i+1} is determined from the first conditions, using central difference for the viscus term (forward/backward at the edges):
+% \begin{equation}
+%     \begin{array}{c}
+%         \bar{A}=\bar{A}{i+\frac{1}{2}}=\displaystyle\frac{\bar{F}{i+1}-\bar{F}i}{u{i+1}-u_i}=\frac{\displaystyle c\left(u_{i+1}-u_i\right)+\frac{b}{2}\left(u_{i+1}^2-u_{i}^2\right)-\mu\left(\left.\frac{\partial u}{\partial x}\right|{i+1}-\left.\frac{\partial u}{\partial x}\right|{i}\right)}{u_{i+1}-u_i}
+%         % \\ \Downarrow \\
+%         % A=\frac{\displaystyle c\left(u_{i+1}-u_i\right)+\frac{b}{2}\left(u_{i+1}^2-u_{i}^2\right)-\mu\left(\left.\frac{\partial u}{\partial x}\right|{i+1}-\left.\frac{\partial u}{\partial x}\right|{i}\right)}{u_{i+1}-u_i}
+%     \end{array}   
+% \end{equation}
+% The numerical flux at the cell interface:
+% \begin{equation}
+%     \displaystyle \bar{f}{i+\frac{1}{2}}=\frac{\bar{F}_i+\bar{F}{i+1}}{2}-\frac{1}{2}\left(\bar{A}{i+\frac{1}{2}}^+-\bar{A}{i+\frac{1}{2}}^-\right)\left(u_{i+1}-u_i\right)
+% \end{equation}
+% Where:
+% \begin{equation}
+%     \left\{\begin{array}{cc}
+%         \begin{array}{c}
+%             \bar{A}{i+\frac{1}{2}}^+\triangleq\displaystyle\frac{1}{2}\left(\bar{A}{i+\frac{1}{2}}+\left|\bar{A}_{i+\frac{1}{2}}\right|\right)\geq0 \\\\
+%             \bar{A}{i+\frac{1}{2}}^-\triangleq\displaystyle\frac{1}{2}\left(\bar{A}{i+\frac{1}{2}}-\left|\bar{A}_{i+\frac{1}{2}}\right|\right)\leq0 \\
+%         \end{array} & \bar{A}{i+\frac{1}{2}}=\bar{A}{i+\frac{1}{2}}^++\bar{A}_{i+\frac{1}{2}}^-
+%     \end{array}\right.
+% \end{equation}
+% And finally:
+% \begin{equation}
+%     u_i^{n+1}=u_i^n-\frac{\Delta t}{\Delta x}\left(\bar{f}{i+\frac{1}{2}}^n-\bar{f}{i-\frac{1}{2}}^n\right)
+% \end{equation}
+
+\subsection{MacCormack Method}
+The original MacCormack method applied to Burgers equaiton results in:
+\begin{equation}
+    \begin{array}{cc}
+        \displaystyle\mathrm{Predictor:} & u_i^{\overline{n+1}}=u_i^n-\Delta t\frac{\Delta F_i^n}{\Delta x}+r\delta^2u_i^n \\\\ 
+        \displaystyle\mathrm{Corrector:} & \frac{1}{2}\left(u_i^n+u_i^{\overline{n+1}}-\Delta t\frac{\nabla F_i^{\overline{n+1}}}{\Delta x}\right)+r\delta^2u_i^{\overline{n+1}}
+    \end{array}
+\end{equation}
+
+\subsection{First Order Beam and Warming}
+
+\subsection{Second Order Beam and Warming}
 
 \end{document}
