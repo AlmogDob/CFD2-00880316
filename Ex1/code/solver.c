@@ -8,10 +8,10 @@
 #define MAXDIR 1000
 #define MAXWORD MAXDIR
 #define PI M_PI
-#define dprintSTRING(expr) do{printf("%d: ", __LINE__); printf(#expr " = %s\n", expr);} while(0)   /* macro for easy debuging*/
-#define dprintINT(expr) do{printf("%d: ", __LINE__); printf(#expr " = %d\n", expr);} while(0)     /* macro for easy debuging*/
-#define dprintF(expr) do{printf("%d: ", __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
-#define dprintD(expr) do{printf("%d: ", __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
+#define dprintSTRING(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %s\n", expr);} while(0)   /* macro for easy debuging*/
+#define dprintINT(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %d\n", expr);} while(0)     /* macro for easy debuging*/
+#define dprintF(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
+#define dprintD(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
 
 typedef enum {
     ROE_FIRST  = (1 << 0),
@@ -31,7 +31,7 @@ typedef enum {
     int create_empty_dir(char *parent_directory);
 #endif
 
-void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, double *k, double *b, double *c, double *mu, t_flag *flags, double *CFL, double *delta_x, int *iterations);
+void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, double *k, double *b, double *c, double *mu, t_flag *flags, double *CFL, double *w, double *delta_x, int *iterations);
 void init(double *u, double u1, double delta_x, int N, t_flag flags);
 void print_array(double *array, int start, int end);
 void print_array_to_file(FILE *fp, double *array, int start, int end);
@@ -51,7 +51,7 @@ int main(int argc, char const *argv[])
 {
 /* declerations */
     char input_file[MAXDIR], output_dir[MAXDIR], temp_word[MAXWORD];
-    double *u, *f, *delta_u, u1, x_max, x_min, CFL, delta_x, delta_time, first_delta_u_norm, current_delta_u_norm, k, c, b, mu;
+    double *u, *f, *delta_u, u1, x_max, x_min, CFL, delta_x, delta_time, first_delta_u_norm, current_delta_u_norm, k, c, b, mu, w;
     int N, iterations;
     FILE *output_u_file, *output_iter_file;  
     t_flag flags = 0;
@@ -78,7 +78,7 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* reading the input */
-    read_input(input_file, &N, &u1, &x_max, &x_min, &k, &b, &c, &mu, &flags, &CFL, &delta_x, &iterations);
+    read_input(input_file, &N, &u1, &x_max, &x_min, &k, &b, &c, &mu, &flags, &CFL, &w, &delta_x, &iterations);
 
 /* Checking the input */
     dprintINT(N);
@@ -91,13 +91,14 @@ int main(int argc, char const *argv[])
     dprintD(mu);
     dprintD(delta_x);
     dprintD(CFL);
+    dprintD(w);
     dprintINT(iterations);
     dprintINT(flags);
     printf("--------------------\n");
 
 /*------------------------------------------------------------*/
+/* creating output directory */
     if (ON_LINUX) {
-    /* creating output directory */
         if (create_empty_dir(output_dir) != 0) {
             fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
             return -1;
@@ -275,7 +276,7 @@ flags      - bit flags
 CFL        - double pointer
 delta_x    - double pointer 
 iterations - max number of desierd iterations */
-void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, double *k, double *b, double *c, double *mu, t_flag *flags, double *CFL, double *delta_x, int *iterations)
+void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, double *k, double *b, double *c, double *mu, t_flag *flags, double *CFL, double *w, double *delta_x, int *iterations)
 {
     char current_word[MAXWORD];
     float temp_f;
@@ -342,6 +343,9 @@ void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_m
         } else if (!strcmp(current_word, "CFL")) {
             fscanf(fp, "%g", &temp_f);
             *CFL = (double)temp_f;
+        } else if (!strcmp(current_word, "w")) {
+            fscanf(fp, "%g", &temp_f);
+            *w = (double)temp_f;
         } else if (!strcmp(current_word, "iterations")) {
             fscanf(fp, "%g", &temp_f);
             *iterations = (int)temp_f;

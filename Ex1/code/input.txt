@@ -34,5 +34,8 @@ limiter
 CFL
 0.9
 
+w
+0.5
+
 iterations
 1e0
