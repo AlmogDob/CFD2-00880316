@@ -10,20 +10,29 @@ x_max
 x_min
 0
 
+delta_x
+1
+
 k
 -1
 
-Roe_first
-1
-
-Roe_second
+c
 0
 
-Limiter
-van_Leer
+b
+1
+
+mu
+0
+
+method
+MacCormack
+
+limiter
+0
 
 CFL
-0.2
+0.9
 
 iterations
-1e4
+1e0

@@ -21,6 +21,7 @@ typedef enum {
     SUPERBEE   = (1 << 4),
     VAN_LEER   = (1 << 5),
     MINMOD     = (1 << 6),
+    MACCORMACK = (1 << 7),
 } t_flag;
 
 #ifdef __linux__
@@ -30,18 +31,18 @@ typedef enum {
     int create_empty_dir(char *parent_directory);
 #endif
 
-void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, double *k, t_flag *flags, double *CFL, double *delta_x, int *iterations);
-void init(double *u, double u1, double delta_x, int N);
+void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, double *k, double *b, double *c, double *mu, t_flag *flags, double *CFL, double *delta_x, int *iterations);
+void init(double *u, double u1, double delta_x, int N, t_flag flags);
 void print_array(double *array, int start, int end);
 void print_array_to_file(FILE *fp, double *array, int start, int end);
 void make_u_physical(double *u_bar_i_plus_half, double u_i, double u_bar_i_plus_1);
-double calculate_F(double u);
-double calculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1);
+double calculate_F(double u, double b, double c);
+double calculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1, double b, double c);
 double limiter(double r, t_flag flags);
-double calculate_Roe_second_f_i_plus_half(double u_i_minus_1, double u_i, double u_i_plus_1, double u_i_plus_2, double k, t_flag flags);
-void calculate_vec_f(double *f, double *u, int N, double k, t_flag flags);
+double calculate_Roe_second_f_i_plus_half(double u_i_minus_1, double u_i, double u_i_plus_1, double u_i_plus_2, double k, double b, double c, t_flag flags);
+void calculate_vec_f(double *f, double *u, int N, double k, double b, double c, t_flag flags);
 double calculate_delta_time(double *u, double delta_x, double CFL, int N);
-void calculate_delta_u(double *f, double *delta_u, double delta_time, double delta_x, int N);
+void calculate_delta_u(double *f, double *u, double *delta_u, double delta_time, double delta_x, double mu, int N, t_flag flags);
 void update_u(double *u, double *delta_u, int N);
 double calculate_norm(double *delta_u, int start, int end);
 void output(char *output_dir, int N, double u1, double x_max, double x_min, t_flag flags, double CFL, double delta_x);
@@ -50,7 +51,7 @@ int main(int argc, char const *argv[])
 {
 /* declerations */
     char input_file[MAXDIR], output_dir[MAXDIR], temp_word[MAXWORD];
-    double *u, *f, *delta_u, u1, x_max, x_min, CFL, delta_x, delta_time, first_delta_u_norm, current_delta_u_norm, k;
+    double *u, *f, *delta_u, u1, x_max, x_min, CFL, delta_x, delta_time, first_delta_u_norm, current_delta_u_norm, k, c, b, mu;
     int N, iterations;
     FILE *output_u_file, *output_iter_file;  
     t_flag flags = 0;
@@ -77,7 +78,7 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* reading the input */
-    read_input(input_file, &N, &u1, &x_max, &x_min, &k, &flags, &CFL, &delta_x, &iterations);
+    read_input(input_file, &N, &u1, &x_max, &x_min, &k, &b, &c, &mu, &flags, &CFL, &delta_x, &iterations);
 
 /* Checking the input */
     dprintINT(N);
@@ -85,54 +86,61 @@ int main(int argc, char const *argv[])
     dprintD(x_max);
     dprintD(x_min);
     dprintD(k);
+    dprintD(c);
+    dprintD(b);
+    dprintD(mu);
     dprintD(delta_x);
     dprintD(CFL);
     dprintINT(iterations);
     dprintINT(flags);
     printf("--------------------\n");
 
+/*------------------------------------------------------------*/
     if (ON_LINUX) {
     /* creating output directory */
         if (create_empty_dir(output_dir) != 0) {
             fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
             return -1;
         }
-        sprintf(temp_word, "/CFL%g", CFL);
-        strcat(output_dir, temp_word);
-        if (create_empty_dir(output_dir) != 0) {
-            fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
-            return -1;
-        }
-        sprintf(temp_word, "/u1_%g", u1);
-        strcat(output_dir, temp_word);
-        if (create_empty_dir(output_dir) != 0) {
-            fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
-            return -1;
+        if (flags & ROE_FIRST || flags & ROE_SECOND) {
+            sprintf(temp_word, "/CFL%g", CFL);
+            strcat(output_dir, temp_word);
+            if (create_empty_dir(output_dir) != 0) {
+                fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
+                return -1;
+            }
+            sprintf(temp_word, "/u1_%g", u1);
+            strcat(output_dir, temp_word);
+            if (create_empty_dir(output_dir) != 0) {
+                fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
+                return -1;
+            }
+            if (flags & ROE_FIRST) {
+                strcat(output_dir, "/Roe_first");
+            } else if (flags & ROE_SECOND) {
+                if (flags & NO_LIMITER) {
+                    strcat(output_dir, "/Roe_second_no_limiter");
+                } else if (flags & VAN_ALBADA) {
+                    strcat(output_dir, "/Roe_second_van_Albada");
+                } else if (flags & SUPERBEE) {
+                    strcat(output_dir, "/Roe_second_superbee");
+                } else if (flags & VAN_LEER) {
+                    strcat(output_dir, "/Roe_second_van_Leer");
+                } else if (flags & MINMOD) {
+                    strcat(output_dir, "/Roe_second_minmod");
+                }
+            }
+            sprintf(temp_word, "_CFL%g", CFL);
+            strcat(output_dir, temp_word);
+        } else if (flags & MACCORMACK) {
+            sprintf(temp_word, "/MacCormack");
+            strcat(output_dir, temp_word);
+            if (create_empty_dir(output_dir) != 0) {
+                fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
+                return -1;
+            }
         }
 
-        if (flags & ROE_FIRST) {
-            strcat(output_dir, "/Roe_first");
-        }
-        if (flags & ROE_SECOND) {
-            if (flags & NO_LIMITER) {
-                strcat(output_dir, "/Roe_second_no_limiter");
-            }
-            if (flags & VAN_ALBADA) {
-                strcat(output_dir, "/Roe_second_van_Albada");
-            }
-            if (flags & SUPERBEE) {
-                strcat(output_dir, "/Roe_second_superbee");
-            }
-            if (flags & VAN_LEER) {
-                strcat(output_dir, "/Roe_second_van_Leer");
-            }
-            if (flags & MINMOD) {
-                strcat(output_dir, "/Roe_second_minmod");
-            }
-        }
-
-        sprintf(temp_word, "_CFL%g", CFL);
-        strcat(output_dir, temp_word);
         if (create_empty_dir(output_dir) != 0) {
             fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
             return -1;
@@ -165,7 +173,7 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* initializtion */
-    init(u, u1, delta_x, N);
+    init(u, u1, delta_x, N, flags);
     print_array(u, 0, N+1);
     print_array_to_file(output_u_file, u, 0, N+1);
     fprintf(output_iter_file, "%s, %s, %s\n", "No", "norm", "delta_time");
@@ -174,9 +182,9 @@ int main(int argc, char const *argv[])
 
 
     for (int iter = 0; iter < iterations; iter++) {
-        calculate_vec_f(f, u, N, k, flags);
+        calculate_vec_f(f, u, N, k, b, c, flags);
         delta_time = calculate_delta_time(u, delta_x, CFL, N);
-        calculate_delta_u(f, delta_u, delta_time, delta_x, N);
+        calculate_delta_u(f, u, delta_u, delta_time, delta_x, mu, N, flags);
         if (iter == 0) {
             first_delta_u_norm = calculate_norm(delta_u, 1, N);
             current_delta_u_norm = calculate_norm(delta_u, 1, N);
@@ -267,11 +275,10 @@ flags      - bit flags
 CFL        - double pointer
 delta_x    - double pointer 
 iterations - max number of desierd iterations */
-void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, double *k, t_flag *flags, double *CFL, double *delta_x, int *iterations)
+void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_min, double *k, double *b, double *c, double *mu, t_flag *flags, double *CFL, double *delta_x, int *iterations)
 {
     char current_word[MAXWORD];
     float temp_f;
-    int temp_i;
     FILE *fp = fopen(input_file, "rt");
     if (fp == NULL) {
         fprintf(stderr, "%s:%d:[Error] problem opening input file: %s\n", __FILE__, __LINE__, strerror(errno));
@@ -293,18 +300,31 @@ void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_m
         } else if (!strcmp(current_word, "x_min")) {
             fscanf(fp, "%g", &temp_f);
             *x_min = (double)temp_f;
+        } else if (!strcmp(current_word, "delta_x")) {
+            fscanf(fp, "%g", &temp_f);
+            *delta_x = (double)temp_f;
         } else if (!strcmp(current_word, "k")) {
             fscanf(fp, "%g", &temp_f);
             *k = (double)temp_f;
-        } else if (!strcmp(current_word, "Roe_first")) {
-            fscanf(fp, "%d", &temp_i);
-            if (temp_i)
-                *flags |= ROE_FIRST;
-        } else if (!strcmp(current_word, "Roe_second")) {
-            fscanf(fp, "%d", &temp_i);
-            if (temp_i)
-                *flags |= ROE_SECOND;
-        } else if (!strcmp(current_word, "Limiter")) {
+        } else if (!strcmp(current_word, "c")) {
+            fscanf(fp, "%g", &temp_f);
+            *c = (double)temp_f;
+        } else if (!strcmp(current_word, "b")) {
+            fscanf(fp, "%g", &temp_f);
+            *b = (double)temp_f;
+        } else if (!strcmp(current_word, "mu")) {
+            fscanf(fp, "%g", &temp_f);
+            *mu = (double)temp_f;
+        } else if (!strcmp(current_word, "method")) {
+            fscanf(fp, "%s", current_word);
+                if (!strcmp(current_word, "Roe_first")) {
+                    *flags |= ROE_FIRST;
+                } else if (!strcmp(current_word, "Roe_second")) {
+                    *flags |= ROE_SECOND;
+                } else if (!strcmp(current_word, "MacCormack")) {
+                    *flags |= MACCORMACK;
+                }
+        } else if (!strcmp(current_word, "limiter")) {
             fscanf(fp, "%s", current_word);
                 if (!strcmp(current_word, "van_Albada")) {
                     *flags &= ~ NO_LIMITER;
@@ -332,6 +352,7 @@ void read_input(char *input_file, int *N, double *u1, double *x_max, double *x_m
         *delta_x = (double)(*x_max-*x_min)/(double)(*N-1);
     }
     if (*flags & ROE_FIRST && *flags & ROE_SECOND) {
+        fprintf(stderr, "%s:%d: [Error] unable to do more than one method\n", __FILE__, __LINE__);
         exit(1);
     }
 
@@ -344,13 +365,21 @@ u       - pointer to the solution array
 u1      - boundry condition at x_max
 delta_x - double value of delta_x
 N       - number of grid points */
-void init(double *u, double u1, double delta_x, int N)
+void init(double *u, double u1, double delta_x, int N, t_flag flags)
 {
-    for (int i = 1; i <= N; i++) {
-        u[i] = 1 - (1 - u1) * delta_x * (i-1);
+    if (flags & ROE_FIRST || flags & ROE_SECOND) {
+        for (int i = 1; i <= N; i++) {
+            u[i] = 1 - (1 - u1) * delta_x * (i-1);
+        }
+        u[0] = u[0];
+        u[N+1] = u[N];
+    } else if (flags & MACCORMACK) {
+        for (int i = 1; i <= N; i++) {
+            u[i] = 0.5 * (1 + tanh(250 * (delta_x * (i-1) - 20))) ;
+        }
+        u[0] = u[0];
+        u[N+1] = u[N];
     }
-    u[0] = 1;
-    u[N+1] = u1;
 }
 
 /* printing a double array with length 'len' to 'stdin'
@@ -404,25 +433,40 @@ void make_u_physical(double *u_bar_i_plus_half, double u_i, double u_i_plus_1)
 
 /* calculating F
 argument list: */
-double calculate_F(double u)
+double calculate_F(double u, double b, double c)
 {
-    return u * u / 2;
+    return c * u + b * u * u / 2;
 }
 
 /* calculating the flax for a face
 argument list: */
-double calculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1)
+double calculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1, double b, double c)
 {
-    double u_bar_i_plus_half = (u_i + u_i_plus_1) * 0.5;
-    // make_u_physical(&u_bar_i_plus_half, u_i, u_i_plus_1);
+    // double u_bar_i_plus_half = (u_i + u_i_plus_1) * 0.5;
+    // // make_u_physical(&u_bar_i_plus_half, u_i, u_i_plus_1);
 
-    double u_bar_i_plus_half_plus = (u_bar_i_plus_half + fabs(u_bar_i_plus_half)) * 0.5;
-    double u_bar_i_plus_half_minus = (u_bar_i_plus_half - fabs(u_bar_i_plus_half)) * 0.5;
+    // double u_bar_i_plus_half_plus = (u_bar_i_plus_half + fabs(u_bar_i_plus_half)) * 0.5;
+    // double u_bar_i_plus_half_minus = (u_bar_i_plus_half - fabs(u_bar_i_plus_half)) * 0.5;
     
-    double F_i = calculate_F(u_i);
-    double F_i_plus_1 = calculate_F(u_i_plus_1);
+    // double F_i = calculate_F(u_i);
+    // double F_i_plus_1 = calculate_F(u_i_plus_1);
 
-    double f_i_plus_half = (F_i + F_i_plus_1) * 0.5 - 0.5 * (u_bar_i_plus_half_plus - u_bar_i_plus_half_minus) * ( u_i_plus_1 - u_i);
+    // double f_i_plus_half = (F_i + F_i_plus_1) * 0.5 - 0.5 * (u_bar_i_plus_half_plus - u_bar_i_plus_half_minus) * ( u_i_plus_1 - u_i);
+
+    double A_bar_i_plus_half, A_bar_i_plus_half_plus, A_bar_i_plus_half_minus, F_i, F_i_plus_1,  f_i_plus_half;
+
+    if (u_i == u_i_plus_1) {
+        A_bar_i_plus_half = c * u_i + 0.5 * b * u_i * u_i;
+    } else {
+        A_bar_i_plus_half = (c * (u_i_plus_1 - u_i) + 0.5 * b * (u_i_plus_1 * u_i_plus_1 - u_i * u_i)) / (u_i_plus_1 - u_i);
+    }
+    A_bar_i_plus_half_plus = (A_bar_i_plus_half + fabs(A_bar_i_plus_half)) * 0.5;
+    A_bar_i_plus_half_minus = (A_bar_i_plus_half - fabs(A_bar_i_plus_half)) * 0.5;
+
+    F_i = calculate_F(u_i, b, c);
+    F_i_plus_1 = calculate_F(u_i_plus_1, b, c);
+
+    f_i_plus_half = (F_i + F_i_plus_1) * 0.5 - 0.5 * (A_bar_i_plus_half_plus - A_bar_i_plus_half_minus) * ( u_i_plus_1 - u_i);
 
     return f_i_plus_half;
 }
@@ -453,7 +497,7 @@ double limiter(double r, t_flag flags)
 
 /* calculating the flax for a face
 argument list:*/
-double calculate_Roe_second_f_i_plus_half(double u_i_minus_1, double u_i, double u_i_plus_1, double u_i_plus_2, double k, t_flag flags)
+double calculate_Roe_second_f_i_plus_half(double u_i_minus_1, double u_i, double u_i_plus_1, double u_i_plus_2, double k, double b, double c, t_flag flags)
 {
     double r_plus = (u_i_plus_2 - u_i_plus_1) / (u_i_plus_1 - u_i);
     double r_minus = (u_i - u_i_minus_1) / (u_i_plus_1 - u_i);
@@ -469,11 +513,8 @@ double calculate_Roe_second_f_i_plus_half(double u_i_minus_1, double u_i, double
     double u_left_i_plus_half = u_i + (1-k)/4 * psi_minus * delta_u_i_minus_half + (1+k)/4 * psi_plus * delta_u_i_plus_half;
     double u_right_i_plus_half = u_i_plus_1 - (1+k)/4 * psi_plus * delta_u_i_plus_half - (1-k)/4 * psi_minus * delta_u_i_plus_three_half;
 
-    // double u_left_i_plus_half = u_i + (1-k)/4 * psi_plus * delta_u_i_minus_half;
-    // double u_right_i_plus_half = u_i_plus_1 - (1-k)/4 * psi_minus * delta_u_i_plus_three_half;
-
-    double F_left = calculate_F(u_left_i_plus_half);
-    double F_right = calculate_F(u_right_i_plus_half);
+    double F_left = calculate_F(u_left_i_plus_half, b, c);
+    double F_right = calculate_F(u_right_i_plus_half, b, c);
     
     double u_bar_i_plus_half = (u_left_i_plus_half + u_right_i_plus_half) * 0.5;
     // make_u_physical(&u_bar_i_plus_half, u_i, u_i_plus_1);
@@ -490,22 +531,20 @@ f     - pointer to the flax array
 u     - pointer to the u array
 N     - number of grid points
 flags - bit flags */
-void calculate_vec_f(double *f, double *u, int N, double k, t_flag flags)
+void calculate_vec_f(double *f, double *u, int N, double k, double b, double c, t_flag flags)
 {
     if (flags & ROE_FIRST) {
         for (int i = 0; i < N+1; i++) {
-            f[i] = calculate_Roe_first_f_i_plus_half(u[i], u[i+1]);
+            f[i] = calculate_Roe_first_f_i_plus_half(u[i], u[i+1], b, c);
         }
-    }
-    if (flags & ROE_SECOND) {
+    } else if (flags & ROE_SECOND) {
         for (int i = 1; i <= N-1; i++) {
-            f[i] = calculate_Roe_second_f_i_plus_half(u[i-1], u[i], u[i+1], u[i+2], k, flags);
+            f[i] = calculate_Roe_second_f_i_plus_half(u[i-1], u[i], u[i+1], u[i+2], k, b, c, flags);
         }
-        f[0] = calculate_Roe_second_f_i_plus_half(u[0], u[0], u[1], u[2], k, flags);
-        f[N] = calculate_Roe_second_f_i_plus_half(u[N-1], u[N], u[N+1], u[N+1], k, flags);
-
-        // f[0] = u[0];
-        // f[N] = u[N+1];
+        f[0] = calculate_Roe_second_f_i_plus_half(u[0], u[0], u[1], u[2], k, b, c, flags);
+        f[N] = calculate_Roe_second_f_i_plus_half(u[N-1], u[N], u[N+1], u[N+1], k, b, c, flags);
+    } else if (flags & MACCORMACK) {
+        ;
     }
 }
 
@@ -523,10 +562,14 @@ double calculate_delta_time(double *u, double delta_x, double CFL, int N)
     return delta_time;
 }
 
-void calculate_delta_u(double *f, double *delta_u, double delta_time, double delta_x, int N)
+void calculate_delta_u(double *f, double *u, double *delta_u, double delta_time, double delta_x, double mu, int N, t_flag flags)
 {
-    for (int i = 1; i <= N; i++) {
-        delta_u[i] = delta_time / delta_x * (f[i] - f[i-1]);
+    if (flags & ROE_FIRST || flags & ROE_SECOND) {
+        for (int i = 1; i <= N; i++) {
+            delta_u[i] = delta_time / delta_x * (f[i] - f[i-1]) + mu * (delta_time) / (delta_x * delta_x) * (u[i+1] - 2 * u[i] + u[i-1]);
+        }
+    } else if (flags & MACCORMACK) {
+        ;
     }
 }
 
