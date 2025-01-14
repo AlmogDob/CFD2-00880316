@@ -52,6 +52,13 @@ The equation is obtained by neglecting the viscous term from the viscous Burger 
         u_{(x,t=0)} & = & 1-(1-u_1)\cdot x
     \end{array}
 \end{equation}
+In order to set the boundary conditions on the edge faces we will define ghost cells that will be calculated like so:
+\begin{equation}
+    \begin{array}{lcl}
+        u_{\left(i=0\right)}&=&-u_{\left(i=1\right)}+2\cdot u0 \\
+        u_{\left(i=N+1\right)}&=&-u_{\left(i=N\right)}+2\cdot u1 
+    \end{array}
+\end{equation}
 
 \subsection{Finite Volume Formulation}
 \begin{equation}

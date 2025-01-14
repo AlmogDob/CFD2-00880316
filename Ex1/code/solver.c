@@ -14,16 +14,17 @@
 #define dprintD(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
 
 typedef enum {
-    ROE_FIRST  = (1 << 0),
-    ROE_SECOND = (1 << 1),
-    NO_LIMITER = (1 << 2),
-    VAN_ALBADA = (1 << 3),
-    SUPERBEE   = (1 << 4),
-    VAN_LEER   = (1 << 5),
-    MINMOD     = (1 << 6),
-    INVISCID   = (1 << 7),
-    GENERAL    = (1 << 8), 
-    MACCORMACK = (1 << 9),
+    ROE_FIRST        = (1 << 0),
+    ROE_SECOND       = (1 << 1),
+    NO_LIMITER       = (1 << 2),
+    VAN_ALBADA       = (1 << 3),
+    SUPERBEE         = (1 << 4),
+    VAN_LEER         = (1 << 5),
+    MINMOD           = (1 << 6),
+    INVISCID         = (1 << 7),
+    GENERAL          = (1 << 8), 
+    MACCORMACK       = (1 << 9),
+    BEAM_AND_WARMING = (1 << 10),
 } t_flag;
 
 #ifdef __linux__
@@ -35,7 +36,7 @@ typedef enum {
 
 void read_input(char *input_file, int *N, double *u0, double *u1, double *x_max, double *x_min, double *k, double *b, double *c, double *mu, t_flag *flags, double *CFL, double *w, double *delta_x, double *delta_time, int *iterations, double *final_time);
 void init(double *u, double u0, double u1, double x_max, double x_min, double delta_x, int N, t_flag flags);
-void set_ghost_cell(double *u, double u0, double u1);
+void set_ghost_cell(double *u, double u0, double u1, int N);
 void print_array(double *array, int start, int end);
 void print_array_to_file(FILE *fp, double *array, int start, int end);
 void make_u_physical(double *u_bar_i_plus_half, double u_i, double u_bar_i_plus_1);
@@ -46,6 +47,10 @@ double calculate_Roe_second_f_i_plus_half(double u_i_minus_1, double u_i, double
 void calculate_vec_f(double *f, double *u, int N, double k, double b, double c, t_flag flags);
 void calculate_delta_u_MacCormack(double *delta_u, double *u, double *u_bar, double delta_time, double delta_x, double mu, double b, double c, int N);
 double calculate_delta_time(double *u, double delta_x, double CFL, int N);
+void RHS(double *D, double *u, int N);
+void LHS(double *A, double *B, double *C, double delta_time, double delta_y, double mu, double alpha, int N);
+void BC(double *A, double *C, double *D, double u_0, double u_N, int N);
+int tridiag(double *a, double *b, double *c, double *d, double *u, int is, int ie);
 void calculate_delta_u(double *f, double *u, double *delta_u, double *u_bar, double delta_time, double delta_x, double b, double c, double mu, int N, t_flag flags);
 void update_u(double *u, double *delta_u, int N);
 double calculate_norm(double *delta_u, int start, int end);
@@ -164,6 +169,13 @@ int main(int argc, char const *argv[])
                     fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
                     return -1;
                 }
+            } else if (flags & BEAM_AND_WARMING) {
+                sprintf(temp_word, "/Beam_and_Warming");
+                strcat(output_dir, temp_word);
+                if (create_empty_dir(output_dir) != 0) {
+                    fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
+                    return -1;
+                }
             }
             sprintf(temp_word, "/mu%g", mu);
             strcat(output_dir, temp_word);
@@ -220,31 +232,30 @@ int main(int argc, char const *argv[])
     fprintf(output_iter_file, "%s, %s, %s\n", "No", "norm", "delta_time");
 /*------------------------------------------------------------*/
 /* the loop */
-    dprintINT(flags & INVISCID);
+    dprintINT(flags & BEAM_AND_WARMING);
 
     for (int iter = 0; iter < iterations; iter++) {
-        calculate_vec_f(f, u, N, k, b, c, flags);
-
+        set_ghost_cell(u, u0, u1, N);
+        if (flags & ROE_FIRST || flags & ROE_SECOND) {
+            calculate_vec_f(f, u, N, k, b, c, flags);
+        }
         if (flags & INVISCID) {
             delta_time = calculate_delta_time(u, delta_x, CFL, N);
         }
         ellapsed_time += delta_time;
+
         calculate_delta_u(f, u, delta_u, u_bar, delta_time, delta_x, b, c, mu, N, flags);
+
         if (iter == 0) {
             first_delta_u_norm = calculate_norm(delta_u, 1, N);
             current_delta_u_norm = calculate_norm(delta_u, 1, N);
         }
         current_delta_u_norm = calculate_norm(delta_u, 1, N);
 
-        // print_array(delta_u, 1, N);
-
         update_u(u, delta_u, N);
-
-        // print_array(u, 0, N+1);
 
         print_array_to_file(output_u_file, u, 0, N+1);
         fprintf(output_iter_file, "%d, %g, %g\n", iter+1, current_delta_u_norm, delta_time);
-
         printf("%4d: %14g\t, time: %g\n", iter, (float) current_delta_u_norm, ellapsed_time);
 
         if (current_delta_u_norm/first_delta_u_norm < 1e-6 || isinf(current_delta_u_norm) || isnan(current_delta_u_norm) || (flags & GENERAL && ellapsed_time > final_time)) {
@@ -252,7 +263,6 @@ int main(int argc, char const *argv[])
         }
     }
     // dprintINT(flags & ROE_FIRST);
-
     
 /*------------------------------------------------------------*/
 /* output */
@@ -261,8 +271,12 @@ int main(int argc, char const *argv[])
 /*------------------------------------------------------------*/
 /* freeing the memory */
     free(u); 
+    free(u_bar); 
+    free(delta_u); 
+    free(f); 
 
     fclose(output_u_file);
+    fclose(output_iter_file);
 
     return 0;
 }
@@ -380,6 +394,8 @@ void read_input(char *input_file, int *N, double *u0, double *u1, double *x_max,
                     *flags |= ROE_SECOND;
                 } else if (!strcmp(current_word, "MacCormack")) {
                     *flags |= MACCORMACK;
+                } else if (!strcmp(current_word, "Beam_and_Warming")) {
+                    *flags |= BEAM_AND_WARMING;
                 }
         } else if (!strcmp(current_word, "limiter")) {
             fscanf(fp, "%s", current_word);
@@ -452,10 +468,10 @@ void init(double *u, double u0, double u1, double x_max, double x_min, double de
     }
 }
 
-void set_ghost_cell(double *u, double u0, double u1)
+void set_ghost_cell(double *u, double u0, double u1, int N)
 {
-    // u[0] = u[1] - u0 * 2;
-    // u[N+1] = u[N] - u1 * 2;
+    u[0] = -u[1] + u0 * 2;
+    u[N+1] = -u[N] + u1 * 2;
 }
 
 /* printing a double array with length 'len' to 'stdin'
@@ -518,24 +534,6 @@ double calculate_F(double u, double b, double c)
 argument list: */
 double calculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1, double b, double c)
 {
-    // double u_bar_i_plus_half;
-
-    // if (u_i == u_i_plus_1) {
-    //     u_bar_i_plus_half = u_i;
-    // } else {
-    //     u_bar_i_plus_half = (c * (u_i_plus_1 - u_i) + b * 0.5 * (u_i_plus_1 * u_i_plus_1 - u_i * u_i)) / (u_i_plus_1 - u_i);
-    // }
-    // // // make_u_physical(&u_bar_i_plus_half, u_i, u_i_plus_1);
-
-    // double u_bar_i_plus_half_plus = (u_bar_i_plus_half + fabs(u_bar_i_plus_half)) * 0.5;
-    // double u_bar_i_plus_half_minus = (u_bar_i_plus_half - fabs(u_bar_i_plus_half)) * 0.5;
-    
-    // double F_i = calculate_F(u_i, b, c);
-    // double F_i_plus_1 = calculate_F(u_i_plus_1, b, c);
-
-    // double f_i_plus_half = (F_i + F_i_plus_1) * 0.5 - 0.5 * (u_bar_i_plus_half_plus - u_bar_i_plus_half_minus) * ( u_i_plus_1 - u_i);
-
-
     double A_bar_i_plus_half, A_bar_i_plus_half_plus, A_bar_i_plus_half_minus, F_i, F_i_plus_1,  f_i_plus_half;
 
     if (u_i == u_i_plus_1) {
@@ -558,7 +556,6 @@ double calculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1, double b
 argument list:*/
 double limiter(double r, t_flag flags)
 {
-    // if (isnan(r) || isinf(r)) {
     if (!isfinite(r)) {
         return 1;
     } else if (flags & NO_LIMITER) {
@@ -583,28 +580,35 @@ double limiter(double r, t_flag flags)
 argument list:*/
 double calculate_Roe_second_f_i_plus_half(double u_i_minus_1, double u_i, double u_i_plus_1, double u_i_plus_2, double k, double b, double c, t_flag flags)
 {
-    double r_plus = (u_i_plus_2 - u_i_plus_1) / (u_i_plus_1 - u_i);
-    double r_minus = (u_i - u_i_minus_1) / (u_i_plus_1 - u_i);
-    double psi_plus = limiter(r_plus, flags);
-    double psi_minus = limiter(r_minus, flags);
+    double r_plus_i_minus_half = (u_i_plus_1 - u_i) / (u_i - u_i_minus_1);
 
-    // printf("%g, %g, %g, %g\n", r_plus, r_minus, psi_plus, psi_minus);
+    double r_minus_i_plus_half = (u_i - u_i_minus_1) / (u_i_plus_1 - u_i);
+    double r_plus_i_plus_half = (u_i_plus_2 - u_i_plus_1) / (u_i_plus_1 - u_i);
+
+    double r_minus_i_plus_three_half = (u_i_plus_1 - u_i) / (u_i_plus_2 - u_i_plus_1);
+
+
+    double psi_plus_i_minus_half = limiter(r_plus_i_minus_half, flags);
+
+    double psi_minus_i_plus_half = limiter(r_minus_i_plus_half, flags);
+    double psi_plus_i_plus_half = limiter(r_plus_i_plus_half, flags);
+
+    double psi_minus_i_plus_three_half = limiter(r_minus_i_plus_half, flags);
 
     double delta_u_i_minus_half = u_i - u_i_minus_1;
     double delta_u_i_plus_half = u_i_plus_1 - u_i;
     double delta_u_i_plus_three_half = u_i_plus_2 - u_i_plus_1;
 
-    // double u_left_i_plus_half = u_i + (1-k)/4 * psi_minus * delta_u_i_minus_half + (1+k)/4 * psi_plus * delta_u_i_plus_half;
-    // double u_right_i_plus_half = u_i_plus_1 - (1+k)/4 * psi_plus * delta_u_i_plus_half - (1-k)/4 * psi_minus * delta_u_i_plus_three_half;
-
-    double u_left_i_plus_half = u_i + (1-k)/4 * psi_plus * delta_u_i_minus_half + (1+k)/4 * psi_minus * delta_u_i_plus_half;
-    double u_right_i_plus_half = u_i_plus_1 - (1+k)/4 * psi_plus * delta_u_i_plus_half - (1-k)/4 * psi_minus * delta_u_i_plus_three_half;
+    double u_left_i_plus_half = u_i + (1-k)/4 * psi_plus_i_minus_half * delta_u_i_minus_half + (1+k)/4 * psi_minus_i_plus_half * delta_u_i_plus_half;
+    double u_right_i_plus_half = u_i_plus_1 - (1+k)/4 * psi_plus_i_plus_half * delta_u_i_plus_half - (1-k)/4 * psi_minus_i_plus_three_half * delta_u_i_plus_three_half;
 
     double F_left = calculate_F(u_left_i_plus_half, b, c);
     double F_right = calculate_F(u_right_i_plus_half, b, c);
     
     double u_bar_i_plus_half = (u_left_i_plus_half + u_right_i_plus_half) * 0.5;
+
     // make_u_physical(&u_bar_i_plus_half, u_i, u_i_plus_1);
+
     double u_bar_plus_i_plus_half = 0.5 * (u_bar_i_plus_half + fabs(u_bar_i_plus_half));
     double u_bar_minus_i_plus_half = 0.5 * (u_bar_i_plus_half - fabs(u_bar_i_plus_half));
 
@@ -640,7 +644,7 @@ void calculate_delta_u_MacCormack(double *delta_u, double *u, double *u_bar, dou
     }
 
     for (int i = 2; i <= N-1; i++) {
-        delta_u[i] = - u[i] + 0.5 * (u[i] + u_bar[i] - delta_time * (calculate_F(u_bar[i], b, c) - calculate_F(u_bar[i-1], b, c)) / (delta_x)) + mu * delta_time / delta_x / delta_x * (u_bar[i+1] - 2 * u_bar[i] + u_bar[i-1]);
+        delta_u[i] = -u[i] + 0.5 * (u[i] + u_bar[i] - delta_time * (calculate_F(u_bar[i], b, c) - calculate_F(u_bar[i-1], b, c)) / (delta_x)) + mu * delta_time / delta_x / delta_x * (u_bar[i+1] - 2 * u_bar[i] + u_bar[i-1]);
     }
 }
 
@@ -658,6 +662,80 @@ double calculate_delta_time(double *u, double delta_x, double CFL, int N)
     return delta_time;
 }
 
+/* calculate the RHS (vector D) 
+argumet list:
+D - pointer to the array
+u - pointer to the flow solution
+N - number of grid points */
+void RHS(double *D, double *u, int N)
+{
+    for (int i = 1; i < N-1; i++) {
+        D[i] = u[i+1] - 2*u[i] + u[i-1];
+    }
+}
+
+/* calculate the LHS (vectors A, B, C)
+A          - pointer to the A array
+B          - pointer to the B array
+C          - pointer to the C array 
+delta_time - time step between iterations
+delta_y    - distance between to grid points
+mu         - viscosity
+alpha      - parameter that control the scheme
+N          - number of grid points */
+void LHS(double *A, double *B, double *C, double delta_time, double delta_y, double mu, double alpha, int N)
+{
+    for (int i = 1; i < N-1; i++) {
+        A[i] = -alpha;
+        B[i] = delta_y * delta_y / mu / delta_time + 2*alpha;
+        C[i] = -alpha;
+    }
+}
+
+/* setting the boundry conditions
+A   - pointer to the A array
+B   - pointer to the B array
+C   - pointer to the C array 
+D   - pointer to the D array 
+u_0 - boundry condition at zero
+u_N - boundry condition at N
+N   - number of grid points */
+void BC(double *A, double *C, double *D, double u_0, double u_N, int N)
+{
+    D[1] = D[1] - A[1]*u_0;
+    A[1] = 0;
+
+    D[N-1] = D[N-1] - C[N-1]*u_N;
+    C[N-1] = 0;
+}
+
+/*   a, b, c, are the vectors of the diagonal and the two off-diagonals.
+The vector d is the RHS vector, the vector u is the solution
+vector, "is" is the starting point, and ie is
+the last point.
+*/
+int tridiag(double *a, double *b, double *c, double *d, double *u, int is, int ie)
+{
+
+  int i;
+  double beta;
+
+  for (i = is + 1; i <= ie; i++)
+    {
+      if(b[i-1] == 0.) return(1);
+      beta = a[i] / b[i-1];
+      b[i] = b[i] - c[i-1] * beta;
+      d[i] = d[i] - d[i-1] * beta;
+    }
+
+  u[ie] = d[ie] / b[ie];
+  for (i = ie - 1; i >= is; i--)
+    {
+      u[i] = (d[i] - c[i] * u[i+1]) / b[i];
+    }
+  return(0);
+}
+
 void calculate_delta_u(double *f, double *u, double *delta_u, double *u_bar, double delta_time, double delta_x, double b, double c, double mu, int N, t_flag flags)
 {
     if (flags & ROE_FIRST || flags & ROE_SECOND) {
@@ -665,13 +743,13 @@ void calculate_delta_u(double *f, double *u, double *delta_u, double *u_bar, dou
             delta_u[i] = -delta_time / delta_x * (f[i] - f[i-1]) + mu * (delta_time) / (delta_x * delta_x) * (u[i+1] - 2 * u[i] + u[i-1]);
         }
     } else if (flags & MACCORMACK) {
-        calculate_delta_u_MacCormack(delta_u, u_bar, u, delta_time, delta_x, mu, b, c, N);
+        calculate_delta_u_MacCormack(delta_u, u, u_bar, delta_time, delta_x, mu, b, c, N);
     }
 }
 
 void update_u(double *u, double *delta_u, int N)
 {
-    for (int i = 1; i < N+1; i++) {
+    for (int i = 1; i <= N; i++) {
         u[i] = u[i] + delta_u[i];
     }
 }
