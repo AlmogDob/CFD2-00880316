@@ -1,8 +1,11 @@
 N
 41
 
+u0
+1
+
 u1
--1
+0.0
 
 x_max
 1
@@ -13,17 +16,20 @@ x_min
 delta_x
 1
 
+delta_time
+1
+
 k
 -1
 
-c
-0
-
 b
-1
+-1
+
+c
+0.5
 
 mu
-0
+0.25
 
 method
 MacCormack
@@ -32,10 +38,13 @@ limiter
 0
 
 CFL
-0.9
+1.6
 
 w
 0.5
 
 iterations
-1e0
+1e3
+
+final_time
+18

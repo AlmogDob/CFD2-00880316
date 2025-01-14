@@ -1,2 +1,0 @@
-N, u1, x_max, x_min, Roe_first, Roe_second, CFL, delta_x
-41, -1, 1, 0, 1, 0, 0.2, 0.025

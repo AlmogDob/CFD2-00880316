@@ -249,13 +249,14 @@ Using Dirichlet boundary conditions:
 As written above for the inviscid Burgers equation (\ref{Roe_first}), Roes scheme is based on the solution of the linear problem:
 \begin{equation}
     \begin{matrix}
-        \displaystyle\frac{\partial u}{\partial t} + \bar{A}\frac{\partial u}{\partial x} = \mu\frac{\partial^2u}{\partial x^2} && \displaystyle \bar{A}=\frac{\partial F}{\partial u}=cu+\frac{bu^2}{2}
+        \displaystyle\frac{\partial u}{\partial t} + \bar{A}\frac{\partial u}{\partial x}=\mu\frac{\partial^2u}{\partial x^2} && \displaystyle \bar{A}=\frac{\partial F}{\partial u}
     \end{matrix}         
 \end{equation}
-The value of $\bar{A}$ for the cell face between \emph{i} and \emph{i+1} is determined from the first conditions:
+In the case of the Burgers equation, the matrix $\bar{A}$ is a scalar.
 \begin{equation}
-     \bar{A}=\bar{A}_{i+\frac{1}{2}}=\displaystyle\frac{F_{i+1}-F_i}{u_{i+1}-u_i}=\frac{\displaystyle c\left(u_{i+1}-u_i\right)+\frac{b}{2}\left(u_{i+1}^2-u_{i}^2\right)}{u_{i+1}-u_i}
-\end{equation}
+    \bar{A}=\bar{A}_{i+\frac{1}{2}}=\frac{F_{i+1}-F_i}{u_{i+1}-u_i}=\left\{\begin{array}{cc} \displaystyle\frac{\displaystyle c\left(u_{i+1}-u_i\right)+\frac{b}{2}\left(u_{i+1}^2-u_i^2\right)}{u_{i+1}-u_i} & u_i\neq u_{i+1} \\ 
+    A_i & u_i=u_{i+1} \end{array}\right.  
+\end{equation} 
 The numerical flux at the cell interface:
 \begin{equation}
     \displaystyle \bar{f}_{i+\frac{1}{2}}=\frac{F_i+F_{i+1}}{2}-\frac{1}{2}\left(\bar{A}_{i+\frac{1}{2}}^+-\bar{A}_{i+\frac{1}{2}}^-\right)\left(u_{i+1}-u_i\right)
@@ -269,6 +270,20 @@ Where:
         \end{array} & \bar{A}_{i+\frac{1}{2}}=\bar{A}_{i+\frac{1}{2}}^++\bar{A}_{i+\frac{1}{2}}^-
     \end{array}\right.
 \end{equation}
+
+% In the case of the Burgers equation, the matrix $\bar{A}$ is a scalar, namely, $\bar{A}=\bar{u}$. The equation becomes: \begin{equation} \displaystyle\frac{\partial u}{\partial t} + \bar{u}\frac{\partial u}{\partial x}=\mu\frac{\partial^2u}{\partial x^2} \end{equation} \begin{equation} \bar{u}=\bar{u}_{i+\frac{1}{2}}=\frac{F_{i+1}-F_i}{u_{i+1}-u_i}=\left\{\begin{array}{cc} \displaystyle\frac{\displaystyle c\left(u_{i+1}-u_i\right)+\frac{b}{2}\left(u_{i+1}^2-u_i^2\right)}{u_{i+1}-u_i} & u_i\neq u_{i+1} \\ u_i & u_i=u_{i+1} \end{array}\right.  \end{equation} The numerical flux at the cell interface:
+% \begin{equation}
+%     \displaystyle \bar{f}_{i+\frac{1}{2}}=\frac{F_i+F_{i+1}}{2}-\frac{1}{2}\left(\bar{u}_{i+\frac{1}{2}}^+-\bar{u}_{i+\frac{1}{2}}^-\right)\left(u_{i+1}-u_i\right)
+% \end{equation}
+% Where:
+% \begin{equation}
+%     \left\{\begin{array}{cc}
+%         \begin{array}{c}
+%             \bar{u}_{i+\frac{1}{2}}^+\triangleq\displaystyle\frac{1}{2}\left(\bar{u}{i+\frac{1}{2}}+\left|\bar{u}_{i+\frac{1}{2}}\right|\right)\geq0 \\\\
+%             \bar{u}_{i+\frac{1}{2}}^-\triangleq\displaystyle\frac{1}{2}\left(\bar{u}_{i+\frac{1}{2}}-\left|\bar{u}_{i+\frac{1}{2}}\right|\right)\leq0 \\
+%         \end{array} & \bar{u}_{i+\frac{1}{2}}=\bar{u}_{i+\frac{1}{2}}^++\bar{u}_{i+\frac{1}{2}}^-
+%     \end{array}\right.
+% \end{equation}
 And finally:
 \begin{equation}
     u_i^{n+1}=u_i^n-\frac{\Delta t}{\Delta x}\left(\bar{f}_{i+\frac{1}{2}}^n-\bar{f}_{i-\frac{1}{2}}^n\right)+\mu\frac{\Delta t}{\left(\Delta x\right)^2}\left(u_{i+1}^n-2u_i^n+u_{i-1}^n\right)
@@ -331,6 +346,15 @@ Where:
     \item $\Delta f=f_{i+1}-f_i$
     \item $\nabla f=f_i-f_{i-1}$
 \end{itemize}
+% \begin{equation*}
+%     \Downarrow
+% \end{equation*}
+% \begin{equation}
+%     \begin{array}{cc}
+%         \displaystyle\mathrm{Predictor:} & \displaystyle u_i^{\overline{n+1}}=u_i^n-\Delta t\frac{F_{i+1}^n-F_{i}^n}{\Delta x}+r\delta^2u_i^n \\\\ 
+%         \displaystyle\mathrm{Corrector:} & \displaystyle u_i^{n+1}=\frac{1}{2}\left(u_i^n+u_i^{\overline{n+1}}-\Delta t\frac{\nabla F_i^{\overline{n+1}}}{\Delta x}\right)+r\delta^2u_i^{\overline{n+1}}
+%     \end{array}
+% \end{equation}
 
 \subsubsection{Stability}
 The stability condition for MacCormack's method is:
@@ -349,27 +373,66 @@ Beam and Warming inroduced the Delta form and their method is more efficient:
         \end{array}\right.
     \end{array}
 \end{equation}
+Deriving the matrix to invert:
+\begin{align*}
+    \displaystyle\left(I+\theta\Delta t\frac{D_0A_i^n}{2\Delta x}\right)\Delta u_i^n-\theta\frac{\Delta t\mu}{\left(\Delta x\right)^2}\delta^2\Delta u^n_i&=\mathrm{RHS}^n_i\\
+    \displaystyle\left(I+\theta\Delta t\frac{D_0A_i^n}{2\Delta x}\right)\Delta u_i^n-\theta\frac{\Delta t\mu}{\left(\Delta x\right)^2}\left(\Delta u^n_{i+1}-2\Delta u^n_i+\Delta u^n_{i-1}\right)&=\mathrm{RHS_i^n} \\
+    \displaystyle\Delta u_i^n+\theta\frac{\Delta t}{2\Delta x}\left(A_{i-1}^n\Delta u_{i-1}^n-A_{i+1}^n\Delta u_{i+1}^n\right)-\theta\frac{\Delta t\mu}{\left(\Delta x\right)^2}\left(\Delta u^n_{i+1}-2\Delta u^n_i+\Delta u^n_{i-1}\right)&=\mathrm{RHS_i^n} \\
+    A_i\Delta u^n_{i-1}+B_i\Delta u^n_i+C_i\Delta u^n_{i+1}&=D_i
+\end{align*}
+\begin{equation*}
+    \Downarrow
+\end{equation*}
+\begin{equation}
+    \begin{array}{lcl}
+        A_i &=& \displaystyle-\theta\frac{\mu\Delta t}{\left(\Delta x\right)^2}+\theta\frac{\Delta t}{2\Delta x}A_{i-1}^n\\
+        B_i &=& \displaystyle1+2\theta\frac{\mu\Delta t}{\left(\Delta x\right)^2}\\
+        C_i &=& \displaystyle-\alpha\frac{\mu\Delta t}{\left(\Delta x\right)^2}-\theta\frac{\Delta t}{2\Delta x}A_{i-1}^n\\
+        D_i &=& RHS_i^n
+    \end{array}
+\end{equation}
+and advancing the solution with:
+\begin{equation}
+    u_i^{n+1}=u_i^n+\Delta u_i^n
+\end{equation}
+In order to calculate $\Delta u^n_i$ it is needed to invert matrix as follows:
+\begin{equation}
+    \begin{pmatrix}
+        B_1 & C_1 & 0 & \cdots & \cdots & \cdots & 0 \\
+        A_2 & B_2 & C_2 & 0 & \cdots & \cdots & 0 \\
+        0 & \ddots & \ddots & \ddots & 0 & \cdots & 0 \\
+        0 & 0 & A_i & B_i & C_i & 0 & 0 \\
+        0 & \cdots & 0 & \ddots & \ddots & \ddots & 0 \\
+        0 & \cdots & \cdots & 0 & A_{N-2} & B_{N-2} & C_{N-2} \\
+        0 & 0 & \cdots & \cdots & 0 & A_{N-1} &B_{N-1}
+    \end{pmatrix}
+    \begin{pmatrix}
+        \Delta u_1^n\\
+        \Delta u_2^n\\
+        \cdots\\
+        \cdots\\
+        \cdots\\
+        \Delta u_{N-2}^n\\
+        \Delta u_{N-1}^n
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+        D_1-A_1\cdot u_0\\
+        D_2\\
+        \cdots\\
+        \cdots\\
+        \cdots\\
+        D_{N-2}\\
+        D_{N-1}-C_{N-1}\cdot u_N
+    \end{pmatrix}
+\end{equation}
 
-% \begin{align}
-%     A'_i &= - \alpha\frac{\mu\Delta t}{\Delta y^2}\\
-%     B'_i &= 1 + 2 \alpha\frac{\mu\Delta t}{\Delta y^2}\\
-%     C'_i &= - \alpha\frac{\mu\Delta t}{\Delta y^2}\\
-%     D'_i &= \frac{\mu\Delta t}{\Delta y^2}\left(u^n_{i+1} - 2u^n_{i} + u^n_{i-1}\right)
-% \end{align}
-% and advancing the solution with:
-% \begin{equation}
-%     u^{n+1}_i = u^n_i + \Delta u^n_i
-% \end{equation}
-% To reduce problems of big flouting point numbers, define \emph{r}:
-% \begin{equation}
-%     r \triangleq \frac{\mu\Delta t}{\Delta y^2}
-% \end{equation}
-% After dividing by \emph{r}:
-% \begin{align}
-%     A_i &= - \alpha\\
-%     B_i &= \frac{1}{r} + 2 \alpha\\
-%     C_i &= - \alpha\\
-%     D_i &= \left(u^n_{i+1} - 2u^n_{i} + u^n_{i-1}\right)
-% \end{align}
+The Beam and Warming method is extremely dispersive and therefore artiricial viscousity must be explicitly added. Beam and Warming used the following artificial viscosity term:
+\begin{equation}
+    \begin{matrix}
+        \displaystyle-\frac{w}{8}\left(u^n_{i+2}-4u^n_{i+1}+6u^n_i-4u^n_{i-1}+u^n_{i-2}\right) && 0<w\le1
+    \end{matrix}
+\end{equation}
+which can be added to the RHS with no change in accuracy
 
 \end{document}
