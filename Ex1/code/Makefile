@@ -14,3 +14,12 @@ clean_solver:
 
 debug_build_solver: solver.c
 	@gcc -Wall -g -Wextra ./solver.c -lm -o solver
+
+##########################################################
+automat: create_and_run_automat 
+	@echo automat done
+
+create_and_run_automat:
+	gcc -Wall -Wextra ./automat.c -lm -o automat
+	./automat
+	rm automat

@@ -384,7 +384,7 @@ Deriving the matrix to invert:
 \begin{align*}
     \displaystyle\left(I+\theta\Delta t\frac{D_0A_i^n}{2\Delta x}\right)\Delta u_i^n-\theta\frac{\Delta t\mu}{\left(\Delta x\right)^2}\delta^2\Delta u^n_i&=\mathrm{RHS}^n_i\\
     \displaystyle\left(I+\theta\Delta t\frac{D_0A_i^n}{2\Delta x}\right)\Delta u_i^n-\theta\frac{\Delta t\mu}{\left(\Delta x\right)^2}\left(\Delta u^n_{i+1}-2\Delta u^n_i+\Delta u^n_{i-1}\right)&=\mathrm{RHS_i^n} \\
-    \displaystyle\Delta u_i^n+\theta\frac{\Delta t}{2\Delta x}\left(A_{i-1}^n\Delta u_{i-1}^n-A_{i+1}^n\Delta u_{i+1}^n\right)-\theta\frac{\Delta t\mu}{\left(\Delta x\right)^2}\left(\Delta u^n_{i+1}-2\Delta u^n_i+\Delta u^n_{i-1}\right)&=\mathrm{RHS_i^n} \\
+    \displaystyle\Delta u_i^n+\theta\frac{\Delta t}{2\Delta x}\left(A_{i+1}^n\Delta u_{i+1}^n-A_{i-1}^n\Delta u_{i-1}^n\right)-\theta\frac{\Delta t\mu}{\left(\Delta x\right)^2}\left(\Delta u^n_{i+1}-2\Delta u^n_i+\Delta u^n_{i-1}\right)&=\mathrm{RHS_i^n} \\
     A_i\Delta u^n_{i-1}+B_i\Delta u^n_i+C_i\Delta u^n_{i+1}&=D_i
 \end{align*}
 \begin{equation*}
@@ -392,10 +392,10 @@ Deriving the matrix to invert:
 \end{equation*}
 \begin{equation}
     \begin{array}{lcl}
-        A_i &=& \displaystyle-\theta\frac{\mu\Delta t}{\left(\Delta x\right)^2}+\theta\frac{\Delta t}{2\Delta x}A_{i-1}^n\\
-        B_i &=& \displaystyle1+2\theta\frac{\mu\Delta t}{\left(\Delta x\right)^2}\\
-        C_i &=& \displaystyle-\alpha\frac{\mu\Delta t}{\left(\Delta x\right)^2}-\theta\frac{\Delta t}{2\Delta x}A_{i-1}^n\\
-        D_i &=& RHS_i^n
+        A'_i &=& \displaystyle-\theta\frac{\mu\Delta t}{\left(\Delta x\right)^2}-\theta\frac{\Delta t}{2\Delta x}A_{i-1}^n\\
+        B'_i &=& \displaystyle1+2\theta\frac{\mu\Delta t}{\left(\Delta x\right)^2}\\
+        C'_i &=& \displaystyle-\theta\frac{\mu\Delta t}{\left(\Delta x\right)^2}+\theta\frac{\Delta t}{2\Delta x}A_{i+1}^n\\
+        D'_i &=& RHS_i^n
     \end{array}
 \end{equation}
 and advancing the solution with:
@@ -405,13 +405,13 @@ and advancing the solution with:
 In order to calculate $\Delta u^n_i$ it is needed to invert matrix as follows:
 \begin{equation}
     \begin{pmatrix}
-        B_1 & C_1 & 0 & \cdots & \cdots & \cdots & 0 \\
-        A_2 & B_2 & C_2 & 0 & \cdots & \cdots & 0 \\
+        B'_1 & C'_1 & 0 & \cdots & \cdots & \cdots & 0 \\
+        A'_2 & B'_2 & C'_2 & 0 & \cdots & \cdots & 0 \\
         0 & \ddots & \ddots & \ddots & 0 & \cdots & 0 \\
-        0 & 0 & A_i & B_i & C_i & 0 & 0 \\
+        0 & 0 & A'_i & B'_i & C'_i & 0 & 0 \\
         0 & \cdots & 0 & \ddots & \ddots & \ddots & 0 \\
-        0 & \cdots & \cdots & 0 & A_{N-2} & B_{N-2} & C_{N-2} \\
-        0 & 0 & \cdots & \cdots & 0 & A_{N-1} &B_{N-1}
+        0 & \cdots & \cdots & 0 & A'_{N-1} & B'_{N-1} & C'_{N-1} \\
+        0 & 0 & \cdots & \cdots & 0 & A'_{N+1} &B'_{N+1}
     \end{pmatrix}
     \begin{pmatrix}
         \Delta u_1^n\\
@@ -419,21 +419,23 @@ In order to calculate $\Delta u^n_i$ it is needed to invert matrix as follows:
         \cdots\\
         \cdots\\
         \cdots\\
-        \Delta u_{N-2}^n\\
-        \Delta u_{N-1}^n
+        \Delta u_{N}^n\\
+        \Delta u_{N+1}^n
     \end{pmatrix}
     =
     \begin{pmatrix}
-        D_1-A_1\cdot u_0\\
-        D_2\\
+        D'_1\\
+        D'_2\\
         \cdots\\
         \cdots\\
         \cdots\\
-        D_{N-2}\\
-        D_{N-1}-C_{N-1}\cdot u_N
+        D'_{N}\\
+        D'_{N+1}
     \end{pmatrix}
 \end{equation}
-
+\begin{itemize}
+    \item $\left(N+1\right)$ because of the ghost cells
+\end{itemize}
 The Beam and Warming method is extremely dispersive and therefore artiricial viscousity must be explicitly added. Beam and Warming used the following artificial viscosity term:
 \begin{equation}
     \begin{matrix}

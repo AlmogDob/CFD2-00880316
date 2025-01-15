@@ -1,11 +1,11 @@
 N
-41
+81
 
 u0
 0
 
 u1
-1.0
+0.9
 
 x_max
 1
@@ -35,16 +35,19 @@ method
 Beam_and_Warming
 
 limiter
-van_Leer
+van_Leer  
 
 CFL
-1.5
+0.4
 
 w
 0.5
 
+theta
+0.5
+
 iterations
-1e0
+1e4
 
 final_time
 0

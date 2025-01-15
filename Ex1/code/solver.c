@@ -34,7 +34,7 @@ typedef enum {
     int create_empty_dir(char *parent_directory);
 #endif
 
-void read_input(char *input_file, int *N, double *u0, double *u1, double *x_max, double *x_min, double *k, double *b, double *c, double *mu, t_flag *flags, double *CFL, double *w, double *delta_x, double *delta_time, int *iterations, double *final_time);
+void read_input(char *input_file, int *N, double *u0, double *u1, double *x_max, double *x_min, double *k, double *b, double *c, double *mu, t_flag *flags, double *CFL, double *w, double *theta, double *delta_x, double *delta_time, int *iterations, double *final_time);
 void init(double *u, double u0, double u1, double x_max, double x_min, double delta_x, int N, t_flag flags);
 void set_ghost_cell(double *u, double u0, double u1, int N);
 void print_array(double *array, int start, int end);
@@ -47,11 +47,11 @@ double calculate_Roe_second_f_i_plus_half(double u_i_minus_1, double u_i, double
 void calculate_vec_f(double *f, double *u, int N, double k, double b, double c, t_flag flags);
 void calculate_delta_u_MacCormack(double *delta_u, double *u, double *u_bar, double delta_time, double delta_x, double mu, double b, double c, int N);
 double calculate_delta_time(double *u, double delta_x, double CFL, int N);
-void RHS(double *D, double *u, int N);
-void LHS(double *A, double *B, double *C, double delta_time, double delta_y, double mu, double alpha, int N);
-void BC(double *A, double *C, double *D, double u_0, double u_N, int N);
+void RHS(double *D, double *u, double delta_x, double delta_time, double mu, double b, double c, double w, int N);
+void LHS(double *A, double *B, double *C, double *u, double delta_time, double delta_x, double mu, double b, double c, double theta, int N);
+void BC(double *A, double *C, double *D, double *u, double u0, double u1, int N);
 int tridiag(double *a, double *b, double *c, double *d, double *u, int is, int ie);
-void calculate_delta_u(double *f, double *u, double *delta_u, double *u_bar, double delta_time, double delta_x, double b, double c, double mu, int N, t_flag flags);
+void calculate_delta_u(double *f, double *u, double *delta_u, double *u_bar, double *A, double *B, double *C, double *D, double delta_time, double delta_x, double b, double c, double mu, double w, double theta, double u0, double u1, int N, t_flag flags);
 void update_u(double *u, double *delta_u, int N);
 double calculate_norm(double *delta_u, int start, int end);
 void output(char *output_dir, int N, double u1, double x_max, double x_min, t_flag flags, double CFL, double delta_x);
@@ -60,7 +60,7 @@ int main(int argc, char const *argv[])
 {
 /* declerations */
     char input_file[MAXDIR], output_dir[MAXDIR], temp_word[MAXWORD];
-    double *u, *f, *delta_u, *u_bar, u0, u1, x_max, x_min, CFL, delta_x, delta_time, first_delta_u_norm, current_delta_u_norm, k, c, b, mu, w, ellapsed_time=0, final_time;
+    double *u, *f, *delta_u, *u_bar, *A, *B, *C, *D, u0, u1, x_max, x_min, CFL, delta_x, delta_time, first_delta_u_norm, current_delta_u_norm, k, c, b, mu, w, theta, ellapsed_time=0, final_time;
     int N, iterations;
     FILE *output_u_file, *output_iter_file;  
     t_flag flags = 0;
@@ -87,10 +87,11 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* reading the input */
-    read_input(input_file, &N, &u0, &u1, &x_max, &x_min, &k, &b, &c, &mu, &flags, &CFL, &w, &delta_x, &delta_time, &iterations, &final_time);
+    read_input(input_file, &N, &u0, &u1, &x_max, &x_min, &k, &b, &c, &mu, &flags, &CFL, &w, &theta, &delta_x, &delta_time, &iterations, &final_time);
 
 /* Checking the input */
     dprintINT(N);
+    dprintD(u0);
     dprintD(u1);
     dprintD(x_max);
     dprintD(x_min);
@@ -102,6 +103,7 @@ int main(int argc, char const *argv[])
     dprintD(delta_time);
     dprintD(CFL);
     dprintD(w);
+    dprintD(theta);
     dprintINT(iterations);
     dprintD(final_time);
     dprintINT(flags);
@@ -126,7 +128,7 @@ int main(int argc, char const *argv[])
                 fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
                 return -1;
             }
-            sprintf(temp_word, "/u1_%g", u1);
+            sprintf(temp_word, "/u0_%g_u1_%g", u0, u1);
             strcat(output_dir, temp_word);
             if (create_empty_dir(output_dir) != 0) {
                 fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
@@ -176,6 +178,12 @@ int main(int argc, char const *argv[])
                     fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
                     return -1;
                 }
+                sprintf(temp_word, "/theta%g", theta);
+                strcat(output_dir, temp_word);
+                if (create_empty_dir(output_dir) != 0) {
+                    fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
+                    return -1;
+                }
             }
             sprintf(temp_word, "/mu%g", mu);
             strcat(output_dir, temp_word);
@@ -184,6 +192,12 @@ int main(int argc, char const *argv[])
                 return -1;
             }
             sprintf(temp_word, "/delta_time%g", delta_time);
+            strcat(output_dir, temp_word);
+            if (create_empty_dir(output_dir) != 0) {
+                fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
+                return -1;
+            }
+            sprintf(temp_word, "/u0_%g_u1_%g", u0, u1);
             strcat(output_dir, temp_word);
             if (create_empty_dir(output_dir) != 0) {
                 fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
@@ -219,6 +233,22 @@ int main(int argc, char const *argv[])
     for (int i = 0; i < N+2; i++) {
         u_bar[i] = 0;
     }
+    A = (double *)malloc(sizeof(double) * (N+2));
+    for (int i = 0; i < N+2; i++) {
+        A[i] = 0;
+    }
+    B = (double *)malloc(sizeof(double) * (N+2));
+    for (int i = 0; i < N+2; i++) {
+        B[i] = 0;
+    }
+    C = (double *)malloc(sizeof(double) * (N+2));
+    for (int i = 0; i < N+2; i++) {
+        C[i] = 0;
+    }
+    D = (double *)malloc(sizeof(double) * (N+2));
+    for (int i = 0; i < N+2; i++) {
+        D[i] = 0;
+    }
     f = (double *)malloc(sizeof(double) * (N+1));
     for (int i = 0; i < N+1; i++) {
         f[i] = 0;
@@ -244,7 +274,7 @@ int main(int argc, char const *argv[])
         }
         ellapsed_time += delta_time;
 
-        calculate_delta_u(f, u, delta_u, u_bar, delta_time, delta_x, b, c, mu, N, flags);
+        calculate_delta_u(f, u, delta_u, u_bar, A, B, C, D, delta_time, delta_x, b, c, mu, w, theta, u0, u1, N, flags);
 
         if (iter == 0) {
             first_delta_u_norm = calculate_norm(delta_u, 1, N);
@@ -274,6 +304,10 @@ int main(int argc, char const *argv[])
     free(u_bar); 
     free(delta_u); 
     free(f); 
+    free(A);
+    free(B);
+    free(C);
+    free(D);
 
     fclose(output_u_file);
     fclose(output_iter_file);
@@ -335,7 +369,7 @@ flags      - bit flags
 CFL        - double pointer
 delta_x    - double pointer 
 iterations - max number of desierd iterations */
-void read_input(char *input_file, int *N, double *u0, double *u1, double *x_max, double *x_min, double *k, double *b, double *c, double *mu, t_flag *flags, double *CFL, double *w, double *delta_x, double *delta_time, int *iterations, double *final_time)
+void read_input(char *input_file, int *N, double *u0, double *u1, double *x_max, double *x_min, double *k, double *b, double *c, double *mu, t_flag *flags, double *CFL, double *w, double *theta, double *delta_x, double *delta_time, int *iterations, double *final_time)
 {
     char current_word[MAXWORD];
     float temp_f;
@@ -418,6 +452,9 @@ void read_input(char *input_file, int *N, double *u0, double *u1, double *x_max,
         } else if (!strcmp(current_word, "w")) {
             fscanf(fp, "%g", &temp_f);
             *w = (double)temp_f;
+        } else if (!strcmp(current_word, "theta")) {
+            fscanf(fp, "%g", &temp_f);
+            *theta = (double)temp_f;
         } else if (!strcmp(current_word, "iterations")) {
             fscanf(fp, "%g", &temp_f);
             *iterations = (int)temp_f;
@@ -461,9 +498,9 @@ void init(double *u, double u0, double u1, double x_max, double x_min, double de
         u[N+1] = u[N];
     } else if (flags & GENERAL) {
         for (int i = 1; i <= N; i++) {
-            u[i] = 0.5 * (1 + tanh(250 * (delta_x * (i-1) - 20))) ;
+            u[i] = u0 + 0.5 * ((u1-u0) + (u1 - u0) * tanh(250 * (delta_x * (i-1) - 20)));
         }
-        u[0] = u[0];
+        u[0] = u[1];
         u[N+1] = u[N];
     }
 }
@@ -527,7 +564,7 @@ void make_u_physical(double *u_bar_i_plus_half, double u_i, double u_i_plus_1)
 argument list: */
 double calculate_F(double u, double b, double c)
 {
-    return c * u + b * u * u / 2;
+    return c * u + b * u * u * 0.5;
 }
 
 /* calculating the flax for a face
@@ -593,7 +630,7 @@ double calculate_Roe_second_f_i_plus_half(double u_i_minus_1, double u_i, double
     double psi_minus_i_plus_half = limiter(r_minus_i_plus_half, flags);
     double psi_plus_i_plus_half = limiter(r_plus_i_plus_half, flags);
 
-    double psi_minus_i_plus_three_half = limiter(r_minus_i_plus_half, flags);
+    double psi_minus_i_plus_three_half = limiter(r_minus_i_plus_three_half, flags);
 
     double delta_u_i_minus_half = u_i - u_i_minus_1;
     double delta_u_i_plus_half = u_i_plus_1 - u_i;
@@ -644,7 +681,7 @@ void calculate_delta_u_MacCormack(double *delta_u, double *u, double *u_bar, dou
     }
 
     for (int i = 2; i <= N-1; i++) {
-        delta_u[i] = -u[i] + 0.5 * (u[i] + u_bar[i] - delta_time * (calculate_F(u_bar[i], b, c) - calculate_F(u_bar[i-1], b, c)) / (delta_x)) + mu * delta_time / delta_x / delta_x * (u_bar[i+1] - 2 * u_bar[i] + u_bar[i-1]);
+        delta_u[i] = -u[i] + 0.5 * (u[i] + u_bar[i] - delta_time * (calculate_F(u_bar[i], b, c) - calculate_F(u_bar[i-1], b, c)) / (delta_x) + mu * delta_time / delta_x / delta_x * (u_bar[i+1] - 2 * u_bar[i] + u_bar[i-1]));
     }
 }
 
@@ -667,11 +704,18 @@ argumet list:
 D - pointer to the array
 u - pointer to the flow solution
 N - number of grid points */
-void RHS(double *D, double *u, int N)
+void RHS(double *D, double *u, double delta_x, double delta_time, double mu, double b, double c, double w, int N)
 {
-    for (int i = 1; i < N-1; i++) {
-        D[i] = u[i+1] - 2*u[i] + u[i-1];
+    for (int i = 1; i <= N; i++) {
+        D[i] = - delta_time * (calculate_F(u[i+1], b, c) - calculate_F(u[i-1], b, c)) / (2 * delta_x) + delta_time * mu * (u[i+1] - 2*u[i] + u[i-1]) / delta_x / delta_x;
     }
+    for (int i = 2; i <= N-1; i++) {
+        D[i] += -w / (double)8 * (u[i+2] - 4 * u[i+1] + 6 * u[i] - 4 * u[i-1] + u[i-2]);
+    }
+    // D[0] += -w / (double)8 * (u[0+2] - 4 * u[0+1] + 6 * u[0] - 4 * u[0] + u[0]);
+    // D[1] += -w / (double)8 * (u[1+2] - 4 * u[1+1] + 6 * u[1] - 4 * u[1-1] + u[0]);
+    // D[N] += -w / (double)8 * (u[N] - 4 * u[N] + 6 * u[N] - 4 * u[N-1] + u[N-2]);
+    // D[N+1] += -w / (double)8 * (u[N+1] - 4 * u[N+1] + 6 * u[N+1] - 4 * u[N+1-1] + u[N+1-2]);
 }
 
 /* calculate the LHS (vectors A, B, C)
@@ -682,31 +726,14 @@ delta_time - time step between iterations
 delta_y    - distance between to grid points
 mu         - viscosity
 alpha      - parameter that control the scheme
-N          - number of grid points */
-void LHS(double *A, double *B, double *C, double delta_time, double delta_y, double mu, double alpha, int N)
+    - number of grid points */
+void LHS(double *A, double *B, double *C, double *u, double delta_time, double delta_x, double mu, double b, double c, double theta, int N)
 {
-    for (int i = 1; i < N-1; i++) {
-        A[i] = -alpha;
-        B[i] = delta_y * delta_y / mu / delta_time + 2*alpha;
-        C[i] = -alpha;
+    for (int i = 1; i <= N; i++) {
+        A[i] = -theta * (mu * delta_time) / (delta_x * delta_x) - 0.5 * theta * delta_time / delta_x * (c + b * u[i-1]);
+        B[i] = 1 + 2 * theta * mu * delta_time / delta_x / delta_x;
+        C[i] = -theta * (mu * delta_time) / delta_x / delta_x + 0.5 * theta * delta_time / delta_x * (c + b * u[i+1]);
     }
-}
-
-/* setting the boundry conditions
-A   - pointer to the A array
-B   - pointer to the B array
-C   - pointer to the C array 
-D   - pointer to the D array 
-u_0 - boundry condition at zero
-u_N - boundry condition at N
-N   - number of grid points */
-void BC(double *A, double *C, double *D, double u_0, double u_N, int N)
-{
-    D[1] = D[1] - A[1]*u_0;
-    A[1] = 0;
-
-    D[N-1] = D[N-1] - C[N-1]*u_N;
-    C[N-1] = 0;
 }
 
 /*   a, b, c, are the vectors of the diagonal and the two off-diagonals.
@@ -736,7 +763,7 @@ int tridiag(double *a, double *b, double *c, double *d, double *u, int is, int i
   return(0);
 }
 
-void calculate_delta_u(double *f, double *u, double *delta_u, double *u_bar, double delta_time, double delta_x, double b, double c, double mu, int N, t_flag flags)
+void calculate_delta_u(double *f, double *u, double *delta_u, double *u_bar, double *A, double *B, double *C, double *D, double delta_time, double delta_x, double b, double c, double mu, double w, double theta, double u0, double u1, int N, t_flag flags)
 {
     if (flags & ROE_FIRST || flags & ROE_SECOND) {
         for (int i = 1; i <= N; i++) {
@@ -744,7 +771,13 @@ void calculate_delta_u(double *f, double *u, double *delta_u, double *u_bar, dou
         }
     } else if (flags & MACCORMACK) {
         calculate_delta_u_MacCormack(delta_u, u, u_bar, delta_time, delta_x, mu, b, c, N);
+    } else if (flags & BEAM_AND_WARMING) {
+        RHS(D, u, delta_x, delta_time, mu, b, c, w, N);
+        LHS(A, B, C, u, delta_time, delta_x, mu, b, c, theta, N);
+        tridiag(A, B, C, D, delta_u, 1, N);
     }
+
+
 }
 
 void update_u(double *u, double *delta_u, int N)
