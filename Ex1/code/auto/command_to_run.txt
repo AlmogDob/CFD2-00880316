@@ -1,0 +1,4 @@
+make build_solver
+./solver ./auto/input0.txt ./auto/results 
+./solver ./auto/input1.txt ./auto/results 
+make clean_solver
