@@ -815,15 +815,15 @@ N          - number of grid points
 void output(char *output_dir, int N, double u1, double x_max, double x_min, t_flag flags, double CFL, double delta_x)
 {
     char temp_word[MAXWORD];
-    FILE *meta_data_file;
+    FILE *mata_data_file;
 
     strcpy(temp_word, output_dir);
     strcat(temp_word, "/mata_data.txt");
-    meta_data_file = fopen(temp_word, "wt");
+    mata_data_file = fopen(temp_word, "wt");
 
-    fprintf(meta_data_file, "%s, %s, %s, %s, %s, %s, %s, %s\n", "N", "u1", "x_max", "x_min", "Roe_first", "Roe_second", "CFL", "delta_x");
-    fprintf(meta_data_file, "%d, %g, %g, %g, %d, %d, %g, %g", N, u1, x_max, x_min, flags & ROE_FIRST, flags & ROE_SECOND, CFL, delta_x);
+    fprintf(mata_data_file, "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n" , "N", "u0", "u1", "x_max", "x_min", "delta_x", "delta_time", "k", "b", "c", "mu", "method", "limiter", "CFL", "w", "theta", "iterations", "final_time");
+    fprintf(mata_data_file, "%d, %g, %g, %g, %g, %g, %g, %g, %g, %g, %g, %s, %s, %g, %g, %g, %d, %g" , N, u0, u1, x_max, x_min, delta_x, delta_time, k, b, c, mu, method, limiter_name, CFL, w, theta, iterations, final_time);
 
 
-    fclose(meta_data_file);
+    fclose(mata_data_file);
 }
