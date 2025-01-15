@@ -51,7 +51,7 @@ void RHS(double *D, double *u, double delta_x, double delta_time, double mu, dou
 void LHS(double *A, double *B, double *C, double *u, double delta_time, double delta_x, double mu, double b, double c, double theta, int N);
 void BC(double *A, double *C, double *D, double *u, double u0, double u1, int N);
 int tridiag(double *a, double *b, double *c, double *d, double *u, int is, int ie);
-void calculate_delta_u(double *f, double *u, double *delta_u, double *u_bar, double *A, double *B, double *C, double *D, double delta_time, double delta_x, double b, double c, double mu, double w, double theta, double u0, double u1, int N, t_flag flags);
+void calculate_delta_u(double *f, double *u, double *delta_u, double *u_bar, double *A, double *B, double *C, double *D, double delta_time, double delta_x, double b, double c, double mu, double w, double theta, int N, t_flag flags);
 void update_u(double *u, double *delta_u, int N);
 double calculate_norm(double *delta_u, int start, int end);
 void output(char *output_dir, int N, double u1, double x_max, double x_min, t_flag flags, double CFL, double delta_x);
@@ -184,6 +184,12 @@ int main(int argc, char const *argv[])
                     fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
                     return -1;
                 }
+                sprintf(temp_word, "/w%g", w);
+                strcat(output_dir, temp_word);
+                if (create_empty_dir(output_dir) != 0) {
+                    fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
+                    return -1;
+                }
             }
             sprintf(temp_word, "/mu%g", mu);
             strcat(output_dir, temp_word);
@@ -274,7 +280,7 @@ int main(int argc, char const *argv[])
         }
         ellapsed_time += delta_time;
 
-        calculate_delta_u(f, u, delta_u, u_bar, A, B, C, D, delta_time, delta_x, b, c, mu, w, theta, u0, u1, N, flags);
+        calculate_delta_u(f, u, delta_u, u_bar, A, B, C, D, delta_time, delta_x, b, c, mu, w, theta, N, flags);
 
         if (iter == 0) {
             first_delta_u_norm = calculate_norm(delta_u, 1, N);
@@ -763,7 +769,7 @@ int tridiag(double *a, double *b, double *c, double *d, double *u, int is, int i
   return(0);
 }
 
-void calculate_delta_u(double *f, double *u, double *delta_u, double *u_bar, double *A, double *B, double *C, double *D, double delta_time, double delta_x, double b, double c, double mu, double w, double theta, double u0, double u1, int N, t_flag flags)
+void calculate_delta_u(double *f, double *u, double *delta_u, double *u_bar, double *A, double *B, double *C, double *D, double delta_time, double delta_x, double b, double c, double mu, double w, double theta, int N, t_flag flags)
 {
     if (flags & ROE_FIRST || flags & ROE_SECOND) {
         for (int i = 1; i <= N; i++) {

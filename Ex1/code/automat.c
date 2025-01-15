@@ -19,6 +19,7 @@ void create_input_file(char *file_name, int N, double u0, double u1, double x_ma
 int main()
 {
     char temp_dir[BUFSIZ], temp1[BUFSIZ], temp_input[BUFSIZ];
+    int output_counter = 0;
 
     char parent_dir[] = "./auto";
     if (create_empty_dir(parent_dir) != 0) {
@@ -31,63 +32,58 @@ int main()
 
     fprintf(fp, "make build_solver\n");
 
+    char *methods[] = {"Beam_and_Warming", "MacCormack"};
+    double ws[] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1};
+    double thetas[] = {0.5, 1};
+    double mus[] = {0.25, 0.001};
     double delta_times[] = {1, 0.5};
 
-    for (int i = 0; i < 2; i++) {
-        int N = 41;
-        double u0 = 0;
-        double u1 = 1;
-        double x_max = 1;
-        double x_min = 0;
-        double delta_x = 1;
-        double delta_time = delta_times[i];
-        double k = -1;
-        double b = -1;
-        double c = 0.5;
-        double mu = 0.25;
-        char *method = "Beam_and_Warming";
-        char *limiter = 0;
-        double CFL = 0;
-        double w = 0.5;
-        double theta = 1;
-        int iterations = 1e4;
-        double final_time = 0;
+    for (int index5 = 0; index5 < 2; index5++) {
+        for (int index4 = 0; index4 < 10; index4++) {
+            for (int index3 = 0; index3 < 2; index3++) {
+                for (int index2 = 0; index2 < 2; index2++) {
+                    for (int index1 = 0; index1 < 2; index1++) {
+                        int N = 41;
+                        double u0 = 0;
+                        double u1 = 1;
+                        double x_max = 1;
+                        double x_min = 0;
+                        double delta_x = 1;
+                        double delta_time = delta_times[index1];
+                        double k = -1;
+                        double b = -1;
+                        double c = 0.5;
+                        double mu = mus[index2];
+                        char *method = methods[index5];
+                        char *limiter = 0;
+                        double CFL = 0;
+                        double w = ws[index4];
+                        double theta = thetas[index3];
+                        int iterations = 1e4;
+                        double final_time = 0;
 
 
-        strncpy(temp_input, parent_dir, BUFSIZ);
-        strncat(temp_input, "/input", BUFSIZ/2);
-        sprintf(temp1, "%d.txt", i);
-        strncat(temp_input, temp1, BUFSIZ/2);
-        create_input_file(temp_input,
-                          N,
-                          u0,
-                          u1,
-                          x_max,
-                          x_min,
-                          delta_x, 
-                          delta_time,
-                          k,
-                          b,
-                          c,
-                          mu,
-                          method,
-                          limiter,
-                          CFL,
-                          w,
-                          theta,
-                          iterations,
-                          final_time);
+                        strncpy(temp_input, parent_dir, BUFSIZ);
+                        strncat(temp_input, "/input", BUFSIZ/2);
+                        sprintf(temp1, "%d.txt", output_counter++);
+                        strncat(temp_input, temp1, BUFSIZ/2);
+                        create_input_file(temp_input, N, u0, u1, x_max, x_min, delta_x, delta_time, k, b, c, mu, method, limiter, CFL, w, theta, iterations, final_time);
 
-        strncpy(temp_dir, parent_dir, BUFSIZ);
-        strncat(temp_dir, "/results", BUFSIZ);
-        
-        print_command_to_file(fp,
-                            "./solver",
-                            temp_input,
-                            temp_dir,
-                            NULL);
+                        strncpy(temp_dir, parent_dir, BUFSIZ);
+                        strncat(temp_dir, "/results", BUFSIZ/2);
+                        
+                        print_command_to_file(fp,
+                                            "./solver",
+                                            temp_input,
+                                            temp_dir,
+                                            NULL);
 
+                    }
+                }
+            }
+        }
     }
+
     fprintf(fp, "make clean_solver\n");
 
     return 0;
