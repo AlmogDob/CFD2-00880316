@@ -32,13 +32,13 @@ int main()
 
     fprintf(fp, "make build_solver\n");
 
-    char *methods[] = {"Beam_and_Warming", "MacCormack"};
+    char *methods[] = {"Beam_and_Warming", "MacCormack", "Roe_first"};
     double ws[] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1};
     double thetas[] = {0.5, 1};
     double mus[] = {0.25, 0.001};
     double delta_times[] = {1, 0.5};
 
-    for (int index5 = 0; index5 < 2; index5++) {
+    for (int index5 = 0; index5 < 3; index5++) {
         for (int index4 = 0; index4 < 10; index4++) {
             for (int index3 = 0; index3 < 2; index3++) {
                 for (int index2 = 0; index2 < 2; index2++) {

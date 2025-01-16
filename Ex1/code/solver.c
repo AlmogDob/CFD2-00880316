@@ -54,7 +54,7 @@ int tridiag(double *a, double *b, double *c, double *d, double *u, int is, int i
 void calculate_delta_u(double *f, double *u, double *delta_u, double *u_bar, double *A, double *B, double *C, double *D, double delta_time, double delta_x, double b, double c, double mu, double w, double theta, int N, t_flag flags);
 void update_u(double *u, double *delta_u, int N);
 double calculate_norm(double *delta_u, int start, int end);
-void output(char *output_dir, int N, double u1, double x_max, double x_min, t_flag flags, double CFL, double delta_x);
+void output(char *output_dir, int N, double u0, double u1, double x_max, double x_min, double delta_x, double delta_time, double k, double b, double c, double mu,  double CFL, double w, double theta, int iterations, double final_time, t_flag flags);
 
 int main(int argc, char const *argv[])
 {
@@ -302,7 +302,7 @@ int main(int argc, char const *argv[])
     
 /*------------------------------------------------------------*/
 /* output */
-    output(output_dir, N, u1, x_max, x_min, flags, CFL, delta_x);
+    output(output_dir, N, u0, u1, x_max, x_min, delta_x, delta_time, k, b, c, mu, CFL, w, theta, iterations, final_time, flags);
 
 /*------------------------------------------------------------*/
 /* freeing the memory */
@@ -782,8 +782,6 @@ void calculate_delta_u(double *f, double *u, double *delta_u, double *u_bar, dou
         LHS(A, B, C, u, delta_time, delta_x, mu, b, c, theta, N);
         tridiag(A, B, C, D, delta_u, 1, N);
     }
-
-
 }
 
 void update_u(double *u, double *delta_u, int N)
@@ -812,14 +810,46 @@ argumetn list:
 output_dir - name of the output directory
 N          - number of grid points
 */
-void output(char *output_dir, int N, double u1, double x_max, double x_min, t_flag flags, double CFL, double delta_x)
+void output(char *output_dir, int N, double u0, double u1, double x_max, double x_min, double delta_x, double delta_time, double k, double b, double c, double mu,  double CFL, double w, double theta, int iterations, double final_time, t_flag flags)
 {
-    char temp_word[MAXWORD];
+    char temp_word[MAXWORD], method[MAXWORD], limiter_name[MAXWORD];
     FILE *mata_data_file;
 
     strcpy(temp_word, output_dir);
     strcat(temp_word, "/mata_data.txt");
     mata_data_file = fopen(temp_word, "wt");
+
+    if (flags & ROE_FIRST) {
+        strcpy(method, "Roe_first");
+    } else if(flags & ROE_SECOND) {
+        strcpy(method, "Roe_second");
+    } else if(flags & MACCORMACK) {
+        strcpy(method, "MacCormack");
+    } else if(flags & BEAM_AND_WARMING) {
+        strcpy(method, "Beam_and_Warming");
+    }
+    if (flags & NO_LIMITER) {
+        strcpy(limiter_name, "no_limiter");
+    } else if (flags & VAN_ALBADA) {
+        strcpy(limiter_name, "van_Albada");
+    } else if (flags & SUPERBEE) {
+        strcpy(limiter_name, "superbee");
+    } else if (flags & VAN_LEER) {
+        strcpy(limiter_name, "van_Leer");
+    } else if (flags & MINMOD) {
+        strcpy(limiter_name, "minmod");
+    }
+    // ROE_FIRST        = (1 << 0),
+    // ROE_SECOND       = (1 << 1),
+    // NO_LIMITER       = (1 << 2),
+    // VAN_ALBADA       = (1 << 3),
+    // SUPERBEE         = (1 << 4),
+    // VAN_LEER         = (1 << 5),
+    // MINMOD           = (1 << 6),
+    // INVISCID         = (1 << 7),
+    // GENERAL          = (1 << 8), 
+    // MACCORMACK       = (1 << 9),
+    // BEAM_AND_WARMING = (1 << 10),
 
     fprintf(mata_data_file, "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n" , "N", "u0", "u1", "x_max", "x_min", "delta_x", "delta_time", "k", "b", "c", "mu", "method", "limiter", "CFL", "w", "theta", "iterations", "final_time");
     fprintf(mata_data_file, "%d, %g, %g, %g, %g, %g, %g, %g, %g, %g, %g, %s, %s, %g, %g, %g, %d, %g" , N, u0, u1, x_max, x_min, delta_x, delta_time, k, b, c, mu, method, limiter_name, CFL, w, theta, iterations, final_time);
