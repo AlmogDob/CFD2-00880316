@@ -39,7 +39,6 @@ void init(double *u, double u0, double u1, double x_max, double x_min, double de
 void set_ghost_cell(double *u, double u0, double u1, int N);
 void print_array(double *array, int start, int end);
 void print_array_to_file(FILE *fp, double *array, int start, int end);
-void make_u_physical(double *u_bar_i_plus_half, double u_i, double u_bar_i_plus_1);
 double calculate_F(double u, double b, double c);
 double calculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1, double b, double c);
 double limiter(double r, t_flag flags);
@@ -49,7 +48,6 @@ void calculate_delta_u_MacCormack(double *delta_u, double *u, double *u_bar, dou
 double calculate_delta_time(double *u, double delta_x, double CFL, int N);
 void RHS(double *D, double *u, double delta_x, double delta_time, double mu, double b, double c, double w, int N);
 void LHS(double *A, double *B, double *C, double *u, double delta_time, double delta_x, double mu, double b, double c, double theta, int N);
-void BC(double *A, double *C, double *D, double *u, double u0, double u1, int N);
 int tridiag(double *a, double *b, double *c, double *d, double *u, int is, int ie);
 void calculate_delta_u(double *f, double *u, double *delta_u, double *u_bar, double *A, double *B, double *C, double *D, double delta_time, double delta_x, double b, double c, double mu, double w, double theta, int N, t_flag flags);
 void update_u(double *u, double *delta_u, int N);
@@ -309,11 +307,11 @@ int main(int argc, char const *argv[])
     free(u); 
     free(u_bar); 
     free(delta_u); 
-    free(f); 
     free(A);
     free(B);
     free(C);
     free(D);
+    free(f); 
 
     fclose(output_u_file);
     fclose(output_iter_file);
@@ -368,13 +366,22 @@ int create_empty_dir(char *parent_directory)
 argument list:
 input-file - file pointer to input file
 N          - int pointer
+u0         - double pointer
 u1         - double pointer
 x_max      - double pointer
 x_min      - double pointer
-flags      - bit flags
+k          - double pointer
+b          - double pointer
+c          - double pointer
+mu         - double pointer
+flags      - pointer to bit flags
 CFL        - double pointer
+w          - double pointer
+theta      - double pointer
 delta_x    - double pointer 
-iterations - max number of desierd iterations */
+delta_time - double pointer 
+iterations - int pointer max number of desierd iterations 
+final_time - int pointer to the final time of the program */
 void read_input(char *input_file, int *N, double *u0, double *u1, double *x_max, double *x_min, double *k, double *b, double *c, double *mu, t_flag *flags, double *CFL, double *w, double *theta, double *delta_x, double *delta_time, int *iterations, double *final_time)
 {
     char current_word[MAXWORD];
@@ -491,9 +498,13 @@ void read_input(char *input_file, int *N, double *u0, double *u1, double *x_max,
 /* initializing the solution vector with ones and the boundry conditions
 argument list:
 u       - pointer to the solution array
+u0      - boundry condition at x_min
 u1      - boundry condition at x_max
+x_min   - x value at the start
+x_max   - x value at the end
 delta_x - double value of delta_x
-N       - number of grid points */
+N       - number of grid points
+flags   - bit flags */
 void init(double *u, double u0, double u1, double x_max, double x_min, double delta_x, int N, t_flag flags)
 {
     if (flags & INVISCID) {
@@ -511,6 +522,12 @@ void init(double *u, double u0, double u1, double x_max, double x_min, double de
     }
 }
 
+/* setting the value at the ghost cells to maintain the boundary condtions
+argument list:
+u  - pointer to double array
+u0 - double value of u at the start
+u1 - double value of u at the end
+N  - number of grid points */
 void set_ghost_cell(double *u, double u0, double u1, int N)
 {
     u[0] = -u[1] + u0 * 2;
@@ -557,24 +574,22 @@ void print_array_to_file(FILE *fp, double *array, int start, int end)
     fprintf(fp, "\n");
 }
 
-void make_u_physical(double *u_bar_i_plus_half, double u_i, double u_i_plus_1)
-{
-    double epsilon = fmax(0, (u_i_plus_1 - u_i) / 2); 
-
-    if (*u_bar_i_plus_half < epsilon) {
-        *u_bar_i_plus_half = epsilon;
-    }
-}
-
 /* calculating F
-argument list: */
+argument list: 
+u - velocity at a cell
+b - constant value describing the wave
+c - constant value describing the wave */
 double calculate_F(double u, double b, double c)
 {
     return c * u + b * u * u * 0.5;
 }
 
 /* calculating the flax for a face
-argument list: */
+argument list: 
+u_i        - velocity at a current cell
+u_i_plus_1 - velocity at the next cell 
+b          - constant value describing the wave
+c          - constant value describing the wave */
 double calculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1, double b, double c)
 {
     double A_bar_i_plus_half, A_bar_i_plus_half_plus, A_bar_i_plus_half_minus, F_i, F_i_plus_1,  f_i_plus_half;
@@ -596,7 +611,9 @@ double calculate_Roe_first_f_i_plus_half(double u_i, double u_i_plus_1, double b
 }
 
 /* calculating the van Albada limiter
-argument list:*/
+argument list:
+r     - value of r for limiter calculation
+flags - bit flags */
 double limiter(double r, t_flag flags)
 {
     if (!isfinite(r)) {
@@ -620,7 +637,15 @@ double limiter(double r, t_flag flags)
 }
 
 /* calculating the flax for a face
-argument list:*/
+argument list:
+u_i_minus_1 - velocity at the previous cell
+u_i         - velocity at a current cell
+u_i_plus_1  - velocity at the next cell 
+u_i_plus_2  - velocity at the next next cell 
+k           - constant value describing the wave
+b           - constant value describing the wave
+c           - constant value describing the wave 
+flags       - bit flags */
 double calculate_Roe_second_f_i_plus_half(double u_i_minus_1, double u_i, double u_i_plus_1, double u_i_plus_2, double k, double b, double c, t_flag flags)
 {
     double r_plus_i_minus_half = (u_i_plus_1 - u_i) / (u_i - u_i_minus_1);
@@ -650,8 +675,6 @@ double calculate_Roe_second_f_i_plus_half(double u_i_minus_1, double u_i, double
     
     double u_bar_i_plus_half = (u_left_i_plus_half + u_right_i_plus_half) * 0.5;
 
-    // make_u_physical(&u_bar_i_plus_half, u_i, u_i_plus_1);
-
     double u_bar_plus_i_plus_half = 0.5 * (u_bar_i_plus_half + fabs(u_bar_i_plus_half));
     double u_bar_minus_i_plus_half = 0.5 * (u_bar_i_plus_half - fabs(u_bar_i_plus_half));
 
@@ -664,6 +687,9 @@ argument list:
 f     - pointer to the flax array
 u     - pointer to the u array
 N     - number of grid points
+k     - constant value describing the wave
+b     - constant value describing the wave
+c     - constant value describing the wave 
 flags - bit flags */
 void calculate_vec_f(double *f, double *u, int N, double k, double b, double c, t_flag flags)
 {
@@ -680,6 +706,17 @@ void calculate_vec_f(double *f, double *u, int N, double k, double b, double c, 
     }
 }
 
+/* calculate delta u according to the MacCormack shceme 
+argument list:
+delat_u    - pointer to the u array
+u          - pointer to the u array
+u_bar      - pointer to the u array
+delta_time - double value of the time step 
+delta_x    - double value of delta x 
+mu         - double value of the viscosity
+b          - constant value describing the wave
+c          - constant value describing the wave 
+N          - number of grid points */
 void calculate_delta_u_MacCormack(double *delta_u, double *u, double *u_bar, double delta_time, double delta_x, double mu, double b, double c, int N)
 {
     for (int i = 1; i <= N; i++) {
@@ -691,8 +728,12 @@ void calculate_delta_u_MacCormack(double *delta_u, double *u, double *u_bar, dou
     }
 }
 
-/* calculating the delta time according to the CFL number argument list:
-*/
+/* calculating the delta time according to the CFL number
+argument list:
+u          - pointer to the u array
+delta_x    - double value of delta x 
+CFL        - double value of the CFL number
+N          - number of grid points */
 double calculate_delta_time(double *u, double delta_x, double CFL, int N)
 {
     double delta_time = __DBL_MAX__;
@@ -707,9 +748,15 @@ double calculate_delta_time(double *u, double delta_x, double CFL, int N)
 
 /* calculate the RHS (vector D) 
 argumet list:
-D - pointer to the array
-u - pointer to the flow solution
-N - number of grid points */
+D          - pointer to the array
+u          - pointer to the flow solution
+delta_x    - double value of delta x 
+delta_time - double value of the time step 
+mu         - double value of the viscosity
+b          - constant value describing the wave
+c          - constant value describing the wave 
+w          - constant value of the artificial viscosity 
+N          - number of grid points */
 void RHS(double *D, double *u, double delta_x, double delta_time, double mu, double b, double c, double w, int N)
 {
     for (int i = 1; i <= N; i++) {
@@ -728,11 +775,14 @@ void RHS(double *D, double *u, double delta_x, double delta_time, double mu, dou
 A          - pointer to the A array
 B          - pointer to the B array
 C          - pointer to the C array 
+u          - pointer to the flow solution
 delta_time - time step between iterations
-delta_y    - distance between to grid points
+delta_x    - distance between to grid points
 mu         - viscosity
-alpha      - parameter that control the scheme
-    - number of grid points */
+b          - constant value describing the wave
+c          - constant value describing the wave 
+theta      - constant value that control the order
+N          - number of grid points */
 void LHS(double *A, double *B, double *C, double *u, double delta_time, double delta_x, double mu, double b, double c, double theta, int N)
 {
     for (int i = 1; i <= N; i++) {
@@ -742,11 +792,10 @@ void LHS(double *A, double *B, double *C, double *u, double delta_time, double d
     }
 }
 
-/*   a, b, c, are the vectors of the diagonal and the two off-diagonals.
+/* a, b, c, are the vectors of the diagonal and the two off-diagonals.
 The vector d is the RHS vector, the vector u is the solution
 vector, "is" is the starting point, and ie is
-the last point.
-*/
+the last point. */
 int tridiag(double *a, double *b, double *c, double *d, double *u, int is, int ie)
 {
 
@@ -769,6 +818,24 @@ int tridiag(double *a, double *b, double *c, double *d, double *u, int is, int i
   return(0);
 }
 
+/* calculating delta u
+argument list:
+f          - pointer to the flax array
+u          - pointer to the u array
+delat_u    - pointer to the u array
+u_bar      - pointer to the u array
+A          - pointer to the A array
+B          - pointer to the B array
+C          - pointer to the C array 
+delta_time - time step between iterations
+delta_x    - distance between to grid points
+b          - constant value describing the wave
+c          - constant value describing the wave 
+mu         - viscosity
+w          - constant value of the artificial viscosity 
+theta      - constant value that control the order
+N          - number of grid points 
+flags      - bit flags */
 void calculate_delta_u(double *f, double *u, double *delta_u, double *u_bar, double *A, double *B, double *C, double *D, double delta_time, double delta_x, double b, double c, double mu, double w, double theta, int N, t_flag flags)
 {
     if (flags & ROE_FIRST || flags & ROE_SECOND) {
@@ -784,6 +851,11 @@ void calculate_delta_u(double *f, double *u, double *delta_u, double *u_bar, dou
     }
 }
 
+/* updating the velocity vector 
+argument list:
+u       - pointer to the u array
+delat_u - pointer to the u array
+N       - number of grid points */
 void update_u(double *u, double *delta_u, int N)
 {
     for (int i = 1; i <= N; i++) {
@@ -807,9 +879,24 @@ double calculate_norm(double *delta_u, int start, int end)
 
 /* ouputing metadata of the solution 
 argumetn list:
-output_dir - name of the output directory
-N          - number of grid points
-*/
+output_dir - the output directory
+N          - number of grid points 
+u0         - double value of u at the start
+u1         - double value of u at the end
+x_max      - x value at the end
+x_min      - x value at the start
+k          - constant value describing the wave
+b          - constant value describing the wave
+c          - constant value describing the wave 
+mu         - viscosity
+flags      - bit flags
+CFL        - double value of the CFL number
+w          - constant value of the artificial viscosity 
+theta      - constant value that control the order
+delta_time - time step between iterations
+delta_x    - distance between to grid points
+iterations - int value max number of desierd iterations 
+final_time - int value of the final time of the program */
 void output(char *output_dir, int N, double u0, double u1, double x_max, double x_min, double delta_x, double delta_time, double k, double b, double c, double mu,  double CFL, double w, double theta, int iterations, double final_time, t_flag flags)
 {
     char temp_word[MAXWORD], method[MAXWORD], limiter_name[MAXWORD];
@@ -839,17 +926,6 @@ void output(char *output_dir, int N, double u0, double u1, double x_max, double 
     } else if (flags & MINMOD) {
         strcpy(limiter_name, "minmod");
     }
-    // ROE_FIRST        = (1 << 0),
-    // ROE_SECOND       = (1 << 1),
-    // NO_LIMITER       = (1 << 2),
-    // VAN_ALBADA       = (1 << 3),
-    // SUPERBEE         = (1 << 4),
-    // VAN_LEER         = (1 << 5),
-    // MINMOD           = (1 << 6),
-    // INVISCID         = (1 << 7),
-    // GENERAL          = (1 << 8), 
-    // MACCORMACK       = (1 << 9),
-    // BEAM_AND_WARMING = (1 << 10),
 
     fprintf(mata_data_file, "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n" , "N", "u0", "u1", "x_max", "x_min", "delta_x", "delta_time", "k", "b", "c", "mu", "method", "limiter", "CFL", "w", "theta", "iterations", "final_time");
     fprintf(mata_data_file, "%d, %g, %g, %g, %g, %g, %g, %g, %g, %g, %g, %s, %s, %g, %g, %g, %d, %g" , N, u0, u1, x_max, x_min, delta_x, delta_time, k, b, c, mu, method, limiter_name, CFL, w, theta, iterations, final_time);
