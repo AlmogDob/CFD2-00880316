@@ -80,6 +80,7 @@ We will want to set the maximal value of the \emph{CFL} number. We will find the
 \begin{equation}
     \Delta t=\min\left(\Delta t_i\right)\ \forall i
 \end{equation}
+The method is considered stable when $\mathrm{CFL<1}$
 
 \subsection{First Order Roe Method $(u_1 = 0.0)$}
 \label{Roe_first}
@@ -308,7 +309,7 @@ There are many types of limiters. For example:
     \caption{Effect of CFL number on solution - Roe second order with different limiters}
     \label{fig:roe_second_with_limiters}
 \end{figure}
-\noindent We can see that when there are limiters, for a CFL number bigger than 0.8, there are oscillations far from the wavefront, but unlike the case with no limiters, the solution does converge. At low CFL numbers, the oscillations are not pronounced since the time step is really small, except for the van Leer limiter, at which the oscillations are never negligible. The oscillations starts the closest to the wavefron when using the van Leer limiter. 
+\noindent We can see that when there are limiters, for a CFL number bigger than 0.8, there are oscillations far from the wavefront, but unlike the case with no limiters, the solution does converge. At low CFL numbers, the oscillations are not pronounced since the time step is really small, except for the van Leer limiter, at which the oscillations are never negligible. The oscillations starts the closest to the wavefront when using the van Leer limiter. 
 
 \subsubsection{Effect of Limiter}
 \begin{figure}[H]
@@ -723,14 +724,14 @@ We can see that when the viscosity is significant, the time step has near to no 
     \begin{subfigure}[c]{.38\textwidth}
         \centering
         \includegraphics[width=\textwidth]{images/grap18.png}
-        \caption{Beam $\&$ Warming $\mu=0.25,\ \theta=0.5$}
+        \caption{Beam $\&$ Warming $\mu=0.25,\ \theta=1$}
         \label{fig:Beam & Warming_general_mu0.25_theta1_A_diff_w}
     \end{subfigure}
     % \hfill
     \begin{subfigure}[c]{.38\textwidth}
         \centering
         \includegraphics[width=\textwidth]{images/grap18.1.png}
-        \caption{Beam $\&$ Warming $\mu=0.25,\ \theta=0.5$ - zoomed}
+        \caption{Beam $\&$ Warming $\mu=0.25,\ \theta=1$ - zoomed}
         \label{fig:Beam & Warming_general_mu0.25_theta1_B_diff_w}
     \end{subfigure}
     \begin{subfigure}[c]{.38\textwidth}
@@ -749,7 +750,7 @@ We can see that when the viscosity is significant, the time step has near to no 
     \caption{Effect of smoothing on solution - Beam $\&$ Warming}
         \label{fig:Beam_&_Warming_general_diff_w}
 \end{figure}
-We can see that the smoothing has a visible effect on the solution espeticaly significant when the viscosity is negligible. From Figure \ref{fig:Beam_&_Warming_general_diff_w} we can assume that the B$\&$W method needs smoothing in order to converge on a solution. When the viscosity $\left(\mu\right)$ and the artificial viscosity $\left(w\right)$ are negligible, the oscillations are significantly large but when only the artificial viscosity is zero, there are near to no oscillations. And again, it is visible that there is no visible difference between first order $\left(\theta=1\right)$ and second order $\left(\theta=0.5\right)$.
+We can see that the smoothing has a visible effect on the solution especially  significant when the viscosity is negligible. From Figure \ref{fig:Beam_&_Warming_general_diff_w} we can assume that the B$\&$W method needs smoothing in order to converge on a solution. When the viscosity $\left(\mu\right)$ and the artificial viscosity $\left(w\right)$ are negligible, the oscillations are significantly large but when only the artificial viscosity is zero, there are near to no oscillations. And again, it is visible that there is no visible difference between first order $\left(\theta=1\right)$ and second order $\left(\theta=0.5\right)$.
 
 \subsubsection{Difference Between First and Second Order}
 From the figures above (\ref{fig:Beam_&_Warming_general_diff_time} and \ref{fig:Beam_&_Warming_general_diff_w}) one might assume that there is no difference between B$\&$W first and second order. However, this assumption is obviously inaccurate at best and the next figure will show it.
@@ -775,8 +776,22 @@ From the figures above (\ref{fig:Beam_&_Warming_general_diff_time} and \ref{fig:
 
 \section{Conclusions}
 \subsection{Inviscid Burgers Equation}
+\begin{itemize}
+    \item Although the stability limit for the Roe first-order method is $\mathrm{CFL}<1$, in Figure \ref{fig:roe_first_inviscid} we can see that the method is still stable for $\mathrm{CFL}>1$. This can be explained by the fact that stability analysis can be performed only for linear equations and the Burgers equation is a non-linear equation, so it is reasonable that the method states stable for CFL numbers slightly bigger than the limitation.
+    \item The Roe second-order method is less stable than the first-order and since the method is dispersive (unlike the dissipative first-order) there are oscillations for all CFL numbers (the oscillations are negligible when the CFL number is small).
+    \item To limit the oscillations of the second-order, different limiters are in use. The limiters make the method stable at least like the first-order method and they delay the start of the oscillations.
+    \item Each limiter has its advantages and disadvantages.
+    The van Leer limiter, unlike most, keeps some small oscillations on the wavefront, and with the Supperbee limiter, the oscillations start first.
+\end{itemize}
 
 \subsection{Generalized Burgers Equation}
-
+\begin{itemize}
+    \item The effect of the time step is near negligible for the Roe first-order method.
+    \item For the MacCormack and Beam $\&$ Warming methods, the time step is has nearlly negligible effect when the viscosity $\left(\mu\right)$ is high and substianal effect when the viscosity is negligible.
+    \item As expected, the solution with teh MacCormack method (second-order) has oscillations around the wavefront which are more pronounced when the viscosity is negligible.
+    \item Both first and second order Beam and Warming has oscillations around the wavefront. Unlike the other scheme, the time step has a visible effect for both values of viscosity.
+    \item Since the B$\&$W method is highly dispersive (as seen in Figure \ref{fig:Beam_&_Warming_general_diff_w} for $\mathrm{w}=0$) an artificial viscosity $\left(\mathrm{w}\right)$ has been added. The artiricial viscosity is especially importent when the real viscosity $\left(\mu\right)$ is small. 
+    \item As the artificial viscosity increase so do the oscillations near the wavefront.
+\end{itemize}
 
 \end{document}

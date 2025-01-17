@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.10.14)  16 JAN 2025 00:20
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.10.14)  18 JAN 2025 00:36
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -231,9 +231,29 @@ File: pdftex.def 2020/10/05 v1.2a Graphics/color driver for pdftex
 ))
 \Gin@req@height=\dimen160
 \Gin@req@width=\dimen161
+) (/usr/share/texlive/texmf-dist/tex/latex/caption/caption.sty
+Package: caption 2020/10/26 v3.5g Customizing captions (AR)
+ (/usr/share/texlive/texmf-dist/tex/latex/caption/caption3.sty
+Package: caption3 2020/10/21 v2.2e caption3 kernel (AR)
+\captionmargin=\dimen162
+\captionmargin@=\dimen163
+\captionwidth=\dimen164
+\caption@tempdima=\dimen165
+\caption@indent=\dimen166
+\caption@parindent=\dimen167
+\caption@hangindent=\dimen168
+Package caption Info: Standard document class detected.
+)
+\c@caption@flags=\count284
+\c@continuedfloat=\count285
+Package caption Info: hyperref package is loaded.
+) (/usr/share/texlive/texmf-dist/tex/latex/caption/subcaption.sty
+Package: subcaption 2020/10/07 v1.3j Sub-captions (AR)
+\c@subfigure=\count286
+\c@subtable=\count287
 ) (/usr/share/texlive/texmf-dist/tex/latex/float/float.sty
 Package: float 2001/11/08 v1.3d Float enhancements (AL)
-\c@float@type=\count284
+\c@float@type=\count288
 \float@exts=\toks23
 \float@box=\box52
 \@float@everytoks=\toks24
@@ -268,29 +288,29 @@ Package xcolor Info: Model `Gray' substituted by `gray' on input line 1374.
 Package xcolor Info: Model `wave' substituted by `hsb' on input line 1375.
 ) (/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2022-01-12 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count285
+\l__color_backend_stack_int=\count289
 \l__pdf_internal_box=\box54
 ) (./hw1.aux)
 \openout1 = `hw1.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 20.
-LaTeX Font Info:    ... okay on input line 20.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 20.
-LaTeX Font Info:    ... okay on input line 20.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 20.
-LaTeX Font Info:    ... okay on input line 20.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 20.
-LaTeX Font Info:    ... okay on input line 20.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 20.
-LaTeX Font Info:    ... okay on input line 20.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 20.
-LaTeX Font Info:    ... okay on input line 20.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 20.
-LaTeX Font Info:    ... okay on input line 20.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 20.
-LaTeX Font Info:    ... okay on input line 20.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 20.
-LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -326,7 +346,7 @@ LaTeX Font Info:    ... okay on input line 20.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Package hyperref Info: Link coloring ON on input line 20.
+Package hyperref Info: Link coloring ON on input line 22.
 (/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2021-04-02 v2.47 Cross-referencing by name of section
  (/usr/share/texlive/texmf-dist/tex/latex/refcount/refcount.sty
@@ -334,27 +354,27 @@ Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
 ) (/usr/share/texlive/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
 Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
-\c@section@level=\count286
+\c@section@level=\count290
 )
-LaTeX Info: Redefining \ref on input line 20.
-LaTeX Info: Redefining \pageref on input line 20.
-LaTeX Info: Redefining \nameref on input line 20.
+LaTeX Info: Redefining \ref on input line 22.
+LaTeX Info: Redefining \pageref on input line 22.
+LaTeX Info: Redefining \nameref on input line 22.
  (./hw1.out) (./hw1.out)
 \@outlinefile=\write3
 \openout3 = `hw1.out'.
 
  (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count287
-\scratchdimen=\dimen162
+\scratchcounter=\count291
+\scratchdimen=\dimen169
 \scratchbox=\box55
-\nofMPsegments=\count288
-\nofMParguments=\count289
+\nofMPsegments=\count292
+\nofMParguments=\count293
 \everyMPshowfont=\toks25
-\MPscratchCnt=\count290
-\MPscratchDim=\dimen163
-\MPnumerator=\count291
-\makeMPintoPDFobject=\count292
+\MPscratchCnt=\count294
+\MPscratchDim=\dimen170
+\MPnumerator=\count295
+\makeMPintoPDFobject=\count296
 \everyMPtoPDFconversion=\toks26
 ) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
@@ -362,14 +382,17 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 48
  (/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: float package is loaded.
+Package caption Info: End \AtBeginDocument code.
 Package lastpage Info: Please have a look at the pageslts package at
 (lastpage)             https://www.ctan.org/pkg/pageslts
-(lastpage)             ! on input line 20.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 23.
+(lastpage)             ! on input line 22.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 25.
  (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 23.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 25.
  (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
@@ -393,19 +416,19 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.30 \newpage
+l.32 \newpage
               [1]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 82.
+(hyperref)                removing `math shift' on input line 85.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 82.
+(hyperref)                removing `subscript' on input line 85.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 82.
+(hyperref)                removing `math shift' on input line 85.
 
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -415,17 +438,16 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
 [2]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 149.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 149.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 149.
+<images/grap1.png, id=199, 558.04485pt x 425.6703pt>
+File: images/grap1.png Graphic file (type png)
+<use images/grap1.png>
+Package pdftex.def Info: images/grap1.png  used on input line 154.
+(pdftex.def)             Requested size: 209.1301pt x 159.52203pt.
+<images/grap1.1.png, id=200, 562.9833pt x 425.6703pt>
+File: images/grap1.1.png Graphic file (type png)
+<use images/grap1.1.png>
+Package pdftex.def Info: images/grap1.1.png  used on input line 161.
+(pdftex.def)             Requested size: 209.1301pt x 158.12556pt.
 
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -436,21 +458,17 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 [3]
 
-Package fancyhdr Warning: \headheight is too small (12.0pt): 
-(fancyhdr)                Make it at least 13.59999pt, for example:
-(fancyhdr)                \setlength{\headheight}{13.59999pt}.
-(fancyhdr)                You might also make \topmargin smaller to compensate:
-(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 170.
 
-[4]
 
-Package fancyhdr Warning: \headheight is too small (12.0pt): 
-(fancyhdr)                Make it at least 13.59999pt, for example:
-(fancyhdr)                \setlength{\headheight}{13.59999pt}.
-(fancyhdr)                You might also make \topmargin smaller to compensate:
-(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `subscript' on input line 170.
 
-[5]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 170.
+
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 13.59999pt, for example:
@@ -458,7 +476,292 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller to compensate:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[6] 
+[4 <./images/grap1.png (PNG copy)> <./images/grap1.1.png (PNG copy)>]
+<images/grap2.png, id=223, 558.04485pt x 425.79076pt>
+File: images/grap2.png Graphic file (type png)
+<use images/grap2.png>
+Package pdftex.def Info: images/grap2.png  used on input line 240.
+(pdftex.def)             Requested size: 209.1301pt x 159.56718pt.
+<images/grap2.1.png, id=224, 563.34465pt x 425.79076pt>
+File: images/grap2.1.png Graphic file (type png)
+<use images/grap2.1.png>
+Package pdftex.def Info: images/grap2.1.png  used on input line 247.
+(pdftex.def)             Requested size: 209.1301pt x 158.06638pt.
+<images/grap3.png, id=225, 558.6471pt x 427.8384pt>
+File: images/grap3.png Graphic file (type png)
+<use images/grap3.png>
+Package pdftex.def Info: images/grap3.png  used on input line 259.
+(pdftex.def)             Requested size: 149.37958pt x 114.40157pt.
+<images/grap3.1.png, id=226, 563.9469pt x 427.5975pt>
+File: images/grap3.1.png Graphic file (type png)
+<use images/grap3.1.png>
+Package pdftex.def Info: images/grap3.1.png  used on input line 266.
+(pdftex.def)             Requested size: 149.37958pt x 113.26059pt.
+<images/grap4.png, id=227, 558.6471pt x 427.8384pt>
+File: images/grap4.png Graphic file (type png)
+<use images/grap4.png>
+Package pdftex.def Info: images/grap4.png  used on input line 272.
+(pdftex.def)             Requested size: 149.37958pt x 114.40157pt.
+<images/grap4.1.png, id=228, 563.9469pt x 427.5975pt>
+File: images/grap4.1.png Graphic file (type png)
+<use images/grap4.1.png>
+Package pdftex.def Info: images/grap4.1.png  used on input line 279.
+(pdftex.def)             Requested size: 149.37958pt x 113.26059pt.
+<images/grap5.png, id=229, 558.6471pt x 427.8384pt>
+File: images/grap5.png Graphic file (type png)
+<use images/grap5.png>
+Package pdftex.def Info: images/grap5.png  used on input line 285.
+(pdftex.def)             Requested size: 149.37958pt x 114.40157pt.
+<images/grap5.1.png, id=230, 563.9469pt x 427.5975pt>
+File: images/grap5.1.png Graphic file (type png)
+<use images/grap5.1.png>
+Package pdftex.def Info: images/grap5.1.png  used on input line 292.
+(pdftex.def)             Requested size: 149.37958pt x 113.26059pt.
+<images/grap6.png, id=231, 558.6471pt x 427.8384pt>
+File: images/grap6.png Graphic file (type png)
+<use images/grap6.png>
+Package pdftex.def Info: images/grap6.png  used on input line 298.
+(pdftex.def)             Requested size: 149.37958pt x 114.40157pt.
+<images/grap6.1.png, id=232, 563.9469pt x 427.8384pt>
+File: images/grap6.1.png Graphic file (type png)
+<use images/grap6.1.png>
+Package pdftex.def Info: images/grap6.1.png  used on input line 305.
+(pdftex.def)             Requested size: 149.37958pt x 113.3244pt.
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 13.59999pt, for example:
+(fancyhdr)                \setlength{\headheight}{13.59999pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+
+[5 <./images/grap2.png (PNG copy)> <./images/grap2.1.png (PNG copy)>]
+<images/grap7.png, id=240, 558.04485pt x 425.79076pt>
+File: images/grap7.png Graphic file (type png)
+<use images/grap7.png>
+Package pdftex.def Info: images/grap7.png  used on input line 319.
+(pdftex.def)             Requested size: 209.1301pt x 159.56718pt.
+<images/grap7.1.png, id=241, 563.34465pt x 425.79076pt>
+File: images/grap7.1.png Graphic file (type png)
+<use images/grap7.1.png>
+Package pdftex.def Info: images/grap7.1.png  used on input line 326.
+(pdftex.def)             Requested size: 209.1301pt x 158.06638pt.
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 13.59999pt, for example:
+(fancyhdr)                \setlength{\headheight}{13.59999pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+
+[6 <./images/grap3.png (PNG copy)> <./images/grap3.1.png (PNG copy)> <./images/grap4.png (PNG copy)> <./images/grap4.1.png (PNG copy)> <./images/grap5.png (PNG copy)> <./images/grap5.1.png (PNG copy)> <./images/grap6.png (PNG copy)> <./images/grap6.1.png (PNG copy)>]
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 13.59999pt, for example:
+(fancyhdr)                \setlength{\headheight}{13.59999pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+
+[7 <./images/grap7.png (PNG copy)> <./images/grap7.1.png (PNG copy)>]
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 13.59999pt, for example:
+(fancyhdr)                \setlength{\headheight}{13.59999pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+
+[8]
+<images/grap8.png, id=268, 562.9833pt x 427.5975pt>
+File: images/grap8.png Graphic file (type png)
+<use images/grap8.png>
+Package pdftex.def Info: images/grap8.png  used on input line 470.
+(pdftex.def)             Requested size: 209.1301pt x 158.84148pt.
+<images/grap8.1.png, id=269, 563.706pt x 427.8384pt>
+File: images/grap8.1.png Graphic file (type png)
+<use images/grap8.1.png>
+Package pdftex.def Info: images/grap8.1.png  used on input line 477.
+(pdftex.def)             Requested size: 209.1301pt x 158.72206pt.
+<images/grap9.png, id=270, 562.9833pt x 427.5975pt>
+File: images/grap9.png Graphic file (type png)
+<use images/grap9.png>
+Package pdftex.def Info: images/grap9.png  used on input line 483.
+(pdftex.def)             Requested size: 209.1301pt x 158.84148pt.
+<images/grap9.1.png, id=271, 569.2467pt x 427.5975pt>
+File: images/grap9.1.png Graphic file (type png)
+<use images/grap9.1.png>
+Package pdftex.def Info: images/grap9.1.png  used on input line 490.
+(pdftex.def)             Requested size: 209.1301pt x 157.09288pt.
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 13.59999pt, for example:
+(fancyhdr)                \setlength{\headheight}{13.59999pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+
+[9 <./images/grap8.png (PNG copy)> <./images/grap8.1.png (PNG copy)> <./images/grap9.png (PNG copy)> <./images/grap9.1.png (PNG copy)>]
+<images/grap10.png, id=280, 566.3559pt x 427.8384pt>
+File: images/grap10.png Graphic file (type png)
+<use images/grap10.png>
+Package pdftex.def Info: images/grap10.png  used on input line 534.
+(pdftex.def)             Requested size: 166.44836pt x 125.7412pt.
+<images/grap10.1.png, id=281, 563.706pt x 427.5975pt>
+File: images/grap10.1.png Graphic file (type png)
+<use images/grap10.1.png>
+Package pdftex.def Info: images/grap10.1.png  used on input line 541.
+(pdftex.def)             Requested size: 166.44836pt x 126.2576pt.
+<images/grap11.png, id=282, 566.3559pt x 427.8384pt>
+File: images/grap11.png Graphic file (type png)
+<use images/grap11.png>
+Package pdftex.def Info: images/grap11.png  used on input line 547.
+(pdftex.def)             Requested size: 166.44836pt x 125.7412pt.
+<images/grap11.1.png, id=283, 563.706pt x 427.8384pt>
+File: images/grap11.1.png Graphic file (type png)
+<use images/grap11.1.png>
+Package pdftex.def Info: images/grap11.1.png  used on input line 554.
+(pdftex.def)             Requested size: 166.44836pt x 126.32874pt.
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 13.59999pt, for example:
+(fancyhdr)                \setlength{\headheight}{13.59999pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+
+[10 <./images/grap10.png (PNG copy)> <./images/grap10.1.png (PNG copy)> <./images/grap11.png (PNG copy)> <./images/grap11.1.png (PNG copy)>]
+<images/grap12.png, id=290, 566.3559pt x 427.8384pt>
+File: images/grap12.png Graphic file (type png)
+<use images/grap12.png>
+Package pdftex.def Info: images/grap12.png  used on input line 640.
+(pdftex.def)             Requested size: 162.18279pt x 122.51622pt.
+<images/grap12.1.png, id=291, 563.706pt x 427.5975pt>
+File: images/grap12.1.png Graphic file (type png)
+<use images/grap12.1.png>
+Package pdftex.def Info: images/grap12.1.png  used on input line 647.
+(pdftex.def)             Requested size: 162.18279pt x 123.02141pt.
+<images/grap13.png, id=292, 566.3559pt x 427.8384pt>
+File: images/grap13.png Graphic file (type png)
+<use images/grap13.png>
+Package pdftex.def Info: images/grap13.png  used on input line 653.
+(pdftex.def)             Requested size: 162.18279pt x 122.51622pt.
+<images/grap13.1.png, id=293, 563.706pt x 427.5975pt>
+File: images/grap13.1.png Graphic file (type png)
+<use images/grap13.1.png>
+Package pdftex.def Info: images/grap13.1.png  used on input line 660.
+(pdftex.def)             Requested size: 162.18279pt x 123.02141pt.
+<images/grap14.png, id=294, 566.3559pt x 427.8384pt>
+File: images/grap14.png Graphic file (type png)
+<use images/grap14.png>
+Package pdftex.def Info: images/grap14.png  used on input line 666.
+(pdftex.def)             Requested size: 162.18279pt x 122.51622pt.
+<images/grap14.1.png, id=295, 563.706pt x 428.3202pt>
+File: images/grap14.1.png Graphic file (type png)
+<use images/grap14.1.png>
+Package pdftex.def Info: images/grap14.1.png  used on input line 673.
+(pdftex.def)             Requested size: 162.18279pt x 123.22932pt.
+<images/grap15.png, id=296, 566.3559pt x 427.8384pt>
+File: images/grap15.png Graphic file (type png)
+<use images/grap15.png>
+Package pdftex.def Info: images/grap15.png  used on input line 679.
+(pdftex.def)             Requested size: 162.18279pt x 122.51622pt.
+<images/grap15.1.png, id=297, 563.706pt x 427.8384pt>
+File: images/grap15.1.png Graphic file (type png)
+<use images/grap15.1.png>
+Package pdftex.def Info: images/grap15.1.png  used on input line 686.
+(pdftex.def)             Requested size: 162.18279pt x 123.09071pt.
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 13.59999pt, for example:
+(fancyhdr)                \setlength{\headheight}{13.59999pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+
+[11]
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 13.59999pt, for example:
+(fancyhdr)                \setlength{\headheight}{13.59999pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+
+[12 <./images/grap12.png (PNG copy)> <./images/grap12.1.png (PNG copy)> <./images/grap13.png (PNG copy)> <./images/grap13.1.png (PNG copy)> <./images/grap14.png (PNG copy)> <./images/grap14.1.png (PNG copy)> <./images/grap15.png (PNG copy)> <./images/grap15.1.png (PNG copy)>]
+<images/grap16.png, id=315, 566.3559pt x 427.8384pt>
+File: images/grap16.png Graphic file (type png)
+<use images/grap16.png>
+Package pdftex.def Info: images/grap16.png  used on input line 700.
+(pdftex.def)             Requested size: 162.18279pt x 122.51622pt.
+<images/grap16.1.png, id=316, 563.9469pt x 427.5975pt>
+File: images/grap16.1.png Graphic file (type png)
+<use images/grap16.1.png>
+Package pdftex.def Info: images/grap16.1.png  used on input line 707.
+(pdftex.def)             Requested size: 162.18279pt x 122.96921pt.
+<images/grap17.png, id=317, 566.3559pt x 427.8384pt>
+File: images/grap17.png Graphic file (type png)
+<use images/grap17.png>
+Package pdftex.def Info: images/grap17.png  used on input line 713.
+(pdftex.def)             Requested size: 162.18279pt x 122.51622pt.
+<images/grap17.1.png, id=318, 563.706pt x 427.5975pt>
+File: images/grap17.1.png Graphic file (type png)
+<use images/grap17.1.png>
+Package pdftex.def Info: images/grap17.1.png  used on input line 720.
+(pdftex.def)             Requested size: 162.18279pt x 123.02141pt.
+<images/grap18.png, id=319, 566.3559pt x 427.8384pt>
+File: images/grap18.png Graphic file (type png)
+<use images/grap18.png>
+Package pdftex.def Info: images/grap18.png  used on input line 726.
+(pdftex.def)             Requested size: 162.18279pt x 122.51622pt.
+<images/grap18.1.png, id=320, 563.706pt x 427.8384pt>
+File: images/grap18.1.png Graphic file (type png)
+<use images/grap18.1.png>
+Package pdftex.def Info: images/grap18.1.png  used on input line 733.
+(pdftex.def)             Requested size: 162.18279pt x 123.09071pt.
+<images/grap19.png, id=321, 566.3559pt x 427.8384pt>
+File: images/grap19.png Graphic file (type png)
+<use images/grap19.png>
+Package pdftex.def Info: images/grap19.png  used on input line 739.
+(pdftex.def)             Requested size: 162.18279pt x 122.51622pt.
+<images/grap19.1.png, id=322, 563.706pt x 427.8384pt>
+File: images/grap19.1.png Graphic file (type png)
+<use images/grap19.1.png>
+Package pdftex.def Info: images/grap19.1.png  used on input line 746.
+(pdftex.def)             Requested size: 162.18279pt x 123.09071pt.
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 13.59999pt, for example:
+(fancyhdr)                \setlength{\headheight}{13.59999pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+
+[13]
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 13.59999pt, for example:
+(fancyhdr)                \setlength{\headheight}{13.59999pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+
+[14 <./images/grap16.png (PNG copy)> <./images/grap16.1.png (PNG copy)> <./images/grap17.png (PNG copy)> <./images/grap17.1.png (PNG copy)> <./images/grap18.png (PNG copy)> <./images/grap18.1.png (PNG copy)> <./images/grap19.png (PNG copy)> <./images/grap19.1.png (PNG copy)>]
+<images/B&W first.png, id=336, 778.22745pt x 341.1144pt>
+File: images/B&W first.png Graphic file (type png)
+<use images/B&W first.png>
+Package pdftex.def Info: images/B&W first.png  used on input line 761.
+(pdftex.def)             Requested size: 426.79135pt x 187.07216pt.
+<images/B&W second.png, id=337, 782.80455pt x 341.1144pt>
+File: images/B&W second.png Graphic file (type png)
+<use images/B&W second.png>
+Package pdftex.def Info: images/B&W second.png  used on input line 768.
+(pdftex.def)             Requested size: 426.79135pt x 185.97911pt.
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 13.59999pt, for example:
+(fancyhdr)                \setlength{\headheight}{13.59999pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+
+[15 <./images/B&W first.png (PNG copy)> <./images/B&W second.png (PNG copy)>] 
 AED: lastpage setting LastPage
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -467,23 +770,23 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller to compensate:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[7] (./hw1.aux)
+[16] (./hw1.aux)
 Package rerunfilecheck Info: File `hw1.out' has not changed.
-(rerunfilecheck)             Checksum: E325A0F16D3468DF7661DDEE1EEFBCDA;3468.
+(rerunfilecheck)             Checksum: 3D7061DDEA4758673AC708CFC4D9FCE7;4820.
  ) 
 Here is how much of TeX's memory you used:
- 10744 strings out of 478287
- 164147 string characters out of 5849288
- 480930 words of memory out of 5000000
- 28727 multiletter control sequences out of 15000+600000
- 478011 words of font info for 60 fonts, out of 8000000 for 9000
+ 12459 strings out of 478287
+ 199995 string characters out of 5849288
+ 517183 words of memory out of 5000000
+ 30367 multiletter control sequences out of 15000+600000
+ 479710 words of font info for 68 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 60i,15n,63p,670b,425s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 60i,15n,63p,739b,541s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-ts1.enc}</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsl10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1095.pfb>
-Output written on hw1.pdf (8 pages, 248548 bytes).
+Output written on hw1.pdf (17 pages, 13595765 bytes).
 PDF statistics:
- 303 PDF objects out of 1000 (max. 8388607)
- 252 compressed objects within 3 object streams
- 68 named destinations out of 1000 (max. 500000)
- 161 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 452 PDF objects out of 1000 (max. 8388607)
+ 351 compressed objects within 4 object streams
+ 91 named destinations out of 1000 (max. 500000)
+ 417 words of extra memory for PDF output out of 10000 (max. 10000000)
 
