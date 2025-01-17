@@ -198,10 +198,18 @@ $\overline{\delta}$ is an operator such that $\overline{\delta}u_i=\psi\delta u_
         r_{1+\frac{1}{2}}^- & \triangleq & \displaystyle\frac{u_{i}-u_{i-1}}{u_{i+1}-u_i}=\frac{\nabla u_{i}}{\nabla u_{i+1}}
     \end{array}\right.
 \end{equation}
-There are many types of limiters. For example, the van Albada limiter:
-\begin{equation}
-    \psi\left(r\right)=\frac{r+r^2}{1+r^2}
-\end{equation}
+There are many types of limiters. For example:
+\begin{itemize}
+    \item van Albada $$\psi\left(r\right)=\frac{r+r^2}{1+r^2}$$
+    \item van Leer $$\psi\left(r\right)=\frac{r+\left|r\right|}{1+r^2}$$
+    \item minmod$(x,y)$ $$\psi\left(r\right)=\left\{\begin{array}{ccccc}
+        x & \mathrm{if} & \left|x\right|<\left|y\right| & \mathrm{and} & xy>0 \\
+        y & \mathrm{if} & \left|x\right|>\left|y\right| & \mathrm{and} & xy>0 \\
+        0 & \mathrm{if} & & & xy<0 
+    \end{array}\right.$$
+    \item Superbee(Roe) $$\psi\left(r\right)=\max\left(0,\min\left(2r,1\right),\min\left(r,2\right)\right)$$
+
+\end{itemize}
 
 \subsubsection{Effect of CFL}
 
@@ -296,7 +304,6 @@ And finally:
     u_i^{n+1}=u_i^n-\frac{\Delta t}{\Delta x}\left(\bar{f}_{i+\frac{1}{2}}^n-\bar{f}_{i-\frac{1}{2}}^n\right)+\mu\frac{\Delta t}{\left(\Delta x\right)^2}\left(u_{i+1}^n-2u_i^n+u_{i-1}^n\right)
 \end{equation}
 
-
 % MY WAY
 
 % As written above for the inviscid Burgers equation (\ref{Roe_first}), Roes scheme is based on the solution of the linear problem:
@@ -338,6 +345,12 @@ And finally:
 %     u_i^{n+1}=u_i^n-\frac{\Delta t}{\Delta x}\left(\bar{f}{i+\frac{1}{2}}^n-\bar{f}{i-\frac{1}{2}}^n\right)
 % \end{equation}
 
+\subsubsection{Effect of Smoothing}
+
+\subsubsection{Effect of Time Step}
+
+\newpage
+
 \subsection{MacCormack Method}
 The original MacCormack method applied to Burgers equaiton results in:
 \begin{equation}
@@ -363,11 +376,17 @@ Where:
 %     \end{array}
 % \end{equation}
 
-\subsubsection{Stability}
-The stability condition for MacCormack's method is:
-\begin{equation}
-    \Delta t\le\frac{\left(\Delta x\right)^2}{\left|u\right|\Delta x+\mu}
-\end{equation}
+% \subsubsection{Stability}
+% The stability condition for MacCormack's method is:
+% \begin{equation}
+%     \Delta t\le\frac{\left(\Delta x\right)^2}{\left|u\right|\Delta x+\mu}
+% \end{equation}
+
+\subsubsection{Effect of Smoothing}
+
+\subsubsection{Effect of Time Step}
+
+\newpage
 
 \subsection{Beam and Warming}
 Beam and Warming inroduced the Delta form and their method is more efficient:
@@ -411,7 +430,7 @@ In order to calculate $\Delta u^n_i$ it is needed to invert matrix as follows:
         0 & 0 & A'_i & B'_i & C'_i & 0 & 0 \\
         0 & \cdots & 0 & \ddots & \ddots & \ddots & 0 \\
         0 & \cdots & \cdots & 0 & A'_{N-1} & B'_{N-1} & C'_{N-1} \\
-        0 & 0 & \cdots & \cdots & 0 & A'_{N+1} &B'_{N+1}
+        0 & 0 & \cdots & \cdots & 0 & A'_{N} &B'_{N}
     \end{pmatrix}
     \begin{pmatrix}
         \Delta u_1^n\\
@@ -419,8 +438,8 @@ In order to calculate $\Delta u^n_i$ it is needed to invert matrix as follows:
         \cdots\\
         \cdots\\
         \cdots\\
-        \Delta u_{N}^n\\
-        \Delta u_{N+1}^n
+        \Delta u_{N-1}^n\\
+        \Delta u_{N}^n
     \end{pmatrix}
     =
     \begin{pmatrix}
@@ -429,13 +448,10 @@ In order to calculate $\Delta u^n_i$ it is needed to invert matrix as follows:
         \cdots\\
         \cdots\\
         \cdots\\
-        D'_{N}\\
-        D'_{N+1}
+        D'_{N-1}\\
+        D'_{N}
     \end{pmatrix}
 \end{equation}
-\begin{itemize}
-    \item $\left(N+1\right)$ because of the ghost cells
-\end{itemize}
 The Beam and Warming method is extremely dispersive and therefore artiricial viscousity must be explicitly added. Beam and Warming used the following artificial viscosity term:
 \begin{equation}
     \begin{matrix}
@@ -443,5 +459,9 @@ The Beam and Warming method is extremely dispersive and therefore artiricial vis
     \end{matrix}
 \end{equation}
 which can be added to the RHS with no change in accuracy
+
+\subsubsection{Effect of Smoothing}
+
+\subsubsection{Effect of Time Step}
 
 \end{document}

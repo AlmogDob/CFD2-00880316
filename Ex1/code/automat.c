@@ -32,54 +32,48 @@ int main()
 
     fprintf(fp, "make build_solver\n");
 
-    char *methods[] = {"Beam_and_Warming", "MacCormack", "Roe_first"};
-    double ws[] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1};
-    double thetas[] = {0.5, 1};
-    double mus[] = {0.25, 0.001};
-    double delta_times[] = {1, 0.5};
+    char *methods[] = {"Roe_second", "Roe_first"};
+    char *limiters[] = {"no_limiter", "van_Albada", "superbee", "van_Leer", "minmod"};
+    double CFLS[] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2};
 
-    for (int index5 = 0; index5 < 3; index5++) {
-        for (int index4 = 0; index4 < 10; index4++) {
-            for (int index3 = 0; index3 < 2; index3++) {
-                for (int index2 = 0; index2 < 2; index2++) {
-                    for (int index1 = 0; index1 < 2; index1++) {
-                        int N = 41;
-                        double u0 = 0;
-                        double u1 = 1;
-                        double x_max = 1;
-                        double x_min = 0;
-                        double delta_x = 1;
-                        double delta_time = delta_times[index1];
-                        double k = -1;
-                        double b = -1;
-                        double c = 0.5;
-                        double mu = mus[index2];
-                        char *method = methods[index5];
-                        char *limiter = 0;
-                        double CFL = 0;
-                        double w = ws[index4];
-                        double theta = thetas[index3];
-                        int iterations = 1e4;
-                        double final_time = 0;
+    for (int index3 = 0; index3 < 12; index3++) {
+        for (int index2 = 0; index2 < 5; index2++) {
+            for (int index1 = 0; index1 < 2; index1++) {
+                int N = 41;
+                double u0 = 1;
+                double u1 = -1;
+                double x_max = 1;
+                double x_min = 0;
+                double delta_x = 0;
+                double delta_time = 0;
+                double k = -1;
+                double b = 1;
+                double c = 0;
+                double mu = 0;
+                char *method = methods[index1];
+                char *limiter = limiters[index2];
+                double CFL = CFLS[index3];
+                double w = 0;
+                double theta = 0;
+                int iterations = 1e4;
+                double final_time = 0;
 
 
-                        strncpy(temp_input, parent_dir, BUFSIZ);
-                        strncat(temp_input, "/input", BUFSIZ/2);
-                        sprintf(temp1, "%d.txt", output_counter++);
-                        strncat(temp_input, temp1, BUFSIZ/2);
-                        create_input_file(temp_input, N, u0, u1, x_max, x_min, delta_x, delta_time, k, b, c, mu, method, limiter, CFL, w, theta, iterations, final_time);
+                strncpy(temp_input, parent_dir, BUFSIZ);
+                strncat(temp_input, "/input", BUFSIZ/2);
+                sprintf(temp1, "%d.txt", output_counter++);
+                strncat(temp_input, temp1, BUFSIZ/2);
+                create_input_file(temp_input, N, u0, u1, x_max, x_min, delta_x, delta_time, k, b, c, mu, method, limiter, CFL, w, theta, iterations, final_time);
 
-                        strncpy(temp_dir, parent_dir, BUFSIZ);
-                        strncat(temp_dir, "/results", BUFSIZ/2);
-                        
-                        print_command_to_file(fp,
-                                            "./solver",
-                                            temp_input,
-                                            temp_dir,
-                                            NULL);
+                strncpy(temp_dir, parent_dir, BUFSIZ);
+                strncat(temp_dir, "/results", BUFSIZ/2);
+                
+                print_command_to_file(fp,
+                                    "./solver",
+                                    temp_input,
+                                    temp_dir,
+                                    NULL);
 
-                    }
-                }
             }
         }
     }

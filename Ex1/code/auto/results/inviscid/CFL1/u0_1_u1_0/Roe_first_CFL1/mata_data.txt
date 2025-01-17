@@ -1,0 +1,2 @@
+N, u0, u1, x_max, x_min, delta_x, delta_time, k, b, c, mu, method, limiter, CFL, w, theta, iterations, final_time
+41, 1, 0, 1, 0, 0.025, 0.025, -1, 1, 0, 0, Roe_first, minmod, 1, 0, 0, 10000, 1.79769e+308
