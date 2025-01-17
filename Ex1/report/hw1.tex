@@ -4,6 +4,8 @@
 \usepackage[margin=3cm]{geometry}
 \usepackage[colorlinks=true, linkcolor=black, urlcolor=black, citecolor=black]{hyperref}
 \usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
 \usepackage{float}
 \usepackage{fancyhdr, lastpage}
 \usepackage{xcolor}
@@ -144,7 +146,25 @@ The numerical flux may then be written in the following symmetric form:
 % \end{equation}
 
 \subsubsection{Effect of CFL}
-
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[c]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap1.png}
+        \caption{Regular view}
+        \label{fig:roe_first_inviscid_A}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[c]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap1.1.png}
+        \caption{zoomed}
+        \label{fig:roe_first_inviscid_B}
+    \end{subfigure}
+    \caption{Effect of CFL number on solution - Roe first order - inviscid}
+    \label{fig:roe_first_inviscid}
+\end{figure}
+We can see that for CFL number bigger than 1, the solution becomes non-monotonic. As the CFL number increases, the solution becomes sharper near the wave.
 
 \subsection{Second Order Roe $(u_1 = 0.5)$}
 The first-order accurate Roe method interface flux function will be denoted like this:
@@ -212,10 +232,106 @@ There are many types of limiters. For example:
 \end{itemize}
 
 \subsubsection{Effect of CFL}
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[c]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap2.png}
+        \caption{no limiters}
+        \label{fig:roe_second_no_limiter_A}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[c]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap2.1.png}
+        \caption{no limiters - zoomed}
+        \label{fig:roe_second_no_limiter_B}
+    \end{subfigure}
+    \caption{Effect of CFL number on solution - Roe second order with no limiters}
+    \label{fig:roe_second_no_limiter}
+\end{figure}
+\noindent We can see that when there are no limiters, for CFL number bigger than 0.8, the solution does not converge. As the CFL number increases, the oscillations increase. At low CFL numbers, the oscillations are not pronounced since the time step is really small.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[c]{.35\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap3.png}
+        \caption{van Albada}
+        \label{fig:roe_second_van_Albada_A}
+    \end{subfigure}
+    % \hfill
+    \begin{subfigure}[c]{.35\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap3.1.png}
+        \caption{van Albada - zoomed}
+        \label{fig:roe_second_van_Albada_B}
+    \end{subfigure}
+    \begin{subfigure}[c]{.35\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap4.png}
+        \caption{superbee}
+        \label{fig:roe_second_superbee_A}
+    \end{subfigure}
+    % \hfill
+    \begin{subfigure}[c]{.35\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap4.1.png}
+        \caption{superbee - zoomed}
+        \label{fig:roe_second_superbee_B}
+    \end{subfigure}
+    \begin{subfigure}[c]{.35\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap5.png}
+        \caption{van Leer}
+        \label{fig:roe_second_van_Leer_A}
+    \end{subfigure}
+    % \hfill
+    \begin{subfigure}[c]{.35\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap5.1.png}
+        \caption{van Leer - zoomed}
+        \label{fig:roe_second_van_Leer_B}
+    \end{subfigure}
+    \begin{subfigure}[c]{.35\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap6.png}
+        \caption{minmod}
+        \label{fig:roe_second_minmod_A}
+    \end{subfigure}
+    % \hfill
+    \begin{subfigure}[c]{.35\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap6.1.png}
+        \caption{minmod - zoomed}
+        \label{fig:roe_second_minmod_B}
+    \end{subfigure}
+    \caption{Effect of CFL number on solution - Roe second order with different limiters}
+    \label{fig:roe_second_with_limiters}
+\end{figure}
+\noindent We can see that when there are limiters, for a CFL number bigger than 0.8, there are oscillations far from the wavefront, but unlike the case with no limiters, the solution does converge. At low CFL numbers, the oscillations are not pronounced since the time step is really small, except for the van Leer limiter, at which the oscillations are never negligible. The oscillations starts the closest to the wavefron when using the van Leer limiter. 
 
 \subsubsection{Effect of Limiter}
-
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[c]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap7.png}
+        \caption{difference limiters}
+        \label{fig:roe_second_diff_limiters_A}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[c]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap7.1.png}
+        \caption{difference limiters - zoomed}
+        \label{fig:roe_second_diff_limiters_B}
+    \end{subfigure}
+    \caption{Effect of limiters on solution}
+    \label{fig:roe_second_difference_limiters}
+\end{figure}
+We can that the addition of a limiter dampens the oscillations and makes the scheme converge for larger CFL numbers. With Figure \ref{fig:roe_second_difference_limiters} it is clear that most limiters keep the wavefront linear except for the van Leer limiter, which only dampens the oscillations at the wavefront.
 \newpage
+
 \section{Generalized Burgers Equation}
 The generalized Burgers equation is given by:
 \begin{equation}
@@ -345,11 +461,39 @@ And finally:
 %     u_i^{n+1}=u_i^n-\frac{\Delta t}{\Delta x}\left(\bar{f}{i+\frac{1}{2}}^n-\bar{f}{i-\frac{1}{2}}^n\right)
 % \end{equation}
 
-\subsubsection{Effect of Smoothing}
-
 \subsubsection{Effect of Time Step}
-
-\newpage
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[c]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap8.png}
+        \caption{roe first $\mu=0.25$ difference limiters}
+        \label{fig:roe_first_general_mu0.25_A}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[c]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap8.1.png}
+        \caption{roe first $\mu=0.25$ difference limiters - zoomed}
+        \label{fig:roe_first_general_mu0.25_B}
+    \end{subfigure}
+    \begin{subfigure}[c]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap9.png}
+        \caption{roe first $\mu=0.001$ difference limiters}
+        \label{fig:roe_first_general_mu0.001_A}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[c]{.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap9.1.png}
+        \caption{roe first $\mu=0.001$ difference limiters - zoomed}
+        \label{fig:roe_first_general_mu0.001_B}
+    \end{subfigure}
+    \caption{Effect of time step on solution - Roe first order - generalized}
+        \label{fig:roe_first_general}
+\end{figure}
+We can see that in the case of Roe's first order, there is no effect of the time step on the solution with no connection to the viscosity $\left(\mu\right)$. The wave is indeed diffused like expected since this is a first-order method and they are diffusives. 
 
 \subsection{MacCormack Method}
 The original MacCormack method applied to Burgers equaiton results in:
@@ -381,11 +525,39 @@ Where:
 % \begin{equation}
 %     \Delta t\le\frac{\left(\Delta x\right)^2}{\left|u\right|\Delta x+\mu}
 % \end{equation}
-
-\subsubsection{Effect of Smoothing}
-
 \subsubsection{Effect of Time Step}
-
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[c]{.39\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap10.png}
+        \caption{MacCormack $\mu=0.25$}
+        \label{fig:MacCormack_general_mu0.25_A}
+    \end{subfigure}
+    % \hfill
+    \begin{subfigure}[c]{.39\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap10.1.png}
+        \caption{MacCormack $\mu=0.25$ - zoomed}
+        \label{fig:MacCormack_general_mu0.25_B}
+    \end{subfigure}
+    \begin{subfigure}[c]{.39\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap11.png}
+        \caption{MacCormack $\mu=0.001$}
+        \label{fig:MacCormack_general_mu0.001_A}
+    \end{subfigure}
+    % \hfill
+    \begin{subfigure}[c]{.39\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap11.1.png}
+        \caption{MacCormack $\mu=0.001$ - zoomed}
+        \label{fig:MacCormack_general_mu0.001_B}
+    \end{subfigure}
+    \caption{Effect of time step on solution - MacCormack}
+        \label{fig:MacCormack_general}
+\end{figure}
+We can see that when the viscosity is significant, the time step has near to no effect on the solution. When the viscosity is negligible, the time step has a significant effect on the solution, and as the time step increases the oscillations decrease and the solution dampens.
 \newpage
 
 \subsection{Beam and Warming}
@@ -452,16 +624,159 @@ In order to calculate $\Delta u^n_i$ it is needed to invert matrix as follows:
         D'_{N}
     \end{pmatrix}
 \end{equation}
-The Beam and Warming method is extremely dispersive and therefore artiricial viscousity must be explicitly added. Beam and Warming used the following artificial viscosity term:
+The Beam and Warming method is extremely dispersive and therefore artiricial viscosity must be explicitly added. Beam and Warming used the following artificial viscosity term:
 \begin{equation}
     \begin{matrix}
         \displaystyle-\frac{w}{8}\left(u^n_{i+2}-4u^n_{i+1}+6u^n_i-4u^n_{i-1}+u^n_{i-2}\right) && 0<w\le1
     \end{matrix}
 \end{equation}
-which can be added to the RHS with no change in accuracy
+which can be added to the RHS with no change in accuracy.
+\subsubsection{Effect of Time Step}
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[c]{.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap12.png}
+        \caption{Beam $\&$ Warming $\mu=0.25,\ \theta=1$}
+        \label{fig:Beam & Warming_general_mu0.25_theta1_A_diff_time}
+    \end{subfigure}
+    % \hfill
+    \begin{subfigure}[c]{.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap12.1.png}
+        \caption{Beam $\&$ Warming $\mu=0.25,\ \theta=1$ - zoomed}
+        \label{fig:Beam & Warming_general_mu0.25_theta1_B_diff_time}
+    \end{subfigure}
+    \begin{subfigure}[c]{.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap13.png}
+        \caption{Beam $\&$ Warming $\mu=0.001,\ \theta=1$}
+        \label{fig:Beam & Warming_general_mu0.001_theta1_A_diff_time}
+    \end{subfigure}
+    % \hfill
+    \begin{subfigure}[c]{.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap13.1.png}
+        \caption{Beam $\&$ Warming $\mu=0.001,\ \theta=1$ - zoomed}
+        \label{fig:Beam_&_Warming_general_mu0.001_theta1_B_diff_time}
+    \end{subfigure}
+    \begin{subfigure}[c]{.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap14.png}
+        \caption{Beam $\&$ Warming $\mu=0.25,\ \theta=0.5$}
+        \label{fig:Beam & Warming_general_mu0.25_theta0.5_A_diff_time}
+    \end{subfigure}
+    % \hfill
+    \begin{subfigure}[c]{.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap14.1.png}
+        \caption{Beam $\&$ Warming $\mu=0.25,\ \theta=0.5$ - zoomed}
+        \label{fig:Beam & Warming_general_mu0.25_theta0.5_B_diff_time}
+    \end{subfigure}
+    \begin{subfigure}[c]{.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap15.png}
+        \caption{Beam $\&$ Warming $\mu=0.001,\ \theta=0.5$}
+        \label{fig:Beam & Warming_general_mu0.001_theta0.5_A_diff_time}
+    \end{subfigure}
+    % \hfill
+    \begin{subfigure}[c]{.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap15.1.png}
+        \caption{Beam $\&$ Warming $\mu=0.001,\ \theta=0.5$ - zoomed}
+        \label{fig:Beam_&_Warming_general_mu0.001_theta0.5_B_diff_time}
+    \end{subfigure}
+    \caption{Effect of time step on solution - Beam $\&$ Warming}
+        \label{fig:Beam_&_Warming_general_diff_time}
+\end{figure}
+We can see that when the viscosity is significant, the time step has near to no effect on the solution. When the viscosity is negligible, the time step has an effect on the solution, but unlike at the MacCormack method as the time step increases the oscillations does not decrease. It is visible that there is no visible difference between first order $\left(\theta=1\right)$ and second order $\left(\theta=0.5\right)$.
 
 \subsubsection{Effect of Smoothing}
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[c]{.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap16.png}
+        \caption{Beam $\&$ Warming $\mu=0.001,\ \theta=1$}
+        \label{fig:Beam & Warming_general_mu0.001_theta1_A_diff_w}
+    \end{subfigure}
+    % \hfill
+    \begin{subfigure}[c]{.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap16.1.png}
+        \caption{Beam $\&$ Warming $\mu=0.001,\ \theta=1$ - zoomed}
+        \label{fig:Beam & Warming_general_mu0.001_theta1_B_diff_w}
+    \end{subfigure}
+    \begin{subfigure}[c]{.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap17.png}
+        \caption{Beam $\&$ Warming $\mu=0.001,\ \theta=0.5$}
+        \label{fig:Beam & Warming_general_mu0.001_theta0.5_A_diff_w}
+    \end{subfigure}
+    % \hfill
+    \begin{subfigure}[c]{.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap17.1.png}
+        \caption{Beam $\&$ Warming $\mu=0.001,\ \theta=0.5$ - zoomed}
+        \label{fig:Beam_&_Warming_general_mu0.001_theta0.5_B_diff_w}
+    \end{subfigure}
+    \begin{subfigure}[c]{.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap18.png}
+        \caption{Beam $\&$ Warming $\mu=0.25,\ \theta=0.5$}
+        \label{fig:Beam & Warming_general_mu0.25_theta1_A_diff_w}
+    \end{subfigure}
+    % \hfill
+    \begin{subfigure}[c]{.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap18.1.png}
+        \caption{Beam $\&$ Warming $\mu=0.25,\ \theta=0.5$ - zoomed}
+        \label{fig:Beam & Warming_general_mu0.25_theta1_B_diff_w}
+    \end{subfigure}
+    \begin{subfigure}[c]{.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap19.png}
+        \caption{Beam $\&$ Warming $\mu=0.25,\ \theta=0.5$}
+        \label{fig:Beam & Warming_general_mu0.25_theta0.5_A_diff_w}
+    \end{subfigure}
+    % \hfill
+    \begin{subfigure}[c]{.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/grap19.1.png}
+        \caption{Beam $\&$ Warming $\mu=0.25,\ \theta=0.5$ - zoomed}
+        \label{fig:Beam_&_Warming_general_mu0.25_theta0.5_B_diff_w}
+    \end{subfigure}
+    \caption{Effect of smoothing on solution - Beam $\&$ Warming}
+        \label{fig:Beam_&_Warming_general_diff_w}
+\end{figure}
+We can see that the smoothing has a visible effect on the solution espeticaly significant when the viscosity is negligible. From Figure \ref{fig:Beam_&_Warming_general_diff_w} we can assume that the B$\&$W method needs smoothing in order to converge on a solution. When the viscosity $\left(\mu\right)$ and the artificial viscosity $\left(w\right)$ are negligible, the oscillations are significantly large but when only the artificial viscosity is zero, there are near to no oscillations. And again, it is visible that there is no visible difference between first order $\left(\theta=1\right)$ and second order $\left(\theta=0.5\right)$.
 
-\subsubsection{Effect of Time Step}
+\subsubsection{Difference Between First and Second Order}
+From the figures above (\ref{fig:Beam_&_Warming_general_diff_time} and \ref{fig:Beam_&_Warming_general_diff_w}) one might assume that there is no difference between B$\&$W first and second order. However, this assumption is obviously inaccurate at best and the next figure will show it.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[c]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/B&W first.png}
+        \caption{Beam and Warming first order}
+        \label{fig:B&W_1vs2_A}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[c]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/B&W second.png}
+        \caption{Beam and Warming second order}
+        \label{fig:B&W_1vs2_B}
+    \end{subfigure}
+    \caption{Difference between B$\&$W first and second order}
+        \label{fig:B&W_1vs2}
+\end{figure}
+\noindent We can see that indeed there is a difference between first and second order. First order takes less iteration to converge but the residual of the second order is smaller.
+
+\section{Conclusions}
+\subsection{Inviscid Burgers Equation}
+
+\subsection{Generalized Burgers Equation}
+
 
 \end{document}

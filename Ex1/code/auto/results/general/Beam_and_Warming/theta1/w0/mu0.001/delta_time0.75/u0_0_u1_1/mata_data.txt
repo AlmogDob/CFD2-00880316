@@ -1,0 +1,2 @@
+N, u0, u1, x_max, x_min, delta_x, delta_time, k, b, c, mu, method, limiter, CFL, w, theta, iterations, final_time
+41, 0, 1, 40, 0, 1, 0.75, -1, -1, 0.5, 0.001, Beam_and_Warming, no_limiter, 0, 0, 1, 10000, 1.79769e+308
