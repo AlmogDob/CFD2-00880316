@@ -2,10 +2,10 @@ N
 41
 
 u0
-1
+0
 
 u1
--1
+1
 
 x_max
 1
@@ -14,37 +14,37 @@ x_min
 0
 
 delta_x
-0
+1
 
 delta_time
-0
+0.75
 
 k
 -1
 
 b
-1
+-1
 
 c
-0
-
-mu
-0
-
-method
-Roe_first
-
-limiter
-minmod
-
-CFL
 0.5
 
-w
+mu
+0.25
+
+method
+Beam_and_Warming
+
+limiter
+(null)
+
+CFL
 0
 
+w
+0.5
+
 theta
-0
+0.5
 
 iterations
 10000
