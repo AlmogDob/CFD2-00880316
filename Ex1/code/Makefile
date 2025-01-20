@@ -1,8 +1,10 @@
+CFLAGS = -Wall -Wextra -lm -fsanitize=address
+
 solver: build_solver run_solver clean_solver  
 	@echo solver done
 
 build_solver: solver.c
-	@gcc -Wall -Wextra ./solver.c -lm -o solver
+	@gcc ./solver.c $(CFLAGS) -o solver
 
 run_solver:
 	@echo
@@ -13,13 +15,19 @@ clean_solver:
 	rm solver
 
 debug_build_solver: solver.c
-	@gcc -Wall -g -Wextra ./solver.c -lm -o solver
+	@gcc ./solver.c $(CFLAGS) -g -o solver
 
 ##########################################################
-automat: create_and_run_automat 
+automat: build_automat run_automat clean_automat  
 	@echo automat done
 
-create_and_run_automat:
-	gcc -Wall -Wextra ./automat.c -lm -o automat
-	./automat
+build_automat: automat.c
+	@gcc ./automat.c $(CFLAGS) -o automat
+
+run_automat:
+	@echo
+	@./automat $(IN_FILE) $(OUT_DIR) 
+
+clean_automat:
+	@echo
 	rm automat
