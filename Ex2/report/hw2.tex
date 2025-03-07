@@ -113,9 +113,22 @@ On each side of the tube there is an adiabatic, soild wall boundary conditions.
 
 \section{The Numerical Shemes}
 
-\newpage
-a
-\newpage
-b
+
+\subsection{Boundary Conditions}
+In order to set the boundary conditions on the edge faces we will define ghost cells that will be calculated like so:
+\begin{equation}
+    \begin{array}{lcl}
+        u_{\left(i=0\right)} &=& -u_{\left(i=1\right)} \\
+        u_{\left(i=N+1\right)} &=& -u_{\left(i=N\right)}
+    \end{array}
+\end{equation}
+in order to mentain velocity zero on the boundary and like so:
+\begin{equation}
+    \begin{array}{lcl}
+        T_{\left(i=0\right)} &=& T_{\left(i=1\right)} \\
+        T_{\left(i=N+1\right)} &=& T_{\left(i=N\right)}
+    \end{array}
+\end{equation}
+in order to mentain adiabatic boundary conditions.
 
 \end{document}

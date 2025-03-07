@@ -14,7 +14,6 @@ clean_solver:
 	@echo
 	rm solver
 
-
 sanitize_solver: build_solver run_solver clean_solver
 	@echo sanitized solver done
 
@@ -33,8 +32,23 @@ build_automat: automat.c
 
 run_automat:
 	@echo
-	@./automat $(IN_FILE) $(OUT_DIR) 
+	@./automat
 
 clean_automat:
 	@echo
 	rm automat
+
+##########################################################
+temp: build_temp run_temp clean_temp  
+	@echo temp done
+
+build_temp: temp.c
+	@gcc ./temp.c $(CFLAGS) -o temp
+
+run_temp:
+	@echo
+	@./temp
+
+clean_temp:
+	@echo
+	rm temp
