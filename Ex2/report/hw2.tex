@@ -80,6 +80,7 @@ Where:
             \displaystyle\mu=1.458\cdot10^{-6}\frac{T^{\frac{3}{2}}}{T+110.4}, & \displaystyle\mu=2.495\cdot10^{-3}\frac{T^{\frac{3}{2}}}{T+194}
         \end{matrix}
     \end{array}
+    \label{eq: definitions}
 \end{equation}
 \nomenclature{$\rho$}{fluid density}
 \nomenclature{$u$}{fluid velocity}
@@ -103,16 +104,36 @@ The physical domain is a tube extended between $x=0.2$ and $x=1.0$. At both ends
 The initial conditions are showen in Fig.\ref{fig: initial conditions}:
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{images/Initial Conditions.png}
+    \includegraphics[width=0.4\textwidth]{images/Initial Conditions.png}
     \caption{Initial conditions}
     \label{fig: initial conditions}
 \end{figure}
 
 \subsection{Boundary Conditions}
 On each side of the tube there is an adiabatic, soild wall boundary conditions. 
+\begin{table}[H]
+    \centering
+    \begin{tabular}{cc||ccc||cc}
+        $u_{\left(x=0.2\right)}=u_{\left(x=1.0\right)}=0$ &&& $\displaystyle\left.\frac{\partial p}{\partial x}\right|_{x=0.2}=\left.\frac{\partial p}{\partial x}\right|_{x=1.0}=0$ &&& $\displaystyle\left.\frac{\partial T}{\partial x}\right|_{x=0.2}=\left.\frac{\partial T}{\partial x}\right|_{x=1.0}=0$
+    \end{tabular}
+\end{table}
 
-\section{The Numerical Shemes}
+\section{The Computational Domain}
 
+\subsection{Discretization}
+The physical domain $\left[x_I,x_F\right]$ is discretizes into N equispaced cells. The size of each cell is there for:
+\begin{equation}
+    \Delta x=\frac{x_F-x_I}{N}
+\end{equation}
+\nomenclature{$x_F$}{x coordinate of the end of the domain}
+\nomenclature{$\Delta x$}{size of each cell in the domain}
+so the x coordinate of the i-th cell $x_i$ is:
+\begin{equation}
+    \begin{matrix}
+        \displaystyle x_i=x_I+\frac{1}{2}\Delta x+\Delta x\cdot\left(i-1\right) && \text{when starting from $i=1$}
+    \end{matrix}
+\end{equation}
+\nomenclature{$x_i$}{x coordinate of the i-th cell}
 
 \subsection{Boundary Conditions}
 In order to set the boundary conditions on the edge faces we will define ghost cells that will be calculated like so:
@@ -121,6 +142,7 @@ In order to set the boundary conditions on the edge faces we will define ghost c
         u_{\left(i=0\right)} &=& -u_{\left(i=1\right)} \\
         u_{\left(i=N+1\right)} &=& -u_{\left(i=N\right)}
     \end{array}
+    \label{eq: velocity boundary}
 \end{equation}
 in order to mentain velocity zero on the boundary and like so:
 \begin{equation}
@@ -128,7 +150,36 @@ in order to mentain velocity zero on the boundary and like so:
         T_{\left(i=0\right)} &=& T_{\left(i=1\right)} \\
         T_{\left(i=N+1\right)} &=& T_{\left(i=N\right)}
     \end{array}
+    \label{eq: temp boundary}
 \end{equation}
 in order to mentain adiabatic boundary conditions.
+Since the gradient of the pressure on the wall is zero, we get:
+\begin{equation}
+    \begin{array}{lcl}
+        p_{\left(i=0\right)} &=& p_{\left(i=1\right)} \\
+        p_{\left(i=N+1\right)} &=& p_{\left(i=N\right)}
+    \end{array}
+    \label{eq: pressure boundary}
+\end{equation}
+From equations \ref{eq: definitions}, \ref{eq: temp boundary}, and \ref{eq: pressure boundary} we can conclude:
+\begin{equation}
+    \begin{array}{lcl}
+        \rho_{\left(i=0\right)} &=& \rho_{\left(i=1\right)} \\
+        \rho_{\left(i=N+1\right)} &=& \rho_{\left(i=N\right)}
+    \end{array}
+    \label{eq: density boundary}
+\end{equation}
+and from equations \ref{eq: definitions}, \ref{eq: velocity boundary}, \ref{eq: pressure boundary}, and \ref{eq: density boundary} we can conclude:
+\begin{equation}
+    \begin{array}{lcl}
+        e_{\left(i=0\right)} &=& e_{\left(i=1\right)} \\
+        e_{\left(i=N+1\right)} &=& e_{\left(i=N\right)}
+    \end{array}
+    \label{eq: energy boundary}
+\end{equation}
+
+\section{The Numerical Schemes}
+
+
 
 \end{document}
