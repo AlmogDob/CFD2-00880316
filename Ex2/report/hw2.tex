@@ -118,15 +118,31 @@ On each side of the tube there is an adiabatic, soild wall boundary conditions.
     \end{tabular}
 \end{table}
 
-\section{The Computational Domain}
+\section{Normalizing The Navier-Stokes Equations}
+Since the initial conditions are normalized, there is a need to normalize the N-S equations. We will use the following normalizations:
+\begin{equation}
+    \begin{matrix}
+        \rho=\rho_\infty\tilde{\rho}, & u=a_\infty\tilde{u}, & p=\gamma p_\infty\tilde{p}, & T=\gamma T_\infty\tilde{T}, & x=L\tilde{x}, & t=\frac{L}{a_\infty}\tilde{t}, & \mu=\mu_\infty\tilde{\mu}, & \kappa=\kappa_\infty\tilde{\kappa}
+    \end{matrix}
+\end{equation}
+The normalization of the temperature was choosen to cancel out the $\gamma$ in the normalization of the pressure:
+\begin{equation}
+    \begin{array}{lcl}
+        p & = & \rho RT \\
+        \gamma p_\infty\tilde{p} & = & \rho_\infty\tilde{\rho}R\gamma T_\infty\tilde{T} \\
+        \tilde{p} & = & \tilde{\rho}\tilde{T}
+    \end{array}
+\end{equation}
 
+\section{The Computational Domain}
 \subsection{Discretization}
 The physical domain $\left[x_I,x_F\right]$ is discretizes into N equispaced cells. The size of each cell is there for:
 \begin{equation}
-    \Delta x=\frac{x_F-x_I}{N}
+    \Delta x=\frac{x_F-x_I}{N}=\frac{L}{N}
 \end{equation}
 \nomenclature{$x_F$}{x coordinate of the end of the domain}
 \nomenclature{$\Delta x$}{size of each cell in the domain}
+\nomenclature{$L$}{characteristic length}
 so the x coordinate of the i-th cell $x_i$ is:
 \begin{equation}
     \begin{matrix}
@@ -177,9 +193,14 @@ and from equations \ref{eq: definitions}, \ref{eq: velocity boundary}, \ref{eq: 
     \end{array}
     \label{eq: energy boundary}
 \end{equation}
+\newpage
 
 \section{The Numerical Schemes}
 
+\subsection{First Order Approximate Riemann Roe Method}
 
+\subsection{First Order Steger-Warming -- Explicit}
+
+\subsection{First Order Steger-Warming -- Implicit}
 
 \end{document}
