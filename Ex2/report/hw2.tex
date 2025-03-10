@@ -24,7 +24,8 @@
 \newcommand{\parder}[2]{\frac{\partial {#1}}{\partial {#2}}}
 \renewcommand\nomgroup[1]{%
   \item[\bfseries
-  \ifstrequal{#1}{F}{Far--Away Properties}
+  \ifstrequal{#1}{F}{Far--Away Properties}{%
+  \ifstrempty{#1}{N}{Dimensionless Numbers}}
 ]}
 
 \title{Computational Fluid Dynamics \\ HW2}
@@ -75,8 +76,12 @@ Where:
                 \left(e+p\right)u
             \end{pmatrix}, & E_\nu=\begin{pmatrix}
                 0 \\\\
+                \tau_{xx} \\\\
+                u\tau_{xx}-q_x
+            \end{pmatrix}=\begin{pmatrix}
+                0 \\\\
                 \displaystyle\frac{4}{3}\mu\frac{\partial u}{\partial x} \\\\
-                \displaystyle\frac{4}{3}\mu u\frac{\partial u}{\partial x}-\kappa\frac{\partial T}{\partial x}
+                \displaystyle\frac{4}{3}\mu u\frac{\partial u}{\partial x}+\kappa\frac{\partial T}{\partial x}
             \end{pmatrix}
         \end{matrix} \\\\
         \begin{matrix}
@@ -110,7 +115,7 @@ The constants are:
 The physical domain is a tube extended between $x=0.2$ and $x=1.0$. At both ends there are impermeable walls.
 
 \subsection{Initial Conditions}
-The initial conditions are showen in Fig.\ref{fig: initial conditions}:
+The initial conditions are shown in Fig.\ref{fig: initial conditions}:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{images/Initial Conditions.png}
@@ -119,7 +124,7 @@ The initial conditions are showen in Fig.\ref{fig: initial conditions}:
 \end{figure}
 
 \subsection{Boundary Conditions}
-On each side of the tube there is an adiabatic, soild wall boundary conditions. 
+On each side of the tube there is an adiabatic, solid wall boundary conditions. 
 \begin{table}[H]
     \centering
     \begin{tabular}{cc||ccc||cc}
@@ -128,7 +133,7 @@ On each side of the tube there is an adiabatic, soild wall boundary conditions.
 \end{table}
 
 \section{Normalizing The Navier-Stokes Equations}
-Since the initial conditions are normalized, there is a need to normaliz the N-S equations. We will use the following normalizations:
+Since the initial conditions are normalized, there is a need to normalize the N-S equations. We will use the following normalizations:
 \begin{equation}
     \begin{matrix}
         \rho=\rho_\infty\tilde{\rho}, & u=a_\infty\tilde{u}, & p=\gamma p_\infty\tilde{p}, & T=\gamma T_\infty\tilde{T}, & x=L\tilde{x}, & \displaystyle t=\frac{L}{a_\infty}\tilde{t}, & \mu=\mu_\infty\tilde{\mu}, & \kappa=\kappa_\infty\tilde{\kappa}
@@ -141,7 +146,7 @@ Since the initial conditions are normalized, there is a need to normaliz the N-S
 \nomenclature[F]{$\mu_\infty$}{coefficient of viscosity far away}
 \nomenclature[F]{$\kappa_\infty$}{coefficient of thermal conductivity far away}
 
-\noindent The normalization of the temperature was choosen to cancel out the $\gamma$ in the normalization of the pressure:
+\noindent The normalization of the temperature was chosen to cancel out the $\gamma$ in the normalization of the pressure:
 \begin{equation}
     \begin{array}{lcl}
         p & = & \rho RT \\
@@ -186,7 +191,7 @@ After substituting the normalizations in the N-S equations we get:
     \end{pmatrix}=\parder{}{L\tilde{x}}\begin{pmatrix}
         0 \\\\
         \displaystyle\frac{4}{3}\mu_\infty a_\infty\tilde{\mu} \parder{\tilde{u}}{L\tilde{x}} \\\\
-        \displaystyle\frac{4}{3}\mu_\infty a_\infty^2\tilde{\mu}\tilde{u}\parder{\tilde{u}}{L\tilde{x}}-\frac{\kappa_\infty a_\infty^2}{R}\tilde{\kappa}\parder{\tilde{T}}{L\tilde{x}}
+        \displaystyle\frac{4}{3}\mu_\infty a_\infty^2\tilde{\mu}\tilde{u}\parder{\tilde{u}}{L\tilde{x}}+\frac{\kappa_\infty a_\infty^2}{R}\tilde{\kappa}\parder{\tilde{T}}{L\tilde{x}}
     \end{pmatrix}
 \end{equation}
 Rearranging:
@@ -202,10 +207,10 @@ Rearranging:
     \end{pmatrix}=\frac{\mu_\infty}{L^2}\parder{}{\tilde{x}}\begin{pmatrix}
         0 \\\\
         \displaystyle\frac{4}{3}a_\infty\tilde{\mu} \parder{\tilde{u}}{\tilde{x}} \\\\
-        \displaystyle\frac{4}{3}a_\infty^2\tilde{\mu}\tilde{u}\parder{\tilde{u}}{\tilde{x}}-\frac{\kappa_\infty a_\infty^2}{\mu_\infty R}\tilde{\kappa}\parder{\tilde{T}}{\tilde{x}}
+        \displaystyle\frac{4}{3}a_\infty^2\tilde{\mu}\tilde{u}\parder{\tilde{u}}{\tilde{x}}+\frac{\kappa_\infty a_\infty^2}{\mu_\infty R}\tilde{\kappa}\parder{\tilde{T}}{\tilde{x}}
     \end{pmatrix}
 \end{equation}
-Deviding the second equation by $a_\infty$, the third equation by $a_\infty^2$, and the whole set of equations by $\displaystyle\frac{\rho_\infty a_\infty}{L}$ we get:
+Dividing the second equation by $a_\infty$, the third equation by $a_\infty^2$, and the whole set of equations by $\displaystyle\frac{\rho_\infty a_\infty}{L}$ we get:
 \begin{equation}
     \parder{}{\tilde{t}}\begin{pmatrix}
         \tilde{\rho} \\\\
@@ -218,7 +223,7 @@ Deviding the second equation by $a_\infty$, the third equation by $a_\infty^2$, 
     \end{pmatrix}=\frac{\mu_\infty}{L\rho_\infty a_\infty}\parder{}{\tilde{x}}\begin{pmatrix}
         0 \\\\
         \displaystyle\frac{4}{3}\tilde{\mu} \parder{\tilde{u}}{\tilde{x}} \\\\
-        \displaystyle\frac{4}{3}\tilde{\mu}\tilde{u}\parder{\tilde{u}}{\tilde{x}}-\frac{\kappa_\infty}{\mu_\infty R}\tilde{\kappa}\parder{\tilde{T}}{\tilde{x}}
+        \displaystyle\frac{4}{3}\tilde{\mu}\tilde{u}\parder{\tilde{u}}{\tilde{x}}+\frac{\kappa_\infty}{\mu_\infty R}\tilde{\kappa}\parder{\tilde{T}}{\tilde{x}}
     \end{pmatrix}
 \end{equation}
 The Reynolds number and the mach number far away are defined as:
@@ -232,7 +237,7 @@ The Reynolds number and the mach number far away are defined as:
     \end{array}
 \end{equation}
 \nomenclature[F]{$M_\infty$}{mach number far away}
-\nomenclature[F]{$Re_{L\infty}$}{Reynolds number with respect to L far away}
+\nomenclature[N]{$Re_{L\infty}$}{Reynolds number with respect to L far away}
 The Prandtl number far away is defined as:
 \begin{equation}
     \begin{array}{c}
@@ -241,7 +246,7 @@ The Prandtl number far away is defined as:
         \displaystyle\frac{\kappa_\infty}{\mu_\infty R}=\frac{c_p}{Pr_\infty \left(c_p-c_v\right)}=\frac{\gamma}{Pr_\infty\left(\gamma-1\right)}
     \end{array}
 \end{equation}
-\nomenclature[F]{$Pr_\infty$}{Prandtl number far away}
+\nomenclature[N]{$Pr_\infty$}{Prandtl number far away}
 Substituting into the normalized N-S equations:
 \begin{equation}
     \parder{\tilde{Q}}{\tilde{t}}+\parder{\tilde{E}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{E}_\nu}{\tilde{x}}
@@ -260,14 +265,14 @@ Where:
         \end{pmatrix}, & \tilde{E_\nu}=\begin{pmatrix}
         0 \\\\
         \displaystyle\frac{4}{3}\tilde{\mu} \parder{\tilde{u}}{\tilde{x}} \\\\
-        \displaystyle\frac{4}{3}\tilde{\mu}\tilde{u}\parder{\tilde{u}}{\tilde{x}}-\frac{\gamma}{Pr_\infty\left(\gamma-1\right)}\tilde{\kappa}\parder{\tilde{T}}{\tilde{x}}
+        \displaystyle\frac{4}{3}\tilde{\mu}\tilde{u}\parder{\tilde{u}}{\tilde{x}}+\frac{\gamma}{Pr_\infty\left(\gamma-1\right)}\tilde{\kappa}\parder{\tilde{T}}{\tilde{x}}
         \end{pmatrix}
     \end{matrix}
 \end{equation}
 
 \section{The Computational Domain}
 \subsection{Discretization}
-The physical domain $\left[x_I,x_F\right]$ is discretizes into N equispaced cells. The size of each cell is there for:
+The physical domain $\left[x_I,x_F\right]$ is discretized into N equispaced cells. The size of each cell is there for:
 \begin{equation}
     \Delta x=\frac{x_F-x_I}{N}=\frac{L}{N}
 \end{equation}
@@ -291,7 +296,7 @@ In order to set the boundary conditions on the edge faces we will define ghost c
     \end{array}
     \label{eq: velocity boundary}
 \end{equation}
-in order to mentain velocity zero on the boundary and like so:
+in order to maintain velocity zero on the boundary and like so:
 \begin{equation}
     \begin{array}{lcl}
         T_{\left(i=0\right)} &=& T_{\left(i=1\right)} \\
@@ -299,7 +304,7 @@ in order to mentain velocity zero on the boundary and like so:
     \end{array}
     \label{eq: temp boundary}
 \end{equation}
-in order to mentain adiabatic boundary conditions.
+In order to maintain adiabatic boundary conditions.
 Since the gradient of the pressure on the wall is zero, we get:
 \begin{equation}
     \begin{array}{lcl}
@@ -327,6 +332,14 @@ and from equations \ref{eq: definitions}, \ref{eq: velocity boundary}, \ref{eq: 
 \newpage
 
 \section{The Numerical Schemes}
+The normalized Navier-Stokes equations are:
+\begin{equation}
+    \parder{\tilde{Q}}{\tilde{t}}+\parder{\tilde{E}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
+\end{equation}
+Where:
+\begin{equation*}
+    \tilde{V}_1=\tilde{V}_{1\left(Q,Q_x\right)}=\tilde{E}_\nu
+\end{equation*}
 
 \subsection{First Order Approximate Riemann Roe Method}
 
