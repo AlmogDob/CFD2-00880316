@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.10.14)  10 MAR 2025 13:04
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.10.14)  10 MAR 2025 15:48
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -538,7 +538,7 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 
  [2] (./hw2.nls)
 [3]
-<images/Initial Conditions.png, id=96, 581.59282pt x 439.04025pt>
+<images/Initial Conditions.png, id=113, 581.59282pt x 439.04025pt>
 File: images/Initial Conditions.png Graphic file (type png)
 <use images/Initial Conditions.png>
 Package pdftex.def Info: images/Initial Conditions.png  used on input line 121.
@@ -559,22 +559,92 @@ cate ignored
 <to be read again> 
                    \relax 
 l.214 \begin{equation}
-                       [2]pdfTeX warning (ext4): destination with the same iden
-tifier (name{page.3}) has been already used, duplicate ignored
+                       [2]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 284.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\begingroup' on input line 284.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\partial' on input line 284.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\endgroup' on input line 284.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@@over' on input line 284.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\partial' on input line 284.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 284.
+
+pdfTeX warning (ext4): destination with the same identifier (name{page.3}) has 
+been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.298 \end{equation}
-                     [3] [4] 
+l.294 \end{equation}
+                     [3]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 296.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\begingroup' on input line 296.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\partial' on input line 296.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `subscript' on input line 296.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\endgroup' on input line 296.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@@over' on input line 296.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\partial' on input line 296.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 296.
+
+
+Package fancyhdr Warning: \headheight is too small (18.2pt): 
+(fancyhdr)                Make it at least 20.29866pt, for example:
+(fancyhdr)                \setlength{\headheight}{20.29866pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-2.09866pt}.
+
+[4] 
 AED: lastpage setting LastPage
 [5] (./hw2.aux)
 Package rerunfilecheck Info: File `hw2.out' has not changed.
-(rerunfilecheck)             Checksum: 69E28A582C6E66AB9B00C7F7390C92DE;2383.
+(rerunfilecheck)             Checksum: BC44B8AA41DAB510ABBCE52D35C49AC3;2868.
  ) 
 Here is how much of TeX's memory you used:
- 13670 strings out of 478287
- 219536 string characters out of 5849288
- 583121 words of memory out of 5000000
- 31610 multiletter control sequences out of 15000+600000
+ 13681 strings out of 478287
+ 219681 string characters out of 5849288
+ 583124 words of memory out of 5000000
+ 31613 multiletter control sequences out of 15000+600000
  478643 words of font info for 65 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  110i,17n,106p,326b,356s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -594,10 +664,10 @@ exlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsl10.pfb></usr/share/texlive
 -dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/f
 onts/type1/public/fourier/fourier-orns.pfb></usr/share/texmf/fonts/type1/public
 /cm-super/sfrm1095.pfb>
-Output written on hw2.pdf (8 pages, 477508 bytes).
+Output written on hw2.pdf (8 pages, 487768 bytes).
 PDF statistics:
- 241 PDF objects out of 1000 (max. 8388607)
- 196 compressed objects within 2 object streams
- 45 named destinations out of 1000 (max. 500000)
- 110 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 263 PDF objects out of 1000 (max. 8388607)
+ 217 compressed objects within 3 object streams
+ 53 named destinations out of 1000 (max. 500000)
+ 134 words of extra memory for PDF output out of 10000 (max. 10000000)
 

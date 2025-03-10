@@ -218,7 +218,7 @@ Dividing the second equation by $a_\infty$, the third equation by $a_\infty^2$, 
         \tilde{e}
     \end{pmatrix}+\parder{}{\tilde{x}}\begin{pmatrix}
         \tilde{\rho}\tilde{u} \\\\
-        \tilde{p}+a_\infty\tilde{\rho}\tilde{u}^2 \\\\
+        \tilde{p}+\tilde{\rho}\tilde{u}^2 \\\\
         \left(\tilde{e}+\tilde{p}\right)\tilde{u}
     \end{pmatrix}=\frac{\mu_\infty}{L\rho_\infty a_\infty}\parder{}{\tilde{x}}\begin{pmatrix}
         0 \\\\
@@ -260,7 +260,7 @@ Where:
         \tilde{e}
         \end{pmatrix}, & \tilde{E}=\begin{pmatrix}
         \tilde{\rho}\tilde{u} \\\\
-        \tilde{p}+a_\infty\tilde{\rho}\tilde{u}^2 \\\\
+        \tilde{p}+\tilde{\rho}\tilde{u}^2 \\\\
         \left(\tilde{e}+\tilde{p}\right)\tilde{u}
         \end{pmatrix}, & \tilde{E_\nu}=\begin{pmatrix}
         0 \\\\
@@ -268,6 +268,34 @@ Where:
         \displaystyle\frac{4}{3}\tilde{\mu}\tilde{u}\parder{\tilde{u}}{\tilde{x}}+\frac{\gamma}{Pr_\infty\left(\gamma-1\right)}\tilde{\kappa}\parder{\tilde{T}}{\tilde{x}}
         \end{pmatrix}
     \end{matrix}
+\end{equation}
+The normalized Navier-Stokes equations are:
+\begin{equation}
+    \parder{\tilde{Q}}{\tilde{t}}+\parder{\tilde{E}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
+\end{equation}
+Where:
+\begin{equation*}
+    \tilde{V}_1=\tilde{V}_{1\left(\tilde{Q},\tilde{Q}_x\right)}=\tilde{E}_\nu
+\end{equation*}
+
+\section{Linearizing The Navier-Stokes Equations}
+To linearize the N-S equations we need to estimate the derivatives $\displaystyle\parder{\tilde{E}}{\tilde{x}}$ and $\displaystyle\parder{\tilde{V}_1}{\tilde{x}}$.
+
+\subsection{$\parder{\tilde{E}}{\tilde{x}}$ Estimation}
+\begin{equation}
+    \begin{array}{c}
+        \displaystyle\parder{\tilde{E}}{\tilde{x}}=\underbrace{\parder{\tilde{E}}{\tilde{Q}}}_{\tilde{A}}\parder{\tilde{Q}}{\tilde{x}} \\
+        \tilde{A}=\begin{pmatrix}
+            0 & 1 & 0 \\
+            \displaystyle\frac{\gamma-3}{2}\tilde{u}^2 & \left(3-\gamma\right)\tilde{u} & \gamma-1 \\
+            \displaystyle\left(\gamma-1\right)\tilde{u}^3\frac{\gamma\tilde{e}\tilde{u}}{\tilde{\rho}} & \displaystyle\frac{\gamma\tilde{e}}{\tilde{\rho}}-\frac{3\left(\gamma-1\right)\tilde{u}^2}{2} & \gamma\tilde{u}
+        \end{pmatrix}
+    \end{array}
+\end{equation}
+
+\subsection{$\parder{\tilde{V}_1}{\tilde{x}}$ Estimation}
+\begin{equation}
+    \parder{\tilde{V}_1}{\tilde{x}}=\underbrace{\parder{\tilde{V}_1}{\tilde{Q}}}_P\parder{\tilde{Q}}{\tilde{x}}+\underbrace{\parder{\tilde{V}_1}{\tilde{Q}_x}}_R\parder{\tilde{Q}_x}{\tilde{x}}
 \end{equation}
 
 \section{The Computational Domain}
@@ -332,18 +360,50 @@ and from equations \ref{eq: definitions}, \ref{eq: velocity boundary}, \ref{eq: 
 \newpage
 
 \section{The Numerical Schemes}
-The normalized Navier-Stokes equations are:
+
+
+The linearized Navier-Stokes equations:
 \begin{equation}
-    \parder{\tilde{Q}}{\tilde{t}}+\parder{\tilde{E}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
+    \parder{\tilde{Q}}{\tilde{t}}+\underbrace{\parder{\tilde{E}}{\tilde{Q}}}_{A}\parder{\tilde{Q}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\left(\underbrace{\parder{\tilde{V}_1}{\tilde{Q}}}_P\parder{\tilde{Q}}{\tilde{x}}+\underbrace{\parder{\tilde{V}_1}{\tilde{Q}_x}}_R\parder{\tilde{Q}_x}{\tilde{x}}\right)
 \end{equation}
-Where:
-\begin{equation*}
-    \tilde{V}_1=\tilde{V}_{1\left(Q,Q_x\right)}=\tilde{E}_\nu
-\end{equation*}
 
 \subsection{First Order Approximate Riemann Roe Method}
 
 \subsection{First Order Steger-Warming -- Explicit}
+A is a Diagonalizable matrix and can be written as:
+\begin{equation}
+    \begin{array}{c}
+        A=T\Lambda T^{-1} \\
+        T=\begin{pmatrix}
+            1 & \displaystyle\frac{\tilde{\rho}}{2\tilde{a}} & \displaystyle-\frac{\tilde{\rho}}{2\tilde{a}} \\\\
+            \tilde{u} & \displaystyle\frac{\tilde{\rho}}{2\tilde{a}}\left(\tilde{u}+\tilde{a}\right) & \displaystyle-\frac{\tilde{\rho}}{2\tilde{a}}\left(\tilde{u}-\tilde{a}\right) \\\\
+            \displaystyle\frac{\tilde{u}^2}{2} & \displaystyle\frac{\tilde{\rho}}{2\tilde{a}}\left(\frac{\tilde{u}^2}{2}+\tilde{u}\tilde{a}+\frac{\tilde{a}^2}{\gamma-1}\right) & \displaystyle-\frac{\tilde{\rho}}{2\tilde{a}}\left(\frac{\tilde{u}^2}{2}-\tilde{u}\tilde{a}+\frac{\tilde{a}^2}{\gamma-1}\right)
+        \end{pmatrix} \\\\
+        \Lambda=\begin{pmatrix}
+            \tilde{u} & 0 & 0 \\
+            0 & \tilde{u}+\tilde{a} & 0 \\
+            0 & 0 & \tilde{u}-\tilde{a}
+        \end{pmatrix} \\\\
+        T^{-1}=\begin{pmatrix}
+            \displaystyle1-\frac{\gamma-1}{2}\frac{\tilde{u}^2}{\tilde{a}^2} & \displaystyle\left(\gamma-1\right)\frac{\tilde{u}^2}{\tilde{a}^2} & -\frac{\gamma-1}{\tilde{a}^2} \\\\
+            \displaystyle\frac{1}{\tilde{\rho}\tilde{a}}\left(\left(\gamma-1\right)\tilde{u}^2-\tilde{u}\tilde{a}\right) & \displaystyle\frac{1}{\tilde{\rho}\tilde{a}}\left(\tilde{a}-\left(\gamma-1\right)\tilde{u}\right) & \displaystyle\frac{\gamma-1}{\tilde{\rho}\tilde{a}} \\\\
+            \displaystyle-\frac{1}{\tilde{\rho}\tilde{a}}\left(\left(\gamma-1\right)\tilde{u}^2+\tilde{u}\tilde{a}\right) & \displaystyle\frac{1}{\tilde{\rho}\tilde{a}}\left(\tilde{a}+\left(\gamma-1\right)\tilde{u}\right) & \displaystyle-\frac{\gamma-1}{\tilde{\rho}\tilde{a}}
+        \end{pmatrix}
+    \end{array}
+\end{equation}
+Where:
+\begin{equation*}
+    \tilde{a}=\sqrt{\frac{\gamma\tilde{p}}{\tilde{\rho}}}
+\end{equation*}
+Let the $\Lambda^\pm$ matrix be defined as:
+\begin{equation}
+    \Lambda^\pm=\begin{pmatrix}
+        \displaystyle\frac{\tilde{u}\pm\left|\tilde{u}\right|}{2} & 0 & 0 \\
+        0 & \displaystyle\frac{\tilde{u}+\tilde{a}\pm\left|\tilde{u}+\tilde{a}\right|}{2} & 0 \\
+        0 & 0 & \displaystyle\frac{\tilde{u}-\tilde{a}\pm\left|\tilde{u}-\tilde{a}\right|}{2}
+    \end{pmatrix}
+\end{equation}
+Where the matrix $\Lambda^+$ contains only positive eigenvalues and the matrix $\Lambda^-$ contains only negative eigenvalues.
 
 \subsection{First Order Steger-Warming -- Implicit}
 
