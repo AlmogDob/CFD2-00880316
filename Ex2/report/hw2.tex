@@ -86,7 +86,7 @@ Where:
         \end{matrix} \\\\
         \begin{matrix}
             \displaystyle p=\left(\gamma-1\right)\left(e-\frac{1}{2}\rho u^2\right), & \displaystyle T=\frac{p}{\rho R}, \\\\
-            \displaystyle\mu=1.458\cdot10^{-6}\frac{T^{\frac{3}{2}}}{T+110.4}, & \displaystyle\mu=2.495\cdot10^{-3}\frac{T^{\frac{3}{2}}}{T+194}
+            \displaystyle\mu=1.458\cdot10^{-6}\frac{T^{\frac{3}{2}}}{T+110.4}, & \displaystyle\kappa=2.495\cdot10^{-3}\frac{T^{\frac{3}{2}}}{T+194}
         \end{matrix} \\\\
         \begin{matrix}
             R=c_p-c_v, & \displaystyle\gamma=\frac{c_p}{c_v}
@@ -278,25 +278,33 @@ Where:
     \tilde{V}_1=\tilde{V}_{1\left(\tilde{Q},\tilde{Q}_x\right)}=\tilde{E}_\nu
 \end{equation*}
 
-\section{Linearizing The Navier-Stokes Equations}
-To linearize the N-S equations we need to estimate the derivatives $\displaystyle\parder{\tilde{E}}{\tilde{x}}$ and $\displaystyle\parder{\tilde{V}_1}{\tilde{x}}$.
+% \section{Linearizing The Navier-Stokes Equations In Time}
+% To linearize the N-S equations we need to estimate the derivatives $\displaystyle\parder{\tilde{E}}{\tilde{x}}$ and $\displaystyle\parder{\tilde{V}_1}{\tilde{x}}$.
 
-\subsection{$\parder{\tilde{E}}{\tilde{x}}$ Estimation}
-\begin{equation}
-    \begin{array}{c}
-        \displaystyle\parder{\tilde{E}}{\tilde{x}}=\underbrace{\parder{\tilde{E}}{\tilde{Q}}}_{\tilde{A}}\parder{\tilde{Q}}{\tilde{x}} \\
-        \tilde{A}=\begin{pmatrix}
-            0 & 1 & 0 \\
-            \displaystyle\frac{\gamma-3}{2}\tilde{u}^2 & \left(3-\gamma\right)\tilde{u} & \gamma-1 \\
-            \displaystyle\left(\gamma-1\right)\tilde{u}^3\frac{\gamma\tilde{e}\tilde{u}}{\tilde{\rho}} & \displaystyle\frac{\gamma\tilde{e}}{\tilde{\rho}}-\frac{3\left(\gamma-1\right)\tilde{u}^2}{2} & \gamma\tilde{u}
-        \end{pmatrix}
-    \end{array}
-\end{equation}
+% \subsection{$\parder{\tilde{E}}{\tilde{x}}$ Estimation}
+% \begin{equation}
+%     \begin{array}{c}
+%         \displaystyle\parder{\tilde{E}}{\tilde{x}}=\underbrace{\parder{\tilde{E}}{\tilde{Q}}}_{\tilde{A}}\parder{\tilde{Q}}{\tilde{x}} \\
+%         \tilde{A}=\begin{pmatrix}
+%             0 & 1 & 0 \\
+%             \displaystyle\frac{\gamma-3}{2}\tilde{u}^2 & \left(3-\gamma\right)\tilde{u} & \gamma-1 \\
+%             \displaystyle\left(\gamma-1\right)\tilde{u}^3\frac{\gamma\tilde{e}\tilde{u}}{\tilde{\rho}} & \displaystyle\frac{\gamma\tilde{e}}{\tilde{\rho}}-\frac{3\left(\gamma-1\right)\tilde{u}^2}{2} & \gamma\tilde{u}
+%         \end{pmatrix}
+%     \end{array}
+% \end{equation}
 
-\subsection{$\parder{\tilde{V}_1}{\tilde{x}}$ Estimation}
-\begin{equation}
-    \parder{\tilde{V}_1}{\tilde{x}}=\underbrace{\parder{\tilde{V}_1}{\tilde{Q}}}_P\parder{\tilde{Q}}{\tilde{x}}+\underbrace{\parder{\tilde{V}_1}{\tilde{Q}_x}}_R\parder{\tilde{Q}_x}{\tilde{x}}
-\end{equation}
+% \subsection{$\parder{\tilde{V}_1}{\tilde{x}}$ Estimation}
+% \begin{equation}
+%     \begin{array}{c}
+%         \displaystyle\parder{\tilde{V}_1}{\tilde{x}}=\underbrace{\parder{\tilde{V}_1}{\tilde{Q}}}_P\parder{\tilde{Q}}{\tilde{x}}+\underbrace{\parder{\tilde{V}_1}{\tilde{Q}_x}}_R\parder{\tilde{Q}_x}{\tilde{x}} \\\\
+%         \displaystyle\parder{\tilde{V}_1}{\tilde{x}}=P\parder{\tilde{Q}}{\tilde{x}}+R\parder{\tilde{Q}_x}{\tilde{x}} \\\\
+%     \end{array}
+% \end{equation}
+% \begin{equation}
+%     \begin{array}{c}
+%         \tilde{V}_1=V_{1\left(Q,Q_x\right)}
+%     \end{array}
+% \end{equation}
 
 \section{The Computational Domain}
 \subsection{Discretization}
@@ -357,15 +365,36 @@ and from equations \ref{eq: definitions}, \ref{eq: velocity boundary}, \ref{eq: 
     \end{array}
     \label{eq: energy boundary}
 \end{equation}
-\newpage
 
 \section{The Numerical Schemes}
-
-
-The linearized Navier-Stokes equations:
+\subsection{Linearizing The Navier-Stokes Equations In Time}
 \begin{equation}
-    \parder{\tilde{Q}}{\tilde{t}}+\underbrace{\parder{\tilde{E}}{\tilde{Q}}}_{A}\parder{\tilde{Q}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\left(\underbrace{\parder{\tilde{V}_1}{\tilde{Q}}}_P\parder{\tilde{Q}}{\tilde{x}}+\underbrace{\parder{\tilde{V}_1}{\tilde{Q}_x}}_R\parder{\tilde{Q}_x}{\tilde{x}}\right)
+    \begin{array}{lcl}
+        \displaystyle\frac{\Delta Q}{\Delta t} & = & \displaystyle-\left(\parder{\tilde{E}}{\tilde{x}}-\parder{\tilde{V}_1}{\tilde{x}}\right)^{n+1} \\\\
+        \displaystyle\frac{\Delta Q}{\Delta t} & = & \displaystyle-\left(\underbrace{\parder{\tilde{E}}{\tilde{Q}}}_{\tilde{A}}\parder{\tilde{Q}}{\tilde{x}}-\frac{M_\infty}{Re_{L\infty}}\left(\underbrace{\parder{\tilde{V}_1}{\tilde{Q}}}_{\tilde{P}}\parder{\tilde{Q}}{\tilde{x}}+\underbrace{\parder{\tilde{V}_1}{\tilde{Q}_x}}_{\tilde{R}}\parder{\tilde{Q}_x}{\tilde{x}}\right)\right)^{n+1}
+    \end{array}
 \end{equation}
+Where:
+\begin{equation}
+    \begin{array}{ccl}
+        \tilde{A} & = & \begin{pmatrix}
+            0 & 1 & 0 \\
+            \displaystyle\frac{\gamma-3}{2}\tilde{u}^2 & \left(3-\gamma\right)\tilde{u} & \gamma-1 \\
+            \displaystyle-\frac{\gamma\tilde{e}\tilde{u}}{\tilde{\rho}}-\left(\gamma-1\right)\tilde{u}^3 & \displaystyle\frac{\gamma\tilde{e}}{\tilde{\rho}}-\frac{3\left(\gamma-1\right)\tilde{u}^2}{2} & \gamma\tilde{u}
+        \end{pmatrix} \\\\
+        \tilde{P}-\tilde{R}_x & = & \displaystyle-\frac{1}{\rho}\begin{pmatrix}
+            0 & 0 & 0 \\\\
+            \displaystyle-\tilde{u}\left(\frac{4}{3}\tilde{\mu}\right)_x & \displaystyle\left(\frac{4}{3}\tilde{\mu}\right)_x & 0 \\\\
+            \displaystyle-\tilde{u}^2\left(\frac{4}{3}\tilde{\mu}\right)_x & \displaystyle\tilde{u}\left(\frac{4}{3}\tilde{\mu}\right)_x & 0
+        \end{pmatrix} \\\\
+        \tilde{R} & = & \displaystyle-\frac{1}{\rho}\begin{pmatrix}
+            0 & 0 & 0 \\\\
+            \displaystyle\frac{4}{3}\tilde{u}\tilde{\mu} & \displaystyle-\frac{4}{3}\tilde{\mu} & 0 \\\\
+            \displaystyle\left(\frac{4}{3}\tilde{\mu}-\textcolor{blue}{\alpha}\frac{\tilde{\kappa}}{c_v}\right)\tilde{u}^2+\textcolor{blue}{\alpha}\frac{\tilde{\kappa}}{c_v}\frac{\tilde{e}}{\tilde{\rho}} & \displaystyle-\left(\frac{4}{3}\tilde{\mu}-\textcolor{blue}{\alpha}\frac{\tilde{\kappa}}{c_v}\right)\tilde{u} & \displaystyle-\textcolor{blue}{\alpha}\frac{\tilde{\kappa}}{c_v}
+        \end{pmatrix}
+    \end{array}
+\end{equation}
+and $\textcolor{blue}{\alpha}$ is: $$\textcolor{blue}{\alpha=\frac{\gamma}{Pr_\infty\left(\gamma-1\right)}}$$
 
 \subsection{First Order Approximate Riemann Roe Method}
 
@@ -373,18 +402,18 @@ The linearized Navier-Stokes equations:
 A is a Diagonalizable matrix and can be written as:
 \begin{equation}
     \begin{array}{c}
-        A=T\Lambda T^{-1} \\
-        T=\begin{pmatrix}
+        \tilde{A}=\tilde{T}\tilde{\Lambda}\tilde{T}^{-1} \\
+        \tilde{T}=\begin{pmatrix}
             1 & \displaystyle\frac{\tilde{\rho}}{2\tilde{a}} & \displaystyle-\frac{\tilde{\rho}}{2\tilde{a}} \\\\
             \tilde{u} & \displaystyle\frac{\tilde{\rho}}{2\tilde{a}}\left(\tilde{u}+\tilde{a}\right) & \displaystyle-\frac{\tilde{\rho}}{2\tilde{a}}\left(\tilde{u}-\tilde{a}\right) \\\\
             \displaystyle\frac{\tilde{u}^2}{2} & \displaystyle\frac{\tilde{\rho}}{2\tilde{a}}\left(\frac{\tilde{u}^2}{2}+\tilde{u}\tilde{a}+\frac{\tilde{a}^2}{\gamma-1}\right) & \displaystyle-\frac{\tilde{\rho}}{2\tilde{a}}\left(\frac{\tilde{u}^2}{2}-\tilde{u}\tilde{a}+\frac{\tilde{a}^2}{\gamma-1}\right)
         \end{pmatrix} \\\\
-        \Lambda=\begin{pmatrix}
+        \tilde{\Lambda}=\begin{pmatrix}
             \tilde{u} & 0 & 0 \\
             0 & \tilde{u}+\tilde{a} & 0 \\
             0 & 0 & \tilde{u}-\tilde{a}
         \end{pmatrix} \\\\
-        T^{-1}=\begin{pmatrix}
+        \tilde{T}^{-1}=\begin{pmatrix}
             \displaystyle1-\frac{\gamma-1}{2}\frac{\tilde{u}^2}{\tilde{a}^2} & \displaystyle\left(\gamma-1\right)\frac{\tilde{u}^2}{\tilde{a}^2} & -\frac{\gamma-1}{\tilde{a}^2} \\\\
             \displaystyle\frac{1}{\tilde{\rho}\tilde{a}}\left(\left(\gamma-1\right)\tilde{u}^2-\tilde{u}\tilde{a}\right) & \displaystyle\frac{1}{\tilde{\rho}\tilde{a}}\left(\tilde{a}-\left(\gamma-1\right)\tilde{u}\right) & \displaystyle\frac{\gamma-1}{\tilde{\rho}\tilde{a}} \\\\
             \displaystyle-\frac{1}{\tilde{\rho}\tilde{a}}\left(\left(\gamma-1\right)\tilde{u}^2+\tilde{u}\tilde{a}\right) & \displaystyle\frac{1}{\tilde{\rho}\tilde{a}}\left(\tilde{a}+\left(\gamma-1\right)\tilde{u}\right) & \displaystyle-\frac{\gamma-1}{\tilde{\rho}\tilde{a}}
@@ -397,13 +426,69 @@ Where:
 \end{equation*}
 Let the $\Lambda^\pm$ matrix be defined as:
 \begin{equation}
-    \Lambda^\pm=\begin{pmatrix}
+    \tilde{\Lambda}^\pm=\begin{pmatrix}
         \displaystyle\frac{\tilde{u}\pm\left|\tilde{u}\right|}{2} & 0 & 0 \\
         0 & \displaystyle\frac{\tilde{u}+\tilde{a}\pm\left|\tilde{u}+\tilde{a}\right|}{2} & 0 \\
         0 & 0 & \displaystyle\frac{\tilde{u}-\tilde{a}\pm\left|\tilde{u}-\tilde{a}\right|}{2}
     \end{pmatrix}
 \end{equation}
-Where the matrix $\Lambda^+$ contains only positive eigenvalues and the matrix $\Lambda^-$ contains only negative eigenvalues.
+Where the matrix $\tilde{\Lambda}^+$ contains only positive eigenvalues and the matrix $\tilde{\Lambda}^-$ contains only negative eigenvalues. \\ Define:
+\begin{equation}
+    \begin{matrix}
+        \begin{array}{ccl}
+            \tilde{A}^+ & \triangleq & \tilde{T}\tilde{\Lambda}^+\tilde{T}^{-1} \\
+            \tilde{A}^- & \triangleq & \tilde{T}\tilde{\Lambda}^-\tilde{T}^{-1}
+        \end{array} & \Rightarrow & \begin{array}{ccl}
+            \tilde{A} & = & \tilde{A}^++\tilde{A}^- \\
+            \left|\tilde{A}\right| & \triangleq & \tilde{A}^+-\tilde{A}^-
+        \end{array}
+    \end{matrix}
+\end{equation}
+Assuming a perfect gas, the flux vector $\tilde{E}_{\left(Q\right)}$ is a homogeneous function of degree one in $\tilde{Q}$, meaning:$$\forall\alpha\ \ \ \ \tilde{E}_{\left(\alpha \tilde{Q}\right)}=\alpha \tilde{E}_{\left(\tilde{Q}\right)}$$The homogeneity allows to rewrite the flux vector $\tilde{E}$ as:
+\begin{equation}
+    \tilde{E}=\tilde{A}\tilde{Q}=\left(\tilde{A}^++\tilde{A}^-\right)\tilde{Q}=\underbrace{\tilde{A}^+\tilde{Q}}_{\tilde{E}^+}+\underbrace{\tilde{A}^-\tilde{Q}}_{\tilde{E}^-}=\tilde{E}^++\tilde{E}^-
+\end{equation} 
+There is a discontinuities and deference between $\tilde{E}^+,\tilde{E}^-$.
+% There is a discontinuities and deference between $\tilde{E}^+,\tilde{E}^-$ for example:
+% \begin{equation}
+%     \begin{matrix}
+%         \tilde{E}^+_1=\left\{\begin{array}{lc}
+%             0 & M\le-1 \\\\
+%             \displaystyle\frac{\tilde{\rho} \tilde{a}}{2\gamma}\left(M+1\right) & -1\le M\le0 \\\\
+%             \displaystyle\frac{\tilde{\rho} \tilde{a}}{2\gamma}\left(\left(2\gamma-1\right)M+1\right) & 0\le M\le1 \\\\
+%             \tilde{E}_1 & 1\le M
+%         \end{array}\right. & \tilde{E}^-_1=\left\{\begin{array}{lc}
+%             \tilde{E}_1 & M\le-1 \\\\
+%             \displaystyle\frac{\tilde{\rho} \tilde{a}}{2\gamma}\left(\left(2\gamma-1\right)M-1\right) & -1\le M\le0 \\\\
+%             \displaystyle\frac{\tilde{\rho} \tilde{a}}{2\gamma}\left(M-1\right) & 0\le M\le1 \\\\
+%             0 & 1\le M
+%         \end{array}\right.
+%     \end{matrix}
+% \end{equation}
+To eliminate the discontinuities and guarantee a smooth transition through critical points (sonic points or stagnation points), a blending function is introduced together with a blending parameter $\varepsilon$. An appropriate choice of the blending parameter has to be chosen.
+\begin{equation}
+    \begin{matrix}
+        \begin{array}{lcl}
+            \tilde{\lambda}^+ & = & \displaystyle\frac{\tilde{\lambda}+\left|\tilde{\lambda}\right|}{2} \\\\
+            \tilde{\lambda}^- & = & \displaystyle\frac{\tilde{\lambda}-\left|\tilde{\lambda}\right|}{2}
+        \end{array} & \Rightarrow & \begin{array}{lcl}
+            \tilde{\lambda}^{+'} & = & \displaystyle\frac{\tilde{\lambda}+\sqrt{\tilde{\lambda}^2+\varepsilon^2}}{2} \\\\
+            \tilde{\lambda}^{-'} & = & \displaystyle\frac{\tilde{\lambda}-\sqrt{\tilde{\lambda}^2+\varepsilon^2}}{2}
+        \end{array}
+    \end{matrix}
+\end{equation}
+Rewriting the conservation law from of the N-S equations:
+\begin{equation}
+    \parder{\tilde{Q}}{\tilde{t}}=-\parder{\tilde{E}^+}{\tilde{x}}-\parder{\tilde{E}^-}{\tilde{x}}+\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
+\end{equation}
+A simple, explicit, first order (in space and time) scheme is obtained using:
+\begin{equation}
+    \Delta\tilde{Q}_i^n=-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\nabla\tilde{E}_i^{+n}+\Delta\tilde{E}_i^{-n}+\frac{M_\infty}{Re_{L\infty}}\colorbox{red}{WTF TO DO?}\right)
+\end{equation}
+And advancing the solution by:
+\begin{equation}
+    \tilde{Q}_i^{n+1}=\Delta\tilde{Q}_i^n+\tilde{Q}_i^n
+\end{equation} 
 
 \subsection{First Order Steger-Warming -- Implicit}
 
