@@ -282,31 +282,6 @@ Where:
 % \section{Linearizing The Navier-Stokes Equations In Time}
 % To linearize the N-S equations we need to estimate the derivatives $\displaystyle\parder{\tilde{E}}{\tilde{x}}$ and $\displaystyle\parder{\tilde{V}_1}{\tilde{x}}$.
 
-% \subsection{$\parder{\tilde{E}}{\tilde{x}}$ Estimation}
-% \begin{equation}
-%     \begin{array}{c}
-%         \displaystyle\parder{\tilde{E}}{\tilde{x}}=\underbrace{\parder{\tilde{E}}{\tilde{Q}}}_{\tilde{A}}\parder{\tilde{Q}}{\tilde{x}} \\
-%         \tilde{A}=\begin{pmatrix}
-%             0 & 1 & 0 \\
-%             \displaystyle\frac{\gamma-3}{2}\tilde{u}^2 & \left(3-\gamma\right)\tilde{u} & \gamma-1 \\
-%             \displaystyle\left(\gamma-1\right)\tilde{u}^3\frac{\gamma\tilde{e}\tilde{u}}{\tilde{\rho}} & \displaystyle\frac{\gamma\tilde{e}}{\tilde{\rho}}-\frac{3\left(\gamma-1\right)\tilde{u}^2}{2} & \gamma\tilde{u}
-%         \end{pmatrix}
-%     \end{array}
-% \end{equation}
-
-% \subsection{$\parder{\tilde{V}_1}{\tilde{x}}$ Estimation}
-% \begin{equation}
-%     \begin{array}{c}
-%         \displaystyle\parder{\tilde{V}_1}{\tilde{x}}=\underbrace{\parder{\tilde{V}_1}{\tilde{Q}}}_P\parder{\tilde{Q}}{\tilde{x}}+\underbrace{\parder{\tilde{V}_1}{\tilde{Q}_x}}_R\parder{\tilde{Q}_x}{\tilde{x}} \\\\
-%         \displaystyle\parder{\tilde{V}_1}{\tilde{x}}=P\parder{\tilde{Q}}{\tilde{x}}+R\parder{\tilde{Q}_x}{\tilde{x}} \\\\
-%     \end{array}
-% \end{equation}
-% \begin{equation}
-%     \begin{array}{c}
-%         \tilde{V}_1=V_{1\left(Q,Q_x\right)}
-%     \end{array}
-% \end{equation}
-
 \section{The Computational Domain}
 \subsection{Discretization}
 The physical domain $\left[x_I,x_F\right]$ is discretized into N equispaced cells. The size of each cell is there for:
@@ -368,7 +343,7 @@ and from equations \ref{eq: definitions}, \ref{eq: velocity boundary}, \ref{eq: 
 \end{equation}
 
 \section{The Numerical Schemes}
-\subsection{Linearizing The Navier-Stokes Equations In Time}
+\subsection{Jacobian Matrices of The Navier-Stokes Equations}
 \begin{equation}
     \begin{array}{lcl}
         \displaystyle\frac{\Delta Q}{\Delta t} & = & \displaystyle-\left(\parder{\tilde{E}}{\tilde{x}}-\parder{\tilde{V}_1}{\tilde{x}}\right)^{n+1} \\\\
@@ -400,6 +375,32 @@ and $\textcolor{blue}{\alpha}$ is: $$\textcolor{blue}{\alpha=\frac{\gamma}{Pr_\i
 \nomenclature[M]{$\tilde{P}$}{normalized jacobian matrix of $E_\nu$ w.r.t. Q}
 \nomenclature[M]{$\tilde{R}$}{normalized jacobian matrix of $E_\nu$ w.r.t. $Q_x$}
 
+\subsection{Linearization In Time}
+\subsubsection{$\tilde{E}_i^{n+1}$ Estimation}
+\begin{equation}
+    \begin{array}{c}
+        \displaystyle\tilde{E}_i^{n+1}=\tilde{E}_i^{n}+\underbrace{\left.\parder{\tilde{E}}{\tilde{Q}}\right|_i^n}_{\displaystyle\tilde{A}_i^n}\Delta\tilde{Q}_i^n+\mathrm{H.O.T} \\\\
+        \displaystyle\tilde{E}_i^{n+1}=\tilde{E}_i^{n}+\tilde{A}_i^n\Delta\tilde{Q}_i^n
+    \end{array}
+\end{equation}
+
+\subsubsection{$\tilde{V_1}_{i}^{n+1}$ Estimation}
+\begin{equation}
+    \begin{array}{c}
+        \displaystyle\tilde{V}_{1,i}^{n+1}=\tilde{V}_{1,i}^{n}+\underbrace{\left.\parder{\tilde{V}_1}{\tilde{Q}}\right|_i^n}_{\displaystyle\tilde{P}_i^n}\Delta\tilde{Q}_i^n+\underbrace{\left.\parder{\tilde{V}_1}{\tilde{Q}_x}\right|_i^n}_{\displaystyle\tilde{R}_i^n}\Delta\tilde{Q_x}_i^n+\mathrm{H.O.T} \\\\
+        \displaystyle\tilde{V}_{1,i}^{n+1}=\tilde{V}_{1,i}^{n}+\tilde{P}_i^n\Delta\tilde{Q}_i^n+\tilde{R}_i^n\Delta\tilde{Q_x}_i^n \\\\
+    \end{array}
+\end{equation}
+The difficulty stems from the fact that the solution vector is $\Delta\tilde{Q}$ and not $\Delta\tilde{Q}_x$. This can be solved by a linearization of the term $\Delta\tilde{Q}_x$ which can be conducted using the following relation:
+\begin{equation*}
+    \parder{\left(\tilde{R}\Delta\tilde{Q}\right)_i^n}{\tilde{x}}=\parder{\tilde{R}_i^n}{\tilde{x}}\Delta\tilde{Q}_i^n+\tilde{R}_i^n\parder{\Delta\tilde{Q}_i^n}{\tilde{x}}=\parder{\tilde{R}}{\tilde{x}}\Delta\tilde{Q}+\tilde{R}_i^n\Delta\tilde{Q_x}_i^n 
+\end{equation*}
+$$\Downarrow$$
+\begin{equation}
+    \displaystyle\tilde{V}_{1,i}^{n+1}=\tilde{V}_{1,i}^{n}+\left(\tilde{P}-\tilde{R_x}\right)_i^n\Delta\tilde{Q}_i^n+\parder{}{\tilde{x}}\left(\tilde{R}\Delta\tilde{Q}\right)_i^n 
+\end{equation}
+
+
 \subsection{First Order Approximate Riemann Roe Method}
 
 \subsection{First Order Steger-Warming -- Explicit}
@@ -424,8 +425,8 @@ A is a Diagonalizable matrix and can be written as:
         \end{pmatrix}
     \end{array}
 \end{equation}
-\nomenclature[M]{$T$}{normalized eigenvectors matrix}
-\nomenclature[M]{$\Lambda$}{normalized eigenvalues matrix}
+\nomenclature[M]{$\tilde{T}$}{normalized eigenvectors matrix}
+\nomenclature[M]{$\tilde{\Lambda}$}{normalized eigenvalues matrix}
 Where:
 \begin{equation*}
     \tilde{a}=\sqrt{\frac{\gamma\tilde{p}}{\tilde{\rho}}}
@@ -452,7 +453,7 @@ Where the matrix $\tilde{\Lambda}^+$ contains only positive eigenvalues and the 
 \end{equation}
 Assuming a perfect gas, the flux vector $\tilde{E}_{\left(Q\right)}$ is a homogeneous function of degree one in $\tilde{Q}$, meaning:$$\forall\alpha\ \ \ \ \tilde{E}_{\left(\alpha \tilde{Q}\right)}=\alpha \tilde{E}_{\left(\tilde{Q}\right)}$$The homogeneity allows to rewrite the flux vector $\tilde{E}$ as:
 \begin{equation}
-    \tilde{E}=\tilde{A}\tilde{Q}=\left(\tilde{A}^++\tilde{A}^-\right)\tilde{Q}=\underbrace{\tilde{A}^+\tilde{Q}}_{\tilde{E}^+}+\underbrace{\tilde{A}^-\tilde{Q}}_{\tilde{E}^-}=\tilde{E}^++\tilde{E}^-
+    \tilde{E}=\tilde{A}\tilde{Q}=\left(\tilde{A}^++\tilde{A}^-\right)\tilde{Q}=\underbrace{\tilde{A}^+\tilde{Q}}_{\displaystyle\tilde{E}^+}+\underbrace{\tilde{A}^-\tilde{Q}}_{\displaystyle\tilde{E}^-}=\tilde{E}^++\tilde{E}^-
 \end{equation} 
 There is a discontinuities and deference between $\tilde{E}^+,\tilde{E}^-$.
 % There is a discontinuities and deference between $\tilde{E}^+,\tilde{E}^-$ for example:
@@ -487,9 +488,9 @@ Rewriting the conservation law from of the N-S equations:
 \begin{equation}
     \parder{\tilde{Q}}{\tilde{t}}=-\parder{\tilde{E}^+}{\tilde{x}}-\parder{\tilde{E}^-}{\tilde{x}}+\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
 \end{equation}
-A simple, explicit, first order (in space and time) scheme is obtained using:
+A simple, explicit, first order (in space and time) scheme in delta from is obtained using:
 \begin{equation}
-    \Delta\tilde{Q}_i^n=-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\nabla\tilde{E}_i^{+n}+\Delta\tilde{E}_i^{-n}+\frac{M_\infty}{Re_{L\infty}}\colorbox{red}{WTF TO DO?}\right)
+    \Delta\tilde{Q}_i^n=-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\nabla\tilde{E}_i^{+n}+\Delta\tilde{E}_i^{-n}-\frac{M_\infty}{Re_{L\infty}}\delta\tilde{V}_{1,i}^{n}\right)
 \end{equation}
 \nomenclature{$\Delta\tilde{t}$}{normalized step size in time}
 \nomenclature{$\Delta\tilde{x}$}{normalized step size in space}
@@ -499,5 +500,25 @@ And advancing the solution by:
 \end{equation} 
 
 \subsection{First Order Steger-Warming -- Implicit}
+The Implicit Steger-Warming scheme starts from:
+\begin{equation}
+    \begin{array}{lcl}
+        \displaystyle\frac{\Delta\tilde{Q}_i^n}{\Delta\tilde{t}} & = & \displaystyle-\parder{\tilde{E}_i^{n+1}}{\tilde{x}}+\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_{1,i}^{n+1}}{\tilde{x}} \\\\
+        \displaystyle\Delta\tilde{Q}_i^n & = & \displaystyle-\Delta\tilde{t}\parder{}{\tilde{x}}\left(\tilde{E}_i^{n}+\tilde{A}_i^n\Delta\tilde{Q}_i^n\right)+\Delta\tilde{t}\frac{M_\infty}{Re_{L\infty}}\parder{}{\tilde{x}}\left(\tilde{V}_{1,i}^{n}+\left(\tilde{P}-\tilde{R_x}\right)_i^n\Delta\tilde{Q}_i^n+\parder{}{\tilde{x}}\left(\tilde{R}\Delta\tilde{Q}\right)_i^n\right)
+    \end{array}
+\end{equation}
+Rearranging in delta form:
+\begin{equation}
+    \begin{array}{c}
+        \displaystyle\left(I+\Delta\tilde{t}\left(\parder{}{\tilde{x}}\left[\tilde{A}-\left(\tilde{P}-\tilde{R_x}\right)\right]_i^n-\frac{\partial^2\tilde{R}_i^n}{\partial\tilde{x}^2}\right)\right)\Delta\tilde{Q}_i^n=\mathrm{RHS}_i^n \\\\
+        \mathrm{RHS}_i^n=\displaystyle-\Delta\tilde{t}\parder{}{\tilde{x}}\left(\tilde{E}^{+}+\tilde{E}^{-}-\frac{M_\infty}{Re_{L\infty}}\tilde{V}_{1}\right)_i^n
+    \end{array}
+\end{equation}
+\begin{equation}
+    \begin{array}{c}
+        \displaystyle\left(I+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\left[\nabla\tilde{A}_i^{+n}+\Delta\tilde{A}_i^{-n}-\delta\left(\tilde{P}-\tilde{R_x}\right)\right]_i^n-\frac{\delta^2}{\Delta\tilde{x}}\tilde{R}_i^n\right)\right)\Delta\tilde{Q}_i^n=\mathrm{RHS}_i^n \\\\
+        \mathrm{RHS}_i^n=\displaystyle-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\nabla\tilde{E}^{+}+\Delta\tilde{E}^{-}-\frac{M_\infty}{Re_{L\infty}}\delta\tilde{V}_{1}\right)_i^n
+    \end{array}
+\end{equation}
 
 \end{document}

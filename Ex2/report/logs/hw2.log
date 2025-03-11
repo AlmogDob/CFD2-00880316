@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.10.14)  11 MAR 2025 02:11
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.10.14)  11 MAR 2025 18:48
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -543,7 +543,7 @@ LaTeX Font Info:    Trying to load font information for U+futs on input line 52
  (/usr/share/texlive/texmf-dist/tex/latex/fourier/ufuts.fd
 File: ufuts.fd 2004/03/02 Fontinst v1.926 font definitions for U/futs.
 ) [4]
-<images/Initial Conditions.png, id=109, 581.59282pt x 439.04025pt>
+<images/Initial Conditions.png, id=125, 581.59282pt x 439.04025pt>
 File: images/Initial Conditions.png Graphic file (type png)
 <use images/Initial Conditions.png>
 Package pdftex.def Info: images/Initial Conditions.png  used on input line 122.
@@ -564,23 +564,61 @@ l.215 \begin{equation}
 tifier (name{page.3}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.335 \end{equation}
+l.310 \end{equation}
                      [3]pdfTeX warning (ext4): destination with the same identi
 fier (name{page.4}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.397 \end{equation}
-                     [4] [5] 
+l.372 \end{equation}
+                     [4]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 379.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `subscript' on input line 379.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `superscript' on input line 379.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 379.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 387.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `subscript' on input line 387.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `superscript' on input line 387.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 387.
+
+[5] [6]
+Overfull \hbox (0.43712pt too wide) detected at line 509
+[][][]
+ []
+
+
 AED: lastpage setting LastPage
-[6] (./hw2.aux)
+[7] (./hw2.aux)
 Package rerunfilecheck Info: File `hw2.out' has not changed.
-(rerunfilecheck)             Checksum: E5E44307DFB3BA560725324472FC538D;2691.
+(rerunfilecheck)             Checksum: 6B6049CC589C5C217B8099128D1E52B0;3157.
  ) 
 Here is how much of TeX's memory you used:
- 13683 strings out of 478287
- 219702 string characters out of 5849288
- 584142 words of memory out of 5000000
- 31611 multiletter control sequences out of 15000+600000
+ 13696 strings out of 478287
+ 219896 string characters out of 5849288
+ 583145 words of memory out of 5000000
+ 31614 multiletter control sequences out of 15000+600000
  478643 words of font info for 65 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  110i,18n,106p,404b,418s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -602,10 +640,10 @@ onts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/ty
 pe1/public/fourier/fourier-orns.pfb></usr/share/texlive/texmf-dist/fonts/type1/
 public/amsfonts/symbols/msam10.pfb></usr/share/texmf/fonts/type1/public/cm-supe
 r/sfrm1095.pfb>
-Output written on hw2.pdf (10 pages, 512191 bytes).
+Output written on hw2.pdf (11 pages, 518044 bytes).
 PDF statistics:
- 278 PDF objects out of 1000 (max. 8388607)
- 226 compressed objects within 3 object streams
- 57 named destinations out of 1000 (max. 500000)
- 118 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 306 PDF objects out of 1000 (max. 8388607)
+ 253 compressed objects within 3 object streams
+ 67 named destinations out of 1000 (max. 500000)
+ 142 words of extra memory for PDF output out of 10000 (max. 10000000)
 
