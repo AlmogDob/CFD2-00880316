@@ -47,11 +47,10 @@
 \listoffigures
 \newpage
 
-\thispagestyle{empty}
+\setcounter{page}{1}
 \printnomenclature
 \newpage
 
-\setcounter{page}{1}
 \section{Problem Definition}
 \subsection{Governing Equations}
 Consider the one-dimensional Navier-Stokes Equations:
@@ -346,8 +345,8 @@ and from equations \ref{eq: definitions}, \ref{eq: velocity boundary}, \ref{eq: 
 \subsection{Jacobian Matrices of The Navier-Stokes Equations}
 \begin{equation}
     \begin{array}{lcl}
-        \displaystyle\frac{\Delta Q}{\Delta t} & = & \displaystyle-\left(\parder{\tilde{E}}{\tilde{x}}-\parder{\tilde{V}_1}{\tilde{x}}\right)^{n+1} \\\\
-        \displaystyle\frac{\Delta Q}{\Delta t} & = & \displaystyle-\left(\underbrace{\parder{\tilde{E}}{\tilde{Q}}}_{\tilde{A}}\parder{\tilde{Q}}{\tilde{x}}-\frac{M_\infty}{Re_{L\infty}}\left(\underbrace{\parder{\tilde{V}_1}{\tilde{Q}}}_{\tilde{P}}\parder{\tilde{Q}}{\tilde{x}}+\underbrace{\parder{\tilde{V}_1}{\tilde{Q}_x}}_{\tilde{R}}\parder{\tilde{Q}_x}{\tilde{x}}\right)\right)^{n+1}
+        \displaystyle\parder{\tilde{Q}}{\tilde{t}} & = & \displaystyle-\parder{\tilde{E}}{\tilde{x}}-\parder{\tilde{V}_1}{\tilde{x}} \\\\
+        \displaystyle\parder{\tilde{Q}}{\tilde{t}} & = & \displaystyle-\underbrace{\parder{\tilde{E}}{\tilde{Q}}}_{\tilde{A}}\parder{\tilde{Q}}{\tilde{x}}-\frac{M_\infty}{Re_{L\infty}}\left(\underbrace{\parder{\tilde{V}_1}{\tilde{Q}}}_{\tilde{P}}\parder{\tilde{Q}}{\tilde{x}}+\underbrace{\parder{\tilde{V}_1}{\tilde{Q}_x}}_{\tilde{R}}\parder{\tilde{Q}_x}{\tilde{x}}\right)
     \end{array}
 \end{equation}
 Where:
@@ -404,7 +403,7 @@ $$\Downarrow$$
 \subsection{First Order Approximate Riemann Roe Method}
 
 \subsection{First Order Steger-Warming -- Explicit}
-A is a Diagonalizable matrix and can be written as:
+A is a diagonalizable matrix and can be written as:
 \begin{equation}
     \begin{array}{c}
         \tilde{A}=\tilde{T}\tilde{\Lambda}\tilde{T}^{-1} \\
@@ -431,7 +430,7 @@ Where:
 \begin{equation*}
     \tilde{a}=\sqrt{\frac{\gamma\tilde{p}}{\tilde{\rho}}}
 \end{equation*}
-Let the $\Lambda^\pm$ matrix be defined as:
+Let the $\tilde{\Lambda}^\pm$ matrix be defined as:
 \begin{equation}
     \tilde{\Lambda}^\pm=\begin{pmatrix}
         \displaystyle\frac{\tilde{u}\pm\left|\tilde{u}\right|}{2} & 0 & 0 \\
@@ -455,7 +454,7 @@ Assuming a perfect gas, the flux vector $\tilde{E}_{\left(Q\right)}$ is a homoge
 \begin{equation}
     \tilde{E}=\tilde{A}\tilde{Q}=\left(\tilde{A}^++\tilde{A}^-\right)\tilde{Q}=\underbrace{\tilde{A}^+\tilde{Q}}_{\displaystyle\tilde{E}^+}+\underbrace{\tilde{A}^-\tilde{Q}}_{\displaystyle\tilde{E}^-}=\tilde{E}^++\tilde{E}^-
 \end{equation} 
-There is a discontinuities and deference between $\tilde{E}^+,\tilde{E}^-$.
+There is a discontinuity and deference between $\tilde{E}^+,\tilde{E}^-$.
 % There is a discontinuities and deference between $\tilde{E}^+,\tilde{E}^-$ for example:
 % \begin{equation}
 %     \begin{matrix}
@@ -484,13 +483,13 @@ To eliminate the discontinuities and guarantee a smooth transition through criti
         \end{array}
     \end{matrix}
 \end{equation}
-Rewriting the conservation law from of the N-S equations:
+Rewriting the conservation law form of the N-S equations:
 \begin{equation}
     \parder{\tilde{Q}}{\tilde{t}}=-\parder{\tilde{E}^+}{\tilde{x}}-\parder{\tilde{E}^-}{\tilde{x}}+\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
 \end{equation}
-A simple, explicit, first order (in space and time) scheme in delta from is obtained using:
+A simple, explicit, first order (in space and time) scheme in delta form is obtained using:
 \begin{equation}
-    \Delta\tilde{Q}_i^n=-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\nabla\tilde{E}_i^{+n}+\Delta\tilde{E}_i^{-n}-\frac{M_\infty}{Re_{L\infty}}\delta\tilde{V}_{1,i}^{n}\right)
+    \Delta\tilde{Q}_i^n=\displaystyle-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\nabla\tilde{E}_i^{+n}+\Delta\tilde{E}_i^{-n}-\frac{M_\infty}{Re_{L\infty}}\delta\tilde{V}_{1,i}^{n}\right)
 \end{equation}
 \nomenclature{$\Delta\tilde{t}$}{normalized step size in time}
 \nomenclature{$\Delta\tilde{x}$}{normalized step size in space}
@@ -498,6 +497,26 @@ And advancing the solution by:
 \begin{equation}
     \tilde{Q}_i^{n+1}=\Delta\tilde{Q}_i^n+\tilde{Q}_i^n
 \end{equation} 
+
+\subsubsection{Finite Volume Formulation}
+\begin{equation}
+    \begin{array}{lcl}
+        \Delta\tilde{Q}_i^n & = & \displaystyle-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\tilde{E}_i^{+n}-\tilde{E}_{i-1}^{+n}+\tilde{E}_{i+1}^{-n}-\tilde{E}_i^{-n}-\frac{M_\infty}{Re_{L\infty}}\left(\tilde{V}_{1,i+\frac{1}{2}}^{n}-\tilde{V}_{1,i-\frac{1}{2}}^{n}\right)\right) \\\\
+        \Delta\tilde{Q}_i^n & = & \displaystyle-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\left(\tilde{E}_i^{+n}+\tilde{E}_{i+1}^{-n}\right)-\left(\tilde{E}_{i-1}^{+n}+\tilde{E}_i^{-n}\right)-\frac{M_\infty}{Re_{L\infty}}\left(\tilde{V}_{1,i+\frac{1}{2}}^{n}-\tilde{V}_{1,i-\frac{1}{2}}^{n}\right)\right)
+    \end{array}
+\end{equation}
+Define:
+\begin{equation}
+    \begin{array}{lcl}
+        \tilde{E}_{i+\frac{1}{2}} & \triangleq & \tilde{E}_i^++E_{i+1}^- \\\\
+        & = & \tilde{A}^+_i\tilde{Q}_i+\tilde{A}^-_{i+1}\tilde{Q}_{i+1} \\\\
+        & \equiv & \tilde{\tilde{E}}_{i+\frac{1}{2}}
+    \end{array}
+\end{equation}
+Rewrite using the finite volume notation for the inviscid terms as:
+\begin{equation}
+    \Delta\tilde{Q}_i^n=-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\tilde{\tilde{E}}_{i+\frac{1}{2}}^n-\tilde{\tilde{E}}_{i-\frac{1}{2}}^n-\frac{M_\infty}{Re_{L\infty}}\left(\tilde{V}_{1,i+\frac{1}{2}}^{n}-\tilde{V}_{1,i-\frac{1}{2}}^{n}\right)\right)
+\end{equation}
 
 \subsection{First Order Steger-Warming -- Implicit}
 The Implicit Steger-Warming scheme starts from:
