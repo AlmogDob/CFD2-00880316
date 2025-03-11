@@ -25,7 +25,8 @@
 \renewcommand\nomgroup[1]{%
   \item[\bfseries
   \ifstrequal{#1}{F}{Far--Away Properties}{%
-  \ifstrempty{#1}{N}{Dimensionless Numbers}}
+  \ifstrequal{#1}{N}{Dimensionless Numbers}{%
+  \ifstrequal{#1}{M}{Matrices}}}
 ]}
 
 \title{Computational Fluid Dynamics \\ HW2}
@@ -395,6 +396,9 @@ Where:
     \end{array}
 \end{equation}
 and $\textcolor{blue}{\alpha}$ is: $$\textcolor{blue}{\alpha=\frac{\gamma}{Pr_\infty\left(\gamma-1\right)}}$$
+\nomenclature[M]{$\tilde{A}$}{normalized jacobian matrix of E w.r.t. Q}
+\nomenclature[M]{$\tilde{P}$}{normalized jacobian matrix of $E_\nu$ w.r.t. Q}
+\nomenclature[M]{$\tilde{R}$}{normalized jacobian matrix of $E_\nu$ w.r.t. $Q_x$}
 
 \subsection{First Order Approximate Riemann Roe Method}
 
@@ -420,6 +424,8 @@ A is a Diagonalizable matrix and can be written as:
         \end{pmatrix}
     \end{array}
 \end{equation}
+\nomenclature[M]{$T$}{normalized eigenvectors matrix}
+\nomenclature[M]{$\Lambda$}{normalized eigenvalues matrix}
 Where:
 \begin{equation*}
     \tilde{a}=\sqrt{\frac{\gamma\tilde{p}}{\tilde{\rho}}}
@@ -485,6 +491,8 @@ A simple, explicit, first order (in space and time) scheme is obtained using:
 \begin{equation}
     \Delta\tilde{Q}_i^n=-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\nabla\tilde{E}_i^{+n}+\Delta\tilde{E}_i^{-n}+\frac{M_\infty}{Re_{L\infty}}\colorbox{red}{WTF TO DO?}\right)
 \end{equation}
+\nomenclature{$\Delta\tilde{t}$}{normalized step size in time}
+\nomenclature{$\Delta\tilde{x}$}{normalized step size in space}
 And advancing the solution by:
 \begin{equation}
     \tilde{Q}_i^{n+1}=\Delta\tilde{Q}_i^n+\tilde{Q}_i^n
