@@ -26,7 +26,8 @@
   \item[\bfseries
   \ifstrequal{#1}{F}{Far--Away Properties}{%
   \ifstrequal{#1}{N}{Dimensionless Numbers}{%
-  \ifstrequal{#1}{M}{Matrices}}}
+  \ifstrequal{#1}{M}{Matrices}{%
+  \ifstrequal{#1}{D}{Diagonal}}}}
 ]}
 
 \title{Computational Fluid Dynamics \\ HW2}
@@ -272,6 +273,7 @@ Where:
 The normalized Navier-Stokes equations are:
 \begin{equation}
     \parder{\tilde{Q}}{\tilde{t}}+\parder{\tilde{E}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
+    \label{eq: normalized N-S}
 \end{equation}
 Where:
 \begin{equation*}
@@ -299,7 +301,7 @@ so the x coordinate of the i-th cell $x_i$ is:
 \nomenclature{$x_i$}{x coordinate of the i-th cell}
 
 \subsection{Boundary Conditions}
-In order to set the boundary conditions on the edge faces we will define ghost cells that will be calculated like so:
+In order to set the boundary conditions on the edge faces we will define ghost cells that will be calculated as follows:
 \begin{equation}
     \begin{array}{lcl}
         u_{\left(i=0\right)} &=& -u_{\left(i=1\right)} \\
@@ -315,7 +317,7 @@ in order to maintain velocity zero on the boundary and like so:
     \end{array}
     \label{eq: temp boundary}
 \end{equation}
-In order to maintain adiabatic boundary conditions.
+in order to maintain adiabatic boundary conditions.
 Since the gradient of the pressure on the wall is zero, we get:
 \begin{equation}
     \begin{array}{lcl}
@@ -340,14 +342,17 @@ and from equations \ref{eq: definitions}, \ref{eq: velocity boundary}, \ref{eq: 
     \end{array}
     \label{eq: energy boundary}
 \end{equation}
+\newpage
 
 \section{The Numerical Schemes}
 \subsection{Jacobian Matrices of The Navier-Stokes Equations}
+We can rewrite Eq.\ref{eq: normalized N-S} as:
 \begin{equation}
     \begin{array}{lcl}
-        \displaystyle\parder{\tilde{Q}}{\tilde{t}} & = & \displaystyle-\parder{\tilde{E}}{\tilde{x}}-\parder{\tilde{V}_1}{\tilde{x}} \\\\
+        \displaystyle\parder{\tilde{Q}}{\tilde{t}} & = & \displaystyle-\parder{\tilde{E}}{\tilde{x}}-\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}} \\\\
         \displaystyle\parder{\tilde{Q}}{\tilde{t}} & = & \displaystyle-\underbrace{\parder{\tilde{E}}{\tilde{Q}}}_{\tilde{A}}\parder{\tilde{Q}}{\tilde{x}}-\frac{M_\infty}{Re_{L\infty}}\left(\underbrace{\parder{\tilde{V}_1}{\tilde{Q}}}_{\tilde{P}}\parder{\tilde{Q}}{\tilde{x}}+\underbrace{\parder{\tilde{V}_1}{\tilde{Q}_x}}_{\tilde{R}}\parder{\tilde{Q}_x}{\tilde{x}}\right)
     \end{array}
+    \label{eq: chain rule}
 \end{equation}
 Where:
 \begin{equation}
@@ -368,6 +373,7 @@ Where:
             \displaystyle\left(\frac{4}{3}\tilde{\mu}-\textcolor{blue}{\alpha}\frac{\tilde{\kappa}}{c_v}\right)\tilde{u}^2+\textcolor{blue}{\alpha}\frac{\tilde{\kappa}}{c_v}\frac{\tilde{e}}{\tilde{\rho}} & \displaystyle-\left(\frac{4}{3}\tilde{\mu}-\textcolor{blue}{\alpha}\frac{\tilde{\kappa}}{c_v}\right)\tilde{u} & \displaystyle-\textcolor{blue}{\alpha}\frac{\tilde{\kappa}}{c_v}
         \end{pmatrix}
     \end{array}
+    \label{eq: A P R}
 \end{equation}
 and $\textcolor{blue}{\alpha}$ is: $$\textcolor{blue}{\alpha=\frac{\gamma}{Pr_\infty\left(\gamma-1\right)}}$$
 \nomenclature[M]{$\tilde{A}$}{normalized jacobian matrix of E w.r.t. Q}
@@ -403,7 +409,7 @@ $$\Downarrow$$
 \subsection{First Order Approximate Riemann Roe Method}
 
 \subsection{First Order Steger-Warming -- Explicit}
-A is a diagonalizable matrix and can be written as:
+The A matrix (from Eq.\ref{eq: A P R}) is a diagonalizable matrix and can be written as:
 \begin{equation}
     \begin{array}{c}
         \tilde{A}=\tilde{T}\tilde{\Lambda}\tilde{T}^{-1} \\
@@ -450,9 +456,10 @@ Where the matrix $\tilde{\Lambda}^+$ contains only positive eigenvalues and the 
         \end{array}
     \end{matrix}
 \end{equation}
-Assuming a perfect gas, the flux vector $\tilde{E}_{\left(Q\right)}$ is a homogeneous function of degree one in $\tilde{Q}$, meaning:$$\forall\alpha\ \ \ \ \tilde{E}_{\left(\alpha \tilde{Q}\right)}=\alpha \tilde{E}_{\left(\tilde{Q}\right)}$$The homogeneity allows to rewrite the flux vector $\tilde{E}$ as:
+Assuming a perfect gas, the flux vector $\tilde{E}_{\left(Q\right)}$ is a homogeneous function of degree one in $\tilde{Q}$, meaning:$$\forall\alpha\ \ \ \ \tilde{E}_{\left(\alpha \tilde{Q}\right)}=\alpha \tilde{E}_{\left(\tilde{Q}\right)}$$The homogeneity allows to rewrite the flux vector $\tilde{E}$ using Eq.\ref{eq: chain rule} as:
 \begin{equation}
     \tilde{E}=\tilde{A}\tilde{Q}=\left(\tilde{A}^++\tilde{A}^-\right)\tilde{Q}=\underbrace{\tilde{A}^+\tilde{Q}}_{\displaystyle\tilde{E}^+}+\underbrace{\tilde{A}^-\tilde{Q}}_{\displaystyle\tilde{E}^-}=\tilde{E}^++\tilde{E}^-
+    \label{eq: E vector spliting}
 \end{equation} 
 There is a discontinuity and deference between $\tilde{E}^+,\tilde{E}^-$.
 % There is a discontinuities and deference between $\tilde{E}^+,\tilde{E}^-$ for example:
@@ -483,13 +490,14 @@ To eliminate the discontinuities and guarantee a smooth transition through criti
         \end{array}
     \end{matrix}
 \end{equation}
-Rewriting the conservation law form of the N-S equations:
+Rewriting the conservation law form of the N-S equations Eq.\ref{eq: normalized N-S} using Eq.\ref{eq: E vector spliting}:
 \begin{equation}
     \parder{\tilde{Q}}{\tilde{t}}=-\parder{\tilde{E}^+}{\tilde{x}}-\parder{\tilde{E}^-}{\tilde{x}}+\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
 \end{equation}
 A simple, explicit, first order (in space and time) scheme in delta form is obtained using:
 \begin{equation}
     \Delta\tilde{Q}_i^n=\displaystyle-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\nabla\tilde{E}_i^{+n}+\Delta\tilde{E}_i^{-n}-\frac{M_\infty}{Re_{L\infty}}\delta\tilde{V}_{1,i}^{n}\right)
+    \label{eq: explicit S-W delta form}
 \end{equation}
 \nomenclature{$\Delta\tilde{t}$}{normalized step size in time}
 \nomenclature{$\Delta\tilde{x}$}{normalized step size in space}
@@ -499,6 +507,7 @@ And advancing the solution by:
 \end{equation} 
 
 \subsubsection{Finite Volume Formulation}
+Rearranging Eq.\ref{eq: explicit S-W delta form} using the finite volume notation:
 \begin{equation}
     \begin{array}{lcl}
         \Delta\tilde{Q}_i^n & = & \displaystyle-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\tilde{E}_i^{+n}-\tilde{E}_{i-1}^{+n}+\tilde{E}_{i+1}^{-n}-\tilde{E}_i^{-n}-\frac{M_\infty}{Re_{L\infty}}\left(\tilde{V}_{1,i+\frac{1}{2}}^{n}-\tilde{V}_{1,i-\frac{1}{2}}^{n}\right)\right) \\\\
@@ -513,9 +522,33 @@ Define:
         & \equiv & \tilde{\tilde{E}}_{i+\frac{1}{2}}
     \end{array}
 \end{equation}
-Rewrite using the finite volume notation for the inviscid terms as:
+Finally we get:
 \begin{equation}
     \Delta\tilde{Q}_i^n=-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\tilde{\tilde{E}}_{i+\frac{1}{2}}^n-\tilde{\tilde{E}}_{i-\frac{1}{2}}^n-\frac{M_\infty}{Re_{L\infty}}\left(\tilde{V}_{1,i+\frac{1}{2}}^{n}-\tilde{V}_{1,i-\frac{1}{2}}^{n}\right)\right)
+    \label{eq: finall explicit S-W}
+\end{equation}
+\subsubsection{Calculating $\tilde{V}_{1,i+\frac{1}{2}}$}
+\begin{equation}
+    \tilde{V}_{1,i+\frac{1}{2}}=\begin{pmatrix}
+        0 \\\\
+        \displaystyle\frac{4}{3}\left.\tilde{\mu}\right|_{i+\frac{1}{2}}\left.\parder{\tilde{u}}{\tilde{x}}\right|_{i+\frac{1}{2}} \\\\
+        \displaystyle\frac{4}{3}\left.\tilde{\mu}\right|_{i+\frac{1}{2}}\left.\tilde{u}\right|_{i+\frac{1}{2}}\left.\parder{\tilde{u}}{\tilde{x}}\right|_{i+\frac{1}{2}}+\frac{\gamma}{Pr_\infty\left(\gamma-1\right)}\left.\tilde{\kappa}\right|_{i+\frac{1}{2}}\left.\parder{\tilde{T}}{\tilde{x}}\right|_{i+\frac{1}{2}}
+        \end{pmatrix}
+\end{equation}
+Where:
+\begin{equation}
+    \begin{array}{c}
+        \begin{matrix}
+            \begin{array}{lcl}
+                \displaystyle\left.\parder{\tilde{u}}{\tilde{x}}\right|_{i+\frac{1}{2}} & = & \displaystyle\frac{\tilde{u}_{i+1}-\tilde{u}_i}{\Delta\tilde{x}}, \\\\
+                \displaystyle\left.\parder{\tilde{T}}{\tilde{x}}\right|_{i+\frac{1}{2}} & = & \displaystyle\frac{\tilde{T}_{i+1}-\tilde{T}_i}{\Delta\tilde{x}},
+            \end{array} \hspace{0.5cm}&\hspace{0.5cm} \begin{array}{lcl}
+                \displaystyle\left.\tilde{\mu}\right|_{i+\frac{1}{2}} & = & \displaystyle\frac{\tilde{\mu}_{i+1}+\tilde{\mu}_i}{2} \\\\
+                \displaystyle\left.\tilde{\kappa}\right|_{i+\frac{1}{2}} & = & \displaystyle\frac{\tilde{\kappa}_{i+1}+\tilde{\kappa}_i}{2} \\\\
+            \end{array}
+        \end{matrix}\\\\
+        \displaystyle\left.\tilde{u}\right|_{i+\frac{1}{2}}=\frac{\tilde{u}_{i+1}+\tilde{u}_i}{2} \\\\
+    \end{array}
 \end{equation}
 
 \subsection{First Order Steger-Warming -- Implicit}
@@ -535,9 +568,72 @@ Rearranging in delta form:
 \end{equation}
 \begin{equation}
     \begin{array}{c}
-        \displaystyle\left(I+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\left[\nabla\tilde{A}_i^{+n}+\Delta\tilde{A}_i^{-n}-\delta\left(\tilde{P}-\tilde{R_x}\right)\right]_i^n-\frac{\delta^2}{\Delta\tilde{x}}\tilde{R}_i^n\right)\right)\Delta\tilde{Q}_i^n=\mathrm{RHS}_i^n \\\\
+        \displaystyle\left(I+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\left[\nabla\tilde{A}^{+}+\Delta\tilde{A}^{-}-\frac{D_0}{2}\left(\tilde{P}-\tilde{R_x}\right)\right]_i^n-\frac{\delta^2}{\Delta\tilde{x}}\tilde{R}_i^n\right)\right)\Delta\tilde{Q}_i^n=\mathrm{RHS}_i^n \\\\
         \mathrm{RHS}_i^n=\displaystyle-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\nabla\tilde{E}^{+}+\Delta\tilde{E}^{-}-\frac{M_\infty}{Re_{L\infty}}\delta\tilde{V}_{1}\right)_i^n
     \end{array}
+\end{equation}
+Rewrite using the finite volume notation for the inviscid terms like in Eq.\ref{eq: finall explicit S-W}:
+\begin{equation}
+    \begin{array}{c}
+        \displaystyle\left(I+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\left[\nabla\tilde{A}^{+}+\Delta\tilde{A}^{-}-\frac{D_0}{2}\left(\tilde{P}-\tilde{R_x}\right)\right]_i^n-\frac{\delta^2}{\Delta\tilde{x}}\tilde{R}_i^n\right)\right)\Delta\tilde{Q}_i^n=\mathrm{RHS}_i^n \\\\
+        \mathrm{RHS}_i^n=\displaystyle-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\tilde{\tilde{E}}_{i+\frac{1}{2}}^n-\tilde{\tilde{E}}_{i-\frac{1}{2}}^n-\frac{M_\infty}{Re_{L\infty}}\left(\tilde{V}_{1,i+\frac{1}{2}}^{n}-\tilde{V}_{1,i-\frac{1}{2}}^{n}\right)\right)
+    \end{array}
+\end{equation}
+and opening the delta form on the LHS:
+% \begin{equation}
+%     \begin{array}{lcl}
+%         \mathrm{LHS}_i^n & = & \displaystyle\Delta\tilde{Q}_i^n+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\nabla\tilde{A}_i^{+n}\Delta\tilde{Q}_i^n+\Delta\tilde{A}_i^{-n}\Delta\tilde{Q}_i^n-\delta\left(\tilde{P}-\tilde{R_x}\right)_i^n\Delta\tilde{Q}_i^n-\frac{\delta^2}{\Delta\tilde{x}}\tilde{R}_i^n\Delta\tilde{Q}_i^n\right) \\\\
+%     \end{array}
+% \end{equation}
+\begin{equation}
+    \begingroup\makeatletter\def\f@size{10}\check@mathfonts
+    \begin{array}{lcl}
+        \mathrm{LHS}_i^n & = & \displaystyle\Delta\tilde{Q}_i^n+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\nabla\tilde{A}_i^{+n}\Delta\tilde{Q}_i^n+\Delta\tilde{A}_i^{-n}\Delta\tilde{Q}_i^n-\frac{D_0}{2}\left(\tilde{P}-\tilde{R_x}\right)_i^n\Delta\tilde{Q}_i^n-\frac{\delta^2}{\Delta\tilde{x}}\tilde{R}_i^n\Delta\tilde{Q}_i^n\right) \\\\
+        & = & \displaystyle\Delta\tilde{Q}_i^n+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\tilde{A}_i^{+n}\Delta\tilde{Q}_i^n-\tilde{A}_{i-1}^{+n}\Delta\tilde{Q}_{i-1}^n+\tilde{A}_{i+1}^{-n}\Delta\tilde{Q}_{i+1}^n-\tilde{A}_i^{-n}\Delta\tilde{Q}_i^n-\right. \\\\
+        & & \displaystyle-\frac{1}{2}\left[\left(\tilde{P}-\tilde{R_x}\right)_{i+1}^n\Delta\tilde{Q}_{i+1}^n-\left(\tilde{P}-\tilde{R_x}\right)_{i-1}^n\Delta\tilde{Q}_{i-1}^n\right]- \\\\
+        & & \displaystyle-\left.\frac{1}{\Delta\tilde{x}}\left[\tilde{R}_{i+1}^n\Delta\tilde{Q}_{i+1}^n-2\tilde{R}_i^n\Delta\tilde{Q}_i^n+\tilde{R}_{i-1}^n\Delta\tilde{Q}_{i-1}^n\right]\right) \\\\
+        & = & \displaystyle\Theta_i^n\Delta\tilde{Q}_{i-1}^n+\Phi_i^n\Delta\tilde{Q}_i^n+\Psi_i^n\Delta\tilde{Q}_{i+1}^n
+    \end{array}
+    \endgroup
+\end{equation}
+\nomenclature[D]{$\Theta$}{lower off-diagonal}
+\nomenclature[D]{$\Phi$}{main diagonal}
+\nomenclature[D]{$\Psi$}{upper off-diagonal}
+Where:
+\begin{equation}
+    \begin{array}{lcl}
+        \Theta_i^n & = & \displaystyle-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\tilde{A}_{i-1}^{+n}+\frac{\Delta\tilde{t}}{2\Delta\tilde{x}}\left(\tilde{P}-\tilde{R_x}\right)_{i-1}^n-\frac{\Delta\tilde{t}}{\Delta\tilde{x}^2}\tilde{R}_{i-1}^n \\\\
+        \Phi_i^n & = & \displaystyle I+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\tilde{A}_i^{+n}-\tilde{A}_i^{-n}\right)+2\frac{\Delta\tilde{t}}{\Delta\tilde{x}^2}\tilde{R}_i^n \\\\
+        \Psi_i^n & = & \displaystyle\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\tilde{A}_{i+1}^{-n}-\frac{\Delta\tilde{t}}{2\Delta\tilde{x}}\left(\tilde{P}-\tilde{R_x}\right)_{i+1}^n-\frac{\Delta\tilde{t}}{\Delta\tilde{x}^2}\tilde{R}_{i+1}^n
+    \end{array}
+\end{equation}
+For the implicit Steger-Warming scheme a matrix inversion is needed as follows:
+\begin{equation}
+    \begin{pmatrix}
+        \Phi_1^n & \Psi_1^n & 0 & \cdots & \cdots & \cdots & 0 \\
+        \Theta_2^n & \Phi_2^n & \Psi_2^n & 0 & \cdots & \cdots & 0 \\
+        0 & \ddots & \ddots & \ddots & 0 & \cdots & 0 \\
+        0 & 0 & \Theta_i^n & \Phi_i^n & \Psi_i^n & 0 & 0 \\
+        0 & \cdots & 0 & \ddots & \ddots & \ddots & 0 \\
+        0 & \cdots & \cdots & 0 & \Theta_{N-1}^n & \Phi_{N-1}^n & \Psi_{N-1}^n \\
+        0 & \cdots & \cdots & \cdots & 0 & \Theta_{N}^n & \Phi_{N}^n
+    \end{pmatrix}\begin{pmatrix}
+        \Delta\tilde{Q}_1^n \\
+        \Delta\tilde{Q}_2^n \\
+        \cdots \\
+        \cdots \\
+        \cdots \\
+        \Delta\tilde{Q}_{N-1}^n \\
+        \Delta\tilde{Q}_N^n 
+    \end{pmatrix}=\begin{pmatrix}
+        \mathrm{RHS}_1^n \\
+        \mathrm{RHS}_2^n\\
+        \cdots \\
+        \cdots \\
+        \cdots \\
+        \mathrm{RHS}_{N-1}^n\\
+        \mathrm{RHS}_N^n
+    \end{pmatrix}
 \end{equation}
 
 \end{document}
