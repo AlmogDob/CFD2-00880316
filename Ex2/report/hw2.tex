@@ -27,7 +27,8 @@
   \ifstrequal{#1}{F}{Far--Away Properties}{%
   \ifstrequal{#1}{N}{Dimensionless Numbers}{%
   \ifstrequal{#1}{M}{Matrices}{%
-  \ifstrequal{#1}{D}{Diagonal}}}}
+  \ifstrequal{#1}{D}{Diagonal}{%
+  \ifstrequal{#1}{V}{Vectors}}}}}
 ]}
 
 \title{Computational Fluid Dynamics \\ HW2}
@@ -60,10 +61,10 @@ Consider the one-dimensional Navier-Stokes Equations:
 \begin{equation}
     \frac{\partial Q}{\partial t}+\frac{\partial E}{\partial x}=\frac{\partial E_\nu}{\partial x}
 \end{equation}
-\nomenclature{$Q$}{conservation state space}
+\nomenclature[V]{$Q$}{conservation state space vector}
 \nomenclature{$t$}{time}
-\nomenclature{$E$}{inviscid convective vector}
-\nomenclature{$E_\nu$}{viscous convective vector}
+\nomenclature[V]{$E$}{inviscid convective vector}
+\nomenclature[V]{$E_\nu$}{viscous convective vector}
 \nomenclature{$x$}{spatial coordinate}
 Where:
 \begin{equation}
@@ -96,18 +97,18 @@ Where:
         \end{matrix}
     \end{array}
     \label{eq: definitions}
+    \nomenclature{$\rho$}{fluid density}
+    \nomenclature{$u$}{fluid velocity}
+    \nomenclature{$e$}{total energy}
+    \nomenclature{$p$}{pressure}
+    \nomenclature{$\gamma$}{ratio of specific heats}
+    \nomenclature{$T$}{temperature}
+    \nomenclature{$R$}{gas constant}
+    \nomenclature{$\mu$}{coefficient of viscosity}
+    \nomenclature{$\kappa$}{coefficient of thermal conductivity}
+    \nomenclature{$c_p$}{constant specific heat capacity for a constant pressure}
+    \nomenclature{$c_v$}{constant specific heat capacity for a constant volume}
 \end{equation}
-\nomenclature{$\rho$}{fluid density}
-\nomenclature{$u$}{fluid velocity}
-\nomenclature{$e$}{total energy}
-\nomenclature{$p$}{pressure}
-\nomenclature{$\gamma$}{ratio of specific heats}
-\nomenclature{$T$}{temperature}
-\nomenclature{$R$}{gas constant}
-\nomenclature{$\mu$}{coefficient of viscosity}
-\nomenclature{$\kappa$}{coefficient of thermal conductivity}
-\nomenclature{$c_p$}{constant specific heat capacity for a constant pressure}
-\nomenclature{$c_v$}{constant specific heat capacity for a constant volume}
 The constants are:
 \begin{itemize}
     \item $\gamma=1.4$ for air under standard atmospheric conditions
@@ -141,15 +142,14 @@ Since the initial conditions are normalized, there is a need to normalize the N-
     \begin{matrix}
         \rho=\rho_\infty\tilde{\rho}, & u=a_\infty\tilde{u}, & p=\gamma p_\infty\tilde{p}, & T=\gamma T_\infty\tilde{T}, & x=L\tilde{x}, & \displaystyle t=\frac{L}{a_\infty}\tilde{t}, & \mu=\mu_\infty\tilde{\mu}, & \kappa=\kappa_\infty\tilde{\kappa}
     \end{matrix}
+    \nomenclature[F]{$\rho_\infty$}{density far away}
+    \nomenclature[F]{$a_\infty$}{speed of sound far away}
+    \nomenclature[F]{$p_\infty$}{pressure far away}
+    \nomenclature[F]{$T_\infty$}{temperature far away}
+    \nomenclature[F]{$\mu_\infty$}{coefficient of viscosity far away}
+    \nomenclature[F]{$\kappa_\infty$}{coefficient of thermal conductivity far away}
 \end{equation}
-\nomenclature[F]{$\rho_\infty$}{density far away}
-\nomenclature[F]{$a_\infty$}{speed of sound far away}
-\nomenclature[F]{$p_\infty$}{pressure far away}
-\nomenclature[F]{$T_\infty$}{temperature far away}
-\nomenclature[F]{$\mu_\infty$}{coefficient of viscosity far away}
-\nomenclature[F]{$\kappa_\infty$}{coefficient of thermal conductivity far away}
-
-\noindent The normalization of the temperature was chosen to cancel out the $\gamma$ in the normalization of the pressure:
+The normalization of the temperature was chosen to cancel out the $\gamma$ in the normalization of the pressure:
 \begin{equation}
     \begin{array}{lcl}
         p & = & \rho RT \\
@@ -238,9 +238,9 @@ The Reynolds number and the mach number far away are defined as:
         \Downarrow \\
         \displaystyle \frac{\mu_\infty}{L\rho_\infty a_\infty}=\frac{M_\infty}{Re_{L\infty}}
     \end{array}
+    \nomenclature[F]{$M_\infty$}{mach number far away}
+    \nomenclature[N]{$Re_{L\infty}$}{Reynolds number with respect to L far away}
 \end{equation}
-\nomenclature[F]{$M_\infty$}{mach number far away}
-\nomenclature[N]{$Re_{L\infty}$}{Reynolds number with respect to L far away}
 The Prandtl number far away is defined as:
 \begin{equation}
     \begin{array}{c}
@@ -248,8 +248,8 @@ The Prandtl number far away is defined as:
         \Downarrow \\
         \displaystyle\frac{\kappa_\infty}{\mu_\infty R}=\frac{c_p}{Pr_\infty \left(c_p-c_v\right)}=\frac{\gamma}{Pr_\infty\left(\gamma-1\right)}
     \end{array}
+    \nomenclature[N]{$Pr_\infty$}{Prandtl number far away}
 \end{equation}
-\nomenclature[N]{$Pr_\infty$}{Prandtl number far away}
 Substituting into the normalized N-S equations:
 \begin{equation}
     \parder{\tilde{Q}}{\tilde{t}}+\parder{\tilde{E}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{E}_\nu}{\tilde{x}}
@@ -282,25 +282,23 @@ Where:
     \tilde{V}_1=\tilde{V}_{1\left(\tilde{Q},\tilde{Q}_x\right)}=\tilde{E}_\nu
 \end{equation*}
 
-% \section{Linearizing The Navier-Stokes Equations In Time}
-% To linearize the N-S equations we need to estimate the derivatives $\displaystyle\parder{\tilde{E}}{\tilde{x}}$ and $\displaystyle\parder{\tilde{V}_1}{\tilde{x}}$.
-
 \section{The Computational Domain}
 \subsection{Discretization}
 The physical domain $\left[x_I,x_F\right]$ is discretized into N equispaced cells. The size of each cell is there for:
+\nomenclature{$x_I$}{x coordinate of the start of the domain}
+\nomenclature{$x_F$}{x coordinate of the end of the domain}
 \begin{equation}
     \Delta x=\frac{x_F-x_I}{N}=\frac{L}{N}
+    \nomenclature{$\Delta x$}{size of each cell in the domain}
+    \nomenclature{$L$}{characteristic length}
 \end{equation}
-\nomenclature{$x_F$}{x coordinate of the end of the domain}
-\nomenclature{$\Delta x$}{size of each cell in the domain}
-\nomenclature{$L$}{characteristic length}
 so the x coordinate of the i-th cell $x_i$ is:
+\nomenclature{$x_i$}{x coordinate of the i-th cell}
 \begin{equation}
     \begin{matrix}
         \displaystyle x_i=x_I+\frac{1}{2}\Delta x+\Delta x\cdot\left(i-1\right) && \text{when starting from $i=1$}
     \end{matrix}
 \end{equation}
-\nomenclature{$x_i$}{x coordinate of the i-th cell}
 
 \subsection{Boundary Conditions}
 In order to set the boundary conditions on the edge faces we will define ghost cells that will be calculated as follows:
@@ -407,8 +405,7 @@ $$\Downarrow$$
     \displaystyle\tilde{V}_{1,i}^{n+1}=\tilde{V}_{1,i}^{n}+\left(\tilde{P}-\tilde{R_x}\right)_i^n\Delta\tilde{Q}_i^n+\parder{}{\tilde{x}}\left(\tilde{R}\Delta\tilde{Q}\right)_i^n 
 \end{equation}
 
-
-\subsection{First Order Approximate Riemann Roe Method}
+\subsection{FDS -- First Order Explicit Roe}
 The normalized Navier-Stokes equations as written in Eq.\ref{eq: normalized N-S}:
 \begin{equation}
     \parder{\tilde{Q}}{\tilde{t}}+\parder{\tilde{E}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
@@ -416,8 +413,8 @@ The normalized Navier-Stokes equations as written in Eq.\ref{eq: normalized N-S}
 In linearized form:
 \begin{equation}
     \parder{\tilde{Q}}{\tilde{t}}+\tilde{A}\parder{\tilde{Q}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
+    \nomenclature[M]{$\hat{\tilde{A}}$}{normalized Roe's average matrix}
 \end{equation}
-\nomenclature[M]{$\hat{\tilde{A}}$}{Roe's average matrix}
 The initial conditions are:
 \begin{equation*}
     \tilde{Q}_{\left(x,0\right)}=\left\{\begin{array}{lr}
@@ -429,14 +426,125 @@ Roe's linear approximation to the 1-D Riemann problem is expressed as:
 \begin{equation}
     \parder{\tilde{Q}}{\tilde{t}}+\hat{\tilde{A}}\parder{\tilde{Q}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
 \end{equation}
-Where $\hat{\tilde{A}}$ replaces the original jacobian matrix $\tilde{A}$ and referred to as Roe's average matrix. Roe's average matrix is assumed constant in this formulation and therefore the problem is linear. The components of Roe's average matrix are evaluated using average values of $\tilde{Q}$ at the interface separating the two states, $L$ and $R$, namely: $$\hat{\tilde{A}}=\hat{\tilde{A}}_{\left(\tilde{Q}_L,\tilde{Q}_R\right)}$$ By setting certain conditions on the matrix $\hat{\tilde{A}}$ the aforementioned "Property U" is obtained for the system of equations.
+Where $\hat{\tilde{A}}$ replaces the original jacobian matrix $\tilde{A}$ and referred to as Roe's average matrix. Roe's average matrix is assumed constant in this formulation and therefore the problem is linear. The components of Roe's average matrix are evaluated using average values of $\tilde{Q}$ at the interface separating the two states, $L$ and $R$, namely: $$\hat{\tilde{A}}=\hat{\tilde{A}}_{\left(\tilde{Q}_L,\tilde{Q}_R\right)}$$ By setting certain conditions on the matrix $\hat{\tilde{A}}$ the aforementioned "Property U" is obtained for the system of equations:
 \begin{itemize}
     \item A linear mapping relates the vector $\tilde{Q}$ to the vector $\tilde{E}$
     \item $\hat{\tilde{A}}_{\left(\tilde{Q}_L,\tilde{Q}_R\right)}\xrightarrow[\tilde{Q}_L\rightarrow\tilde{Q}_R\rightarrow\tilde{Q}]{}\tilde{A}_{\left(\tilde{Q}\right)}$
+    \item $\tilde{E}_R-\tilde{E}_L=\hat{\tilde{A}}\left(\tilde{Q}_R-\tilde{Q}_L\right)$
+    \item The eigenvalues of Roe's average matrix are real and linearly independent
 \end{itemize}
+The linear approximate problem is then hyperbolic and therefore Roe's average matrix may be diagonalized as follows:
+\begin{equation}
+    \hat{\tilde{A}}=\hat{\tilde{T}}\hat{\tilde{\Lambda}}\hat{\tilde{T}}^{-1}
+    \nomenclature[M]{$\hat{\tilde{T}}$}{normalized eigenvectors matrix of Roe's average matrix}
+    \nomenclature[M]{$\hat{\tilde{\Lambda}}$}{normalized eigenvalues matrix of Roe's average matrix}
+\end{equation}
+One can define now the following:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{cc||ccc||cc}
+        $\hat{\tilde{A}}^+=\hat{\tilde{T}}\hat{\tilde{\Lambda}}^+\hat{\tilde{T}}^{-1}$ &&& $\hat{\tilde{A}}^-=\hat{\tilde{T}}\hat{\tilde{\Lambda}}^-\hat{\tilde{T}}^{-1}$ &&& $\left|\hat{\tilde{A}}\right|=\hat{\tilde{T}}\left|\hat{\tilde{\Lambda}}\right|\hat{\tilde{T}}^{-1}$
+    \end{tabular}
+\end{table}
+\noindent Since Roe's average matrix can be split based on negative and positive waves (eigenvalues), the calculation of the fluxes may be split into contributions across negative and positive waves to determine appropriate formulae for the cell-face fluxes in the linear Riemann problem. \\
+Each interface has a series of waves emanating from it and traveling left and right as follows:
+\begin{equation}
+    \begin{array}{c}
+        \begin{array}{c|c}
+            \begin{array}{c}
+                \text{Starting from the left state, one has:} \\
+                \tilde{\tilde{E}}_{i+\frac{1}{2}}=\tilde{E}_L+\hat{\tilde{A}}^-\left(\tilde{Q}_R-\tilde{Q}_L\right)
+            \end{array} & \begin{array}{c}
+                \text{Starting from the right state results in:} \\
+                \tilde{E}_R=\tilde{\tilde{E}}_{i+\frac{1}{2}}+\hat{\tilde{A}}^+\left(\tilde{Q}_R-\tilde{Q}_L\right)
+            \end{array}
+        \end{array} \\\\
+        \Downarrow\hspace{12pt} \\\\
+        \left\{\begin{array}{rcl}
+            \tilde{\tilde{E}}_{i+\frac{1}{2}} & = & \tilde{E}_L+\hat{\tilde{A}}^-\left(\tilde{Q}_R-\tilde{Q}_L\right) \\\\
+            \tilde{\tilde{E}}_{i+\frac{1}{2}} & = & \tilde{E}_R-\hat{\tilde{A}}^+\left(\tilde{Q}_R-\tilde{Q}_L\right)
+        \end{array}\right.
+    \end{array}
+    \nomenclature[V]{$\tilde{\tilde{E}}$}{normalized average flux vector}
+\end{equation}
+By way of averaging, the interface flux becomes:
+\begin{equation}
+    \tilde{\tilde{E}}_{i+\frac{1}{2}}=\frac{1}{2}\left(\tilde{E}_L+\tilde{E}_R\right)-\frac{1}{2}\left|\hat{\tilde{A}}\right|\left(\tilde{Q}_R-\tilde{Q}_L\right)
+\end{equation}
 
-\subsection{First Order Steger-Warming -- Explicit}
-The A matrix (from Eq.\ref{eq: A P R}) is a diagonalizable matrix and can be written as:
+\subsubsection{Constructing The Roe Matrix}
+Let $\tilde{H}$ be the normalized total enthalpy:
+\begin{equation*}
+    \tilde{H}=\tilde{h}+\frac{1}{2}\tilde{u}^2=\frac{\tilde{e}+\tilde{p}}{\tilde{\rho}}
+    \nomenclature{$\tilde{H}$}{normalized total enthalpy}
+\end{equation*}
+One can rewrite the vectors $\tilde{Q}$ and $\tilde{E}$ in terms of the normalized total enthalpy instead of the normalized total energy $\tilde{e}$ as follows:
+\begin{equation}
+    \begin{matrix}
+        \tilde{Q}=\begin{pmatrix}
+            \tilde{\rho} \\\\
+            \tilde{\rho}\tilde{u} \\\\
+            \displaystyle\frac{\tilde{\rho}\tilde{H}}{\gamma}+\frac{\gamma-1}{2\gamma}\tilde{\rho}\tilde{u}^2
+        \end{pmatrix},\hspace{1cm} & \tilde{E}=\begin{pmatrix}
+            \tilde{\rho}\tilde{u} \\\\
+            \displaystyle\frac{\gamma-1}{\gamma}\tilde{\rho}\tilde{H}+\frac{\gamma+1}{2\gamma}\tilde{\rho}\tilde{u}^2 \\\\
+            \tilde{\rho}\tilde{u}\tilde{H}
+        \end{pmatrix}
+    \end{matrix}
+\end{equation}
+The jacobian matrix $\tilde{A}$ can also be expressed in terms of the total enthalpy:
+\begin{equation}
+    \tilde{A}=\begin{pmatrix}
+        0 & 1 & 0 \\\\
+        \displaystyle\frac{\gamma-3}{2}\tilde{u}^2 & \left(3-\gamma\right)\tilde{u} & \gamma-1 \\\\
+        \displaystyle\frac{1}{2}\left(\gamma-1\right)\tilde{u}^3-\tilde{u}\tilde{H} & \tilde{H}-\left(\gamma-1\right)\tilde{u}^2 & \gamma\tilde{u}
+    \end{pmatrix}
+\end{equation}
+Let the vector $\tilde{Z}$ be defined as:
+\begin{equation*}
+    \tilde{Z}=\sqrt{\tilde{\rho}}\begin{pmatrix}
+        1 \\
+        \tilde{u} \\
+        \tilde{H}
+    \end{pmatrix}
+\end{equation*}
+The vectors $\tilde{Q}$ and $\tilde{E}$ can be expressed as quadratic functions of the variable $\tilde{Z}$:
+\begin{equation}
+    \begin{matrix}
+        \tilde{Q}=\begin{pmatrix}
+            \tilde{z}_1^2 \\\\
+            \tilde{z}_1\tilde{z}_2 \\\\
+            \displaystyle\frac{\tilde{z}_1\tilde{z}_3}{\gamma}+\frac{\gamma-1}{2\gamma}\tilde{z}_2^2
+        \end{pmatrix},\hspace{1cm} & \tilde{E}=\begin{pmatrix}
+            \tilde{z}_1\tilde{z}_2 \\\\
+            \displaystyle\frac{\gamma-1}{\gamma}\tilde{z}_1\tilde{z}_3+\frac{\gamma+1}{2\gamma}\tilde{z}_2^2 \\\\
+            \tilde{z}_2\tilde{z}_3
+        \end{pmatrix}
+    \end{matrix}
+\end{equation}
+Define:
+\begin{equation}
+    \bar{\tilde{x}}\triangleq\frac{1}{2}\left(\tilde{x}_L+\tilde{x}_R\right)
+\end{equation}
+Applying the above formula results in:
+\begin{equation}
+    \begin{matrix}
+        \left\{\begin{array}{rcl}
+            \tilde{Q}_R-\tilde{Q}_L & = & \tilde{B}\left(\tilde{z}_R-\tilde{z}_L\right) \\\\
+            \tilde{E}_R-\tilde{E}_L & = & \tilde{C}\left(\tilde{z}_R-\tilde{z}_L\right)
+        \end{array}\right. & \Rightarrow & \tilde{E}_R-\tilde{E}_L=\tilde{C}\tilde{B}^{-1}\left(\tilde{Q}_R-\tilde{Q}_L\right)
+        \nomenclature[M]{$\tilde{B},\ \tilde{C}$}{deconstruction of Roe's average matrix}
+    \end{matrix}
+\end{equation}
+Where the matrices $\tilde{B}$ and $\tilde{C}$ have the form:
+\begin{equation}
+    \begin{matrix}
+        
+    \end{matrix}
+\end{equation}
+
+\subsection{FVS -- First Order Explicit Steger-Warming}
+Like the Roe's average matrix the A matrix (from Eq.\ref{eq: A P R}) is a diagonalizable matrix and can be written as:
 \begin{equation}
     \begin{array}{c}
         \tilde{A}=\tilde{T}\tilde{\Lambda}\tilde{T}^{-1} \\
@@ -456,9 +564,9 @@ The A matrix (from Eq.\ref{eq: A P R}) is a diagonalizable matrix and can be wri
             \displaystyle-\frac{1}{\tilde{\rho}\tilde{a}}\left(\left(\gamma-1\right)\tilde{u}^2+\tilde{u}\tilde{a}\right) & \displaystyle\frac{1}{\tilde{\rho}\tilde{a}}\left(\tilde{a}+\left(\gamma-1\right)\tilde{u}\right) & \displaystyle-\frac{\gamma-1}{\tilde{\rho}\tilde{a}}
         \end{pmatrix}
     \end{array}
+    \nomenclature[M]{$\tilde{T}$}{normalized eigenvectors matrix}
+    \nomenclature[M]{$\tilde{\Lambda}$}{normalized eigenvalues matrix}
 \end{equation}
-\nomenclature[M]{$\tilde{T}$}{normalized eigenvectors matrix}
-\nomenclature[M]{$\tilde{\Lambda}$}{normalized eigenvalues matrix}
 Where:
 \begin{equation*}
     \tilde{a}=\sqrt{\frac{\gamma\tilde{p}}{\tilde{\rho}}}
@@ -471,7 +579,7 @@ Let the $\tilde{\Lambda}^\pm$ matrix be defined as:
         0 & 0 & \displaystyle\frac{\tilde{u}-\tilde{a}\pm\left|\tilde{u}-\tilde{a}\right|}{2}
     \end{pmatrix}
 \end{equation}
-Where the matrix $\tilde{\Lambda}^+$ contains only positive eigenvalues and the matrix $\tilde{\Lambda}^-$ contains only negative eigenvalues. \\ Define:
+Where the matrix $\tilde{\Lambda}^+$ contains only positive eigenvalues and the matrix $\tilde{\Lambda}^-$ contains only negative eigenvalues. As in Roe's scheme, one can define:
 \begin{equation}
     \begin{matrix}
         \begin{array}{ccl}
@@ -486,7 +594,7 @@ Where the matrix $\tilde{\Lambda}^+$ contains only positive eigenvalues and the 
 Assuming a perfect gas, the flux vector $\tilde{E}_{\left(Q\right)}$ is a homogeneous function of degree one in $\tilde{Q}$, meaning:$$\forall\alpha\ \ \ \ \tilde{E}_{\left(\alpha \tilde{Q}\right)}=\alpha \tilde{E}_{\left(\tilde{Q}\right)}$$The homogeneity allows to rewrite the flux vector $\tilde{E}$ using Eq.\ref{eq: chain rule} as:
 \begin{equation}
     \tilde{E}=\tilde{A}\tilde{Q}=\left(\tilde{A}^++\tilde{A}^-\right)\tilde{Q}=\underbrace{\tilde{A}^+\tilde{Q}}_{\displaystyle\tilde{E}^+}+\underbrace{\tilde{A}^-\tilde{Q}}_{\displaystyle\tilde{E}^-}=\tilde{E}^++\tilde{E}^-
-    \label{eq: E vector spliting}
+    \label{eq: E vector splitting}
 \end{equation} 
 There is a discontinuity and deference between $\tilde{E}^+,\tilde{E}^-$.
 % There is a discontinuities and deference between $\tilde{E}^+,\tilde{E}^-$ for example:
@@ -517,7 +625,7 @@ To eliminate the discontinuities and guarantee a smooth transition through criti
         \end{array}
     \end{matrix}
 \end{equation}
-Rewriting the conservation law form of the N-S equations Eq.\ref{eq: normalized N-S} using Eq.\ref{eq: E vector spliting}:
+Rewriting the conservation law form of the N-S equations Eq.\ref{eq: normalized N-S} using Eq.\ref{eq: E vector splitting}:
 \begin{equation}
     \parder{\tilde{Q}}{\tilde{t}}=-\parder{\tilde{E}^+}{\tilde{x}}-\parder{\tilde{E}^-}{\tilde{x}}+\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
 \end{equation}
@@ -525,9 +633,9 @@ A simple, explicit, first order (in space and time) scheme in delta form is obta
 \begin{equation}
     \Delta\tilde{Q}_i^n=\displaystyle-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\nabla\tilde{E}_i^{+n}+\Delta\tilde{E}_i^{-n}-\frac{M_\infty}{Re_{L\infty}}\delta\tilde{V}_{1,i}^{n}\right)
     \label{eq: explicit S-W delta form}
+    \nomenclature{$\Delta\tilde{t}$}{normalized step size in time}
+    \nomenclature{$\Delta\tilde{x}$}{normalized step size in space}
 \end{equation}
-\nomenclature{$\Delta\tilde{t}$}{normalized step size in time}
-\nomenclature{$\Delta\tilde{x}$}{normalized step size in space}
 And advancing the solution by:
 \begin{equation}
     \tilde{Q}_i^{n+1}=\Delta\tilde{Q}_i^n+\tilde{Q}_i^n
@@ -578,7 +686,7 @@ Where:
     \end{array}
 \end{equation}
 
-\subsection{First Order Steger-Warming -- Implicit}
+\subsection{FVS -- First Order Implicit Steger-Warming}
 The Implicit Steger-Warming scheme starts from:
 \begin{equation}
     \begin{array}{lcl}
@@ -613,7 +721,7 @@ and opening the delta form on the LHS:
 %     \end{array}
 % \end{equation}
 \begin{equation}
-    \begingroup\makeatletter\def\f@size{10}\check@mathfonts
+    \begingroup\makeatletter\def\f@size{11}\check@mathfonts
     \begin{array}{lcl}
         \mathrm{LHS}_i^n & = & \displaystyle\Delta\tilde{Q}_i^n+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\nabla\tilde{A}_i^{+n}\Delta\tilde{Q}_i^n+\Delta\tilde{A}_i^{-n}\Delta\tilde{Q}_i^n-\frac{M_\infty}{Re_{L\infty}}\frac{D_0}{2}\left(\tilde{P}-\tilde{R_x}\right)_i^n\Delta\tilde{Q}_i^n-\frac{M_\infty}{Re_{L\infty}}\frac{\delta^2}{\Delta\tilde{x}}\tilde{R}_i^n\Delta\tilde{Q}_i^n\right) \\\\
         & = & \displaystyle\Delta\tilde{Q}_i^n+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\tilde{A}_i^{+n}\Delta\tilde{Q}_i^n-\tilde{A}_{i-1}^{+n}\Delta\tilde{Q}_{i-1}^n+\tilde{A}_{i+1}^{-n}\Delta\tilde{Q}_{i+1}^n-\tilde{A}_i^{-n}\Delta\tilde{Q}_i^n-\right. \\\\
@@ -622,10 +730,10 @@ and opening the delta form on the LHS:
         & = & \displaystyle\Theta_i^n\Delta\tilde{Q}_{i-1}^n+\Phi_i^n\Delta\tilde{Q}_i^n+\Psi_i^n\Delta\tilde{Q}_{i+1}^n
     \end{array}
     \endgroup
+    \nomenclature[D]{$\Theta$}{lower off-diagonal}
+    \nomenclature[D]{$\Phi$}{main diagonal}
+    \nomenclature[D]{$\Psi$}{upper off-diagonal}
 \end{equation}
-\nomenclature[D]{$\Theta$}{lower off-diagonal}
-\nomenclature[D]{$\Phi$}{main diagonal}
-\nomenclature[D]{$\Psi$}{upper off-diagonal}
 Where:
 \begin{equation}
     \begin{array}{lcl}
