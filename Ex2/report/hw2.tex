@@ -380,31 +380,6 @@ and $\textcolor{blue}{\alpha}$ is: $$\textcolor{blue}{\alpha=\frac{\gamma}{Pr_\i
 \nomenclature[M]{$\tilde{P}$}{normalized jacobian matrix of $E_\nu$ w.r.t. Q}
 \nomenclature[M]{$\tilde{R}$}{normalized jacobian matrix of $E_\nu$ w.r.t. $Q_x$}
 
-\subsection{Linearization In Time}
-\subsubsection{$\tilde{E}_i^{n+1}$ Estimation}
-\begin{equation}
-    \begin{array}{c}
-        \displaystyle\tilde{E}_i^{n+1}=\tilde{E}_i^{n}+\underbrace{\left.\parder{\tilde{E}}{\tilde{Q}}\right|_i^n}_{\displaystyle\tilde{A}_i^n}\Delta\tilde{Q}_i^n+\mathrm{H.O.T} \\\\
-        \displaystyle\tilde{E}_i^{n+1}=\tilde{E}_i^{n}+\tilde{A}_i^n\Delta\tilde{Q}_i^n
-    \end{array}
-\end{equation}
-
-\subsubsection{$\tilde{V_1}_{i}^{n+1}$ Estimation}
-\begin{equation}
-    \begin{array}{c}
-        \displaystyle\tilde{V}_{1,i}^{n+1}=\tilde{V}_{1,i}^{n}+\underbrace{\left.\parder{\tilde{V}_1}{\tilde{Q}}\right|_i^n}_{\displaystyle\tilde{P}_i^n}\Delta\tilde{Q}_i^n+\underbrace{\left.\parder{\tilde{V}_1}{\tilde{Q}_x}\right|_i^n}_{\displaystyle\tilde{R}_i^n}\Delta\tilde{Q_x}_i^n+\mathrm{H.O.T} \\\\
-        \displaystyle\tilde{V}_{1,i}^{n+1}=\tilde{V}_{1,i}^{n}+\tilde{P}_i^n\Delta\tilde{Q}_i^n+\tilde{R}_i^n\Delta\tilde{Q_x}_i^n \\\\
-    \end{array}
-\end{equation}
-The difficulty stems from the fact that the solution vector is $\Delta\tilde{Q}$ and not $\Delta\tilde{Q}_x$. This can be solved by a linearization of the term $\Delta\tilde{Q}_x$ which can be conducted using the following relation:
-\begin{equation*}
-    \parder{\left(\tilde{R}\Delta\tilde{Q}\right)_i^n}{\tilde{x}}=\parder{\tilde{R}_i^n}{\tilde{x}}\Delta\tilde{Q}_i^n+\tilde{R}_i^n\parder{\Delta\tilde{Q}_i^n}{\tilde{x}}=\parder{\tilde{R}}{\tilde{x}}\Delta\tilde{Q}+\tilde{R}_i^n\Delta\tilde{Q_x}_i^n 
-\end{equation*}
-$$\Downarrow$$
-\begin{equation}
-    \displaystyle\tilde{V}_{1,i}^{n+1}=\tilde{V}_{1,i}^{n}+\left(\tilde{P}-\tilde{R_x}\right)_i^n\Delta\tilde{Q}_i^n+\parder{}{\tilde{x}}\left(\tilde{R}\Delta\tilde{Q}\right)_i^n 
-\end{equation}
-
 \subsection{FDS -- First Order Explicit Roe}
 The normalized Navier-Stokes equations as written in Eq.\ref{eq: normalized N-S}:
 \begin{equation}
@@ -687,6 +662,35 @@ Where:
 \end{equation}
 
 \subsection{FVS -- First Order Implicit Steger-Warming}
+
+\subsubsection{Linearization In Time}
+\begin{itemize}
+    \item $\tilde{E}_i^{n+1}$ Estimation
+        \begin{equation}
+            \begin{array}{c}
+                \displaystyle\tilde{E}_i^{n+1}=\tilde{E}_i^{n}+\underbrace{\left.\parder{\tilde{E}}{\tilde{Q}}\right|_i^n}_{\displaystyle\tilde{A}_i^n}\Delta\tilde{Q}_i^n+\mathrm{H.O.T} \\\\
+                \displaystyle\tilde{E}_i^{n+1}=\tilde{E}_i^{n}+\tilde{A}_i^n\Delta\tilde{Q}_i^n
+            \end{array}
+        \end{equation}
+
+    \item $\tilde{V_1}_{i}^{n+1}$ Estimation 
+        \begin{equation}
+            \begin{array}{c}
+                \displaystyle\tilde{V}_{1,i}^{n+1}=\tilde{V}_{1,i}^{n}+\underbrace{\left.\parder{\tilde{V}_1}{\tilde{Q}}\right|_i^n}_{\displaystyle\tilde{P}_i^n}\Delta\tilde{Q}_i^n+\underbrace{\left.\parder{\tilde{V}_1}{\tilde{Q}_x}\right|_i^n}_{\displaystyle\tilde{R}_i^n}\Delta\tilde{Q_x}_i^n+\mathrm{H.O.T} \\\\
+                \displaystyle\tilde{V}_{1,i}^{n+1}=\tilde{V}_{1,i}^{n}+\tilde{P}_i^n\Delta\tilde{Q}_i^n+\tilde{R}_i^n\Delta\tilde{Q_x}_i^n \\\\
+            \end{array}
+        \end{equation}
+        The difficulty stems from the fact that the solution vector is $\Delta\tilde{Q}$ and not $\Delta\tilde{Q}_x$. This can be solved by a linearization of the term $\Delta\tilde{Q}_x$ which can be conducted using the following relation:
+        \begin{equation*}
+            \parder{\left(\tilde{R}\Delta\tilde{Q}\right)_i^n}{\tilde{x}}=\parder{\tilde{R}_i^n}{\tilde{x}}\Delta\tilde{Q}_i^n+\tilde{R}_i^n\parder{\Delta\tilde{Q}_i^n}{\tilde{x}}=\parder{\tilde{R}}{\tilde{x}}\Delta\tilde{Q}+\tilde{R}_i^n\Delta\tilde{Q_x}_i^n 
+        \end{equation*}
+        $$\Downarrow$$
+        \begin{equation}
+            \displaystyle\tilde{V}_{1,i}^{n+1}=\tilde{V}_{1,i}^{n}+\left(\tilde{P}-\tilde{R_x}\right)_i^n\Delta\tilde{Q}_i^n+\parder{}{\tilde{x}}\left(\tilde{R}\Delta\tilde{Q}\right)_i^n 
+        \end{equation}
+\end{itemize}
+
+\subsubsection{The Scheme}
 The Implicit Steger-Warming scheme starts from:
 \begin{equation}
     \begin{array}{lcl}

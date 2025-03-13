@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.10.14)  14 MAR 2025 00:34
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.10.14)  14 MAR 2025 00:47
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -543,7 +543,7 @@ Underfull \hbox (badness 10000) detected at line 50
  []
 
 ) [4]
-<images/Initial Conditions.png, id=144, 581.59282pt x 439.04025pt>
+<images/Initial Conditions.png, id=139, 581.59282pt x 439.04025pt>
 File: images/Initial Conditions.png Graphic file (type png)
 <use images/Initial Conditions.png>
 Package pdftex.def Info: images/Initial Conditions.png  used on input line 125.
@@ -574,108 +574,75 @@ fier (name{page.4}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
 l.345 \newpage
-               [4]
+               [4] [5] [6] [7] [8]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 384.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 384.
+(hyperref)                removing `math shift' on input line 640.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `superscript' on input line 384.
+(hyperref)                removing `subscript' on input line 640.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 384.
+(hyperref)                removing `\begingroup' on input line 640.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 392.
+(hyperref)                removing `\endgroup' on input line 640.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 392.
+(hyperref)                removing `\@@over' on input line 640.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `superscript' on input line 392.
+(hyperref)                removing `math shift' on input line 640.
 
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 392.
-
-[5] [6] [7] [8] [9]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 665.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 665.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\begingroup' on input line 665.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\endgroup' on input line 665.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\@@over' on input line 665.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 665.
-
-
-Overfull \hbox (0.43712pt too wide) detected at line 696
+[9]
+Overfull \hbox (0.43712pt too wide) detected at line 700
 [][][]
  []
 
 [10]
-LaTeX Font Info:    Calculating math sizes for size <11> on input line 724.
+LaTeX Font Info:    Calculating math sizes for size <11> on input line 728.
 
 
 LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <5.5> not available
-(Font)              size <5> substituted on input line 724.
+(Font)              size <5> substituted on input line 728.
 
 
 LaTeX Font Warning: Font shape `OML/cmm/m/it' in size <5.5> not available
-(Font)              size <5> substituted on input line 724.
+(Font)              size <5> substituted on input line 728.
 
 
 LaTeX Font Warning: Font shape `OMS/cmsy/m/n' in size <5.5> not available
-(Font)              size <5> substituted on input line 724.
+(Font)              size <5> substituted on input line 728.
 
 
-Overfull \hbox (43.2042pt too wide) detected at line 736
+Overfull \hbox (43.2042pt too wide) detected at line 740
 [][][][][][]
  []
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 773.
+(hyperref)                removing `math shift' on input line 777.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\left' on input line 773.
+(hyperref)                removing `\left' on input line 777.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\right' on input line 773.
+(hyperref)                removing `\right' on input line 777.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 773.
+(hyperref)                removing `subscript' on input line 777.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 773.
+(hyperref)                removing `math shift' on input line 777.
 
 [11] 
 AED: lastpage setting LastPage
@@ -685,13 +652,13 @@ LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 0.5pt have occurred.
 
 Package rerunfilecheck Info: File `hw2.out' has not changed.
-(rerunfilecheck)             Checksum: D8618C6B65896FAA29C7A72A8553FEAD;3875.
+(rerunfilecheck)             Checksum: BEFEF8FF7D6527A212BA221EA394528F;3714.
  ) 
 Here is how much of TeX's memory you used:
- 13757 strings out of 478287
- 220804 string characters out of 5849288
- 597608 words of memory out of 5000000
- 31643 multiletter control sequences out of 15000+600000
+ 13755 strings out of 478287
+ 220774 string characters out of 5849288
+ 601604 words of memory out of 5000000
+ 31642 multiletter control sequences out of 15000+600000
  480562 words of font info for 74 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  110i,20n,106p,586b,416s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -713,10 +680,10 @@ onts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/ty
 pe1/public/fourier/fourier-orns.pfb></usr/share/texlive/texmf-dist/fonts/type1/
 public/amsfonts/symbols/msam10.pfb></usr/share/texmf/fonts/type1/public/cm-supe
 r/sfrm1095.pfb>
-Output written on hw2.pdf (16 pages, 542329 bytes).
+Output written on hw2.pdf (16 pages, 541316 bytes).
 PDF statistics:
- 389 PDF objects out of 1000 (max. 8388607)
- 330 compressed objects within 4 object streams
- 99 named destinations out of 1000 (max. 500000)
- 174 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 384 PDF objects out of 1000 (max. 8388607)
+ 325 compressed objects within 4 object streams
+ 98 named destinations out of 1000 (max. 500000)
+ 166 words of extra memory for PDF output out of 10000 (max. 10000000)
 
