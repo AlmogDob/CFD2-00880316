@@ -38,20 +38,22 @@
 
 \begin{document}
 
+\pagestyle{empty}
 \maketitle
 \thispagestyle{empty}
 \newpage
 
-\thispagestyle{empty}
 \tableofcontents
 \vfil
 \listoffigures
 \newpage
 
-\setcounter{page}{1}
 \printnomenclature
 \newpage
 
+\pagestyle{fancy}
+\pagenumbering{arabic}
+\setcounter{page}{1}
 \section{Problem Definition}
 \subsection{Governing Equations}
 Consider the one-dimensional Navier-Stokes Equations:
@@ -407,6 +409,31 @@ $$\Downarrow$$
 
 
 \subsection{First Order Approximate Riemann Roe Method}
+The normalized Navier-Stokes equations as written in Eq.\ref{eq: normalized N-S}:
+\begin{equation}
+    \parder{\tilde{Q}}{\tilde{t}}+\parder{\tilde{E}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
+\end{equation}
+In linearized form:
+\begin{equation}
+    \parder{\tilde{Q}}{\tilde{t}}+\tilde{A}\parder{\tilde{Q}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
+\end{equation}
+\nomenclature[M]{$\hat{\tilde{A}}$}{Roe's average matrix}
+The initial conditions are:
+\begin{equation*}
+    \tilde{Q}_{\left(x,0\right)}=\left\{\begin{array}{lr}
+        \tilde{Q}_L & \tilde{x}<\tilde{x}_0 \\\\
+        \tilde{Q}_R & \tilde{x}>\tilde{x}_0
+    \end{array}\right.
+\end{equation*}
+Roe's linear approximation to the 1-D Riemann problem is expressed as:
+\begin{equation}
+    \parder{\tilde{Q}}{\tilde{t}}+\hat{\tilde{A}}\parder{\tilde{Q}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
+\end{equation}
+Where $\hat{\tilde{A}}$ replaces the original jacobian matrix $\tilde{A}$ and referred to as Roe's average matrix. Roe's average matrix is assumed constant in this formulation and therefore the problem is linear. The components of Roe's average matrix are evaluated using average values of $\tilde{Q}$ at the interface separating the two states, $L$ and $R$, namely: $$\hat{\tilde{A}}=\hat{\tilde{A}}_{\left(\tilde{Q}_L,\tilde{Q}_R\right)}$$ By setting certain conditions on the matrix $\hat{\tilde{A}}$ the aforementioned "Property U" is obtained for the system of equations.
+\begin{itemize}
+    \item A linear mapping relates the vector $\tilde{Q}$ to the vector $\tilde{E}$
+    \item $\hat{\tilde{A}}_{\left(\tilde{Q}_L,\tilde{Q}_R\right)}\xrightarrow[\tilde{Q}_L\rightarrow\tilde{Q}_R\rightarrow\tilde{Q}]{}\tilde{A}_{\left(\tilde{Q}\right)}$
+\end{itemize}
 
 \subsection{First Order Steger-Warming -- Explicit}
 The A matrix (from Eq.\ref{eq: A P R}) is a diagonalizable matrix and can be written as:
@@ -562,20 +589,20 @@ The Implicit Steger-Warming scheme starts from:
 Rearranging in delta form:
 \begin{equation}
     \begin{array}{c}
-        \displaystyle\left(I+\Delta\tilde{t}\left(\parder{}{\tilde{x}}\left[\tilde{A}-\left(\tilde{P}-\tilde{R_x}\right)\right]_i^n-\frac{\partial^2\tilde{R}_i^n}{\partial\tilde{x}^2}\right)\right)\Delta\tilde{Q}_i^n=\mathrm{RHS}_i^n \\\\
+        \displaystyle\left(I+\Delta\tilde{t}\left(\parder{}{\tilde{x}}\left[\tilde{A}-\frac{M_\infty}{Re_{L\infty}}\left(\tilde{P}-\tilde{R_x}\right)\right]_i^n-\frac{M_\infty}{Re_{L\infty}}\frac{\partial^2\tilde{R}_i^n}{\partial\tilde{x}^2}\right)\right)\Delta\tilde{Q}_i^n=\mathrm{RHS}_i^n \\\\
         \mathrm{RHS}_i^n=\displaystyle-\Delta\tilde{t}\parder{}{\tilde{x}}\left(\tilde{E}^{+}+\tilde{E}^{-}-\frac{M_\infty}{Re_{L\infty}}\tilde{V}_{1}\right)_i^n
     \end{array}
 \end{equation}
 \begin{equation}
     \begin{array}{c}
-        \displaystyle\left(I+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\left[\nabla\tilde{A}^{+}+\Delta\tilde{A}^{-}-\frac{D_0}{2}\left(\tilde{P}-\tilde{R_x}\right)\right]_i^n-\frac{\delta^2}{\Delta\tilde{x}}\tilde{R}_i^n\right)\right)\Delta\tilde{Q}_i^n=\mathrm{RHS}_i^n \\\\
+        \displaystyle\left(I+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\left[\nabla\tilde{A}^{+}+\Delta\tilde{A}^{-}-\frac{M_\infty}{Re_{L\infty}}\frac{D_0}{2}\left(\tilde{P}-\tilde{R_x}\right)\right]_i^n-\frac{M_\infty}{Re_{L\infty}}\frac{\delta^2}{\Delta\tilde{x}}\tilde{R}_i^n\right)\right)\Delta\tilde{Q}_i^n=\mathrm{RHS}_i^n \\\\
         \mathrm{RHS}_i^n=\displaystyle-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\nabla\tilde{E}^{+}+\Delta\tilde{E}^{-}-\frac{M_\infty}{Re_{L\infty}}\delta\tilde{V}_{1}\right)_i^n
     \end{array}
 \end{equation}
 Rewrite using the finite volume notation for the inviscid terms like in Eq.\ref{eq: finall explicit S-W}:
 \begin{equation}
     \begin{array}{c}
-        \displaystyle\left(I+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\left[\nabla\tilde{A}^{+}+\Delta\tilde{A}^{-}-\frac{D_0}{2}\left(\tilde{P}-\tilde{R_x}\right)\right]_i^n-\frac{\delta^2}{\Delta\tilde{x}}\tilde{R}_i^n\right)\right)\Delta\tilde{Q}_i^n=\mathrm{RHS}_i^n \\\\
+        \displaystyle\left(I+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\left[\nabla\tilde{A}^{+}+\Delta\tilde{A}^{-}-\frac{M_\infty}{Re_{L\infty}}\frac{D_0}{2}\left(\tilde{P}-\tilde{R_x}\right)\right]_i^n-\frac{M_\infty}{Re_{L\infty}}\frac{\delta^2}{\Delta\tilde{x}}\tilde{R}_i^n\right)\right)\Delta\tilde{Q}_i^n=\mathrm{RHS}_i^n \\\\
         \mathrm{RHS}_i^n=\displaystyle-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\tilde{\tilde{E}}_{i+\frac{1}{2}}^n-\tilde{\tilde{E}}_{i-\frac{1}{2}}^n-\frac{M_\infty}{Re_{L\infty}}\left(\tilde{V}_{1,i+\frac{1}{2}}^{n}-\tilde{V}_{1,i-\frac{1}{2}}^{n}\right)\right)
     \end{array}
 \end{equation}
@@ -588,10 +615,10 @@ and opening the delta form on the LHS:
 \begin{equation}
     \begingroup\makeatletter\def\f@size{10}\check@mathfonts
     \begin{array}{lcl}
-        \mathrm{LHS}_i^n & = & \displaystyle\Delta\tilde{Q}_i^n+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\nabla\tilde{A}_i^{+n}\Delta\tilde{Q}_i^n+\Delta\tilde{A}_i^{-n}\Delta\tilde{Q}_i^n-\frac{D_0}{2}\left(\tilde{P}-\tilde{R_x}\right)_i^n\Delta\tilde{Q}_i^n-\frac{\delta^2}{\Delta\tilde{x}}\tilde{R}_i^n\Delta\tilde{Q}_i^n\right) \\\\
+        \mathrm{LHS}_i^n & = & \displaystyle\Delta\tilde{Q}_i^n+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\nabla\tilde{A}_i^{+n}\Delta\tilde{Q}_i^n+\Delta\tilde{A}_i^{-n}\Delta\tilde{Q}_i^n-\frac{M_\infty}{Re_{L\infty}}\frac{D_0}{2}\left(\tilde{P}-\tilde{R_x}\right)_i^n\Delta\tilde{Q}_i^n-\frac{M_\infty}{Re_{L\infty}}\frac{\delta^2}{\Delta\tilde{x}}\tilde{R}_i^n\Delta\tilde{Q}_i^n\right) \\\\
         & = & \displaystyle\Delta\tilde{Q}_i^n+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\tilde{A}_i^{+n}\Delta\tilde{Q}_i^n-\tilde{A}_{i-1}^{+n}\Delta\tilde{Q}_{i-1}^n+\tilde{A}_{i+1}^{-n}\Delta\tilde{Q}_{i+1}^n-\tilde{A}_i^{-n}\Delta\tilde{Q}_i^n-\right. \\\\
-        & & \displaystyle-\frac{1}{2}\left[\left(\tilde{P}-\tilde{R_x}\right)_{i+1}^n\Delta\tilde{Q}_{i+1}^n-\left(\tilde{P}-\tilde{R_x}\right)_{i-1}^n\Delta\tilde{Q}_{i-1}^n\right]- \\\\
-        & & \displaystyle-\left.\frac{1}{\Delta\tilde{x}}\left[\tilde{R}_{i+1}^n\Delta\tilde{Q}_{i+1}^n-2\tilde{R}_i^n\Delta\tilde{Q}_i^n+\tilde{R}_{i-1}^n\Delta\tilde{Q}_{i-1}^n\right]\right) \\\\
+        & & \displaystyle-\frac{1}{2}\frac{M_\infty}{Re_{L\infty}}\left[\left(\tilde{P}-\tilde{R_x}\right)_{i+1}^n\Delta\tilde{Q}_{i+1}^n-\left(\tilde{P}-\tilde{R_x}\right)_{i-1}^n\Delta\tilde{Q}_{i-1}^n\right]- \\\\
+        & & \displaystyle-\left.\frac{1}{\Delta\tilde{x}}\frac{M_\infty}{Re_{L\infty}}\left[\tilde{R}_{i+1}^n\Delta\tilde{Q}_{i+1}^n-2\tilde{R}_i^n\Delta\tilde{Q}_i^n+\tilde{R}_{i-1}^n\Delta\tilde{Q}_{i-1}^n\right]\right) \\\\
         & = & \displaystyle\Theta_i^n\Delta\tilde{Q}_{i-1}^n+\Phi_i^n\Delta\tilde{Q}_i^n+\Psi_i^n\Delta\tilde{Q}_{i+1}^n
     \end{array}
     \endgroup
@@ -602,9 +629,9 @@ and opening the delta form on the LHS:
 Where:
 \begin{equation}
     \begin{array}{lcl}
-        \Theta_i^n & = & \displaystyle-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\tilde{A}_{i-1}^{+n}+\frac{\Delta\tilde{t}}{2\Delta\tilde{x}}\left(\tilde{P}-\tilde{R_x}\right)_{i-1}^n-\frac{\Delta\tilde{t}}{\Delta\tilde{x}^2}\tilde{R}_{i-1}^n \\\\
-        \Phi_i^n & = & \displaystyle I+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\tilde{A}_i^{+n}-\tilde{A}_i^{-n}\right)+2\frac{\Delta\tilde{t}}{\Delta\tilde{x}^2}\tilde{R}_i^n \\\\
-        \Psi_i^n & = & \displaystyle\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\tilde{A}_{i+1}^{-n}-\frac{\Delta\tilde{t}}{2\Delta\tilde{x}}\left(\tilde{P}-\tilde{R_x}\right)_{i+1}^n-\frac{\Delta\tilde{t}}{\Delta\tilde{x}^2}\tilde{R}_{i+1}^n
+        \Theta_i^n & = & \displaystyle-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\tilde{A}_{i-1}^{+n}+\frac{\Delta\tilde{t}}{2\Delta\tilde{x}}\frac{M_\infty}{Re_{L\infty}}\left(\tilde{P}-\tilde{R_x}\right)_{i-1}^n-\frac{\Delta\tilde{t}}{\Delta\tilde{x}^2}\frac{M_\infty}{Re_{L\infty}}\tilde{R}_{i-1}^n \\\\
+        \Phi_i^n & = & \displaystyle I+\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\tilde{A}_i^{+n}-\tilde{A}_i^{-n}\right)+2\frac{\Delta\tilde{t}}{\Delta\tilde{x}^2}\frac{M_\infty}{Re_{L\infty}}\tilde{R}_i^n \\\\
+        \Psi_i^n & = & \displaystyle\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\tilde{A}_{i+1}^{-n}-\frac{\Delta\tilde{t}}{2\Delta\tilde{x}}\frac{M_\infty}{Re_{L\infty}}\left(\tilde{P}-\tilde{R_x}\right)_{i+1}^n-\frac{\Delta\tilde{t}}{\Delta\tilde{x}^2}\frac{M_\infty}{Re_{L\infty}}\tilde{R}_{i+1}^n
     \end{array}
 \end{equation}
 For the implicit Steger-Warming scheme a matrix inversion is needed as follows:
@@ -634,6 +661,16 @@ For the implicit Steger-Warming scheme a matrix inversion is needed as follows:
         \mathrm{RHS}_{N-1}^n\\
         \mathrm{RHS}_N^n
     \end{pmatrix}
+\end{equation}
+\subsubsection{Calculating $\left(\tilde{P}-\tilde{R_x}\right)_{i}$}
+\begin{equation}
+    \begin{matrix}
+        \left(\tilde{P}-\tilde{R_x}\right)_{i}=\displaystyle\frac{1}{\rho}\begin{pmatrix}
+                0 & 0 & 0 \\\\
+                \displaystyle\left.\tilde{u}\right|_i\frac{4}{3}\left.\parder{\tilde{\mu}}{\tilde{x}}\right|_i & \displaystyle-\frac{4}{3}\left.\parder{\tilde{\mu}}{\tilde{x}}\right|_i & 0 \\\\
+                \displaystyle\left.\tilde{u}^2\right|_i\frac{4}{3}\left.\parder{\tilde{\mu}}{\tilde{x}}\right|_i & \displaystyle-\left.\tilde{u}\right|_i\frac{4}{3}\left.\parder{\tilde{\mu}}{\tilde{x}}\right|_i & 0
+            \end{pmatrix},\hspace{1cm} & \displaystyle\left.\parder{\tilde{\mu}}{\tilde{x}}\right|_i=\frac{\tilde{\mu}_{i+1}-\tilde{\mu}_{i-1}}{2\Delta\tilde{x}}
+    \end{matrix}
 \end{equation}
 
 \end{document}
