@@ -12,8 +12,9 @@
 \usepackage{fourier-orns}
 \usepackage{xcolor}
 \usepackage{nomencl}
-\usepackage{etoolbox}
 \makenomenclature
+\usepackage{etoolbox}
+\usepackage{ifthen}
 
 \setlength{\headheight}{18.2pt}
 \setlength{\nomlabelwidth}{1.5cm}
@@ -28,7 +29,8 @@
   \ifstrequal{#1}{N}{Dimensionless Numbers}{%
   \ifstrequal{#1}{M}{Matrices}{%
   \ifstrequal{#1}{D}{Diagonal}{%
-  \ifstrequal{#1}{V}{Vectors}}}}}
+  \ifstrequal{#1}{V}{Vectors}{%
+  \ifstrequal{#1}{P}{Normalized Average Properties}{}}}}}}
 ]}
 
 \title{Computational Fluid Dynamics \\ HW2}
@@ -380,144 +382,6 @@ and $\textcolor{blue}{\alpha}$ is: $$\textcolor{blue}{\alpha=\frac{\gamma}{Pr_\i
 \nomenclature[M]{$\tilde{P}$}{normalized jacobian matrix of $E_\nu$ w.r.t. Q}
 \nomenclature[M]{$\tilde{R}$}{normalized jacobian matrix of $E_\nu$ w.r.t. $Q_x$}
 
-\subsection{FDS -- First Order Explicit Roe}
-The normalized Navier-Stokes equations as written in Eq.\ref{eq: normalized N-S}:
-\begin{equation}
-    \parder{\tilde{Q}}{\tilde{t}}+\parder{\tilde{E}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
-\end{equation}
-In linearized form:
-\begin{equation}
-    \parder{\tilde{Q}}{\tilde{t}}+\tilde{A}\parder{\tilde{Q}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
-    \nomenclature[M]{$\hat{\tilde{A}}$}{normalized Roe's average matrix}
-\end{equation}
-The initial conditions are:
-\begin{equation*}
-    \tilde{Q}_{\left(x,0\right)}=\left\{\begin{array}{lr}
-        \tilde{Q}_L & \tilde{x}<\tilde{x}_0 \\\\
-        \tilde{Q}_R & \tilde{x}>\tilde{x}_0
-    \end{array}\right.
-\end{equation*}
-Roe's linear approximation to the 1-D Riemann problem is expressed as:
-\begin{equation}
-    \parder{\tilde{Q}}{\tilde{t}}+\hat{\tilde{A}}\parder{\tilde{Q}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
-\end{equation}
-Where $\hat{\tilde{A}}$ replaces the original jacobian matrix $\tilde{A}$ and referred to as Roe's average matrix. Roe's average matrix is assumed constant in this formulation and therefore the problem is linear. The components of Roe's average matrix are evaluated using average values of $\tilde{Q}$ at the interface separating the two states, $L$ and $R$, namely: $$\hat{\tilde{A}}=\hat{\tilde{A}}_{\left(\tilde{Q}_L,\tilde{Q}_R\right)}$$ By setting certain conditions on the matrix $\hat{\tilde{A}}$ the aforementioned "Property U" is obtained for the system of equations:
-\begin{itemize}
-    \item A linear mapping relates the vector $\tilde{Q}$ to the vector $\tilde{E}$
-    \item $\hat{\tilde{A}}_{\left(\tilde{Q}_L,\tilde{Q}_R\right)}\xrightarrow[\tilde{Q}_L\rightarrow\tilde{Q}_R\rightarrow\tilde{Q}]{}\tilde{A}_{\left(\tilde{Q}\right)}$
-    \item $\tilde{E}_R-\tilde{E}_L=\hat{\tilde{A}}\left(\tilde{Q}_R-\tilde{Q}_L\right)$
-    \item The eigenvalues of Roe's average matrix are real and linearly independent
-\end{itemize}
-The linear approximate problem is then hyperbolic and therefore Roe's average matrix may be diagonalized as follows:
-\begin{equation}
-    \hat{\tilde{A}}=\hat{\tilde{T}}\hat{\tilde{\Lambda}}\hat{\tilde{T}}^{-1}
-    \nomenclature[M]{$\hat{\tilde{T}}$}{normalized eigenvectors matrix of Roe's average matrix}
-    \nomenclature[M]{$\hat{\tilde{\Lambda}}$}{normalized eigenvalues matrix of Roe's average matrix}
-\end{equation}
-One can define now the following:
-\begin{table}[H]
-    \centering
-    \begin{tabular}{cc||ccc||cc}
-        $\hat{\tilde{A}}^+=\hat{\tilde{T}}\hat{\tilde{\Lambda}}^+\hat{\tilde{T}}^{-1}$ &&& $\hat{\tilde{A}}^-=\hat{\tilde{T}}\hat{\tilde{\Lambda}}^-\hat{\tilde{T}}^{-1}$ &&& $\left|\hat{\tilde{A}}\right|=\hat{\tilde{T}}\left|\hat{\tilde{\Lambda}}\right|\hat{\tilde{T}}^{-1}$
-    \end{tabular}
-\end{table}
-\noindent Since Roe's average matrix can be split based on negative and positive waves (eigenvalues), the calculation of the fluxes may be split into contributions across negative and positive waves to determine appropriate formulae for the cell-face fluxes in the linear Riemann problem. \\
-Each interface has a series of waves emanating from it and traveling left and right as follows:
-\begin{equation}
-    \begin{array}{c}
-        \begin{array}{c|c}
-            \begin{array}{c}
-                \text{Starting from the left state, one has:} \\
-                \tilde{\tilde{E}}_{i+\frac{1}{2}}=\tilde{E}_L+\hat{\tilde{A}}^-\left(\tilde{Q}_R-\tilde{Q}_L\right)
-            \end{array} & \begin{array}{c}
-                \text{Starting from the right state results in:} \\
-                \tilde{E}_R=\tilde{\tilde{E}}_{i+\frac{1}{2}}+\hat{\tilde{A}}^+\left(\tilde{Q}_R-\tilde{Q}_L\right)
-            \end{array}
-        \end{array} \\\\
-        \Downarrow\hspace{12pt} \\\\
-        \left\{\begin{array}{rcl}
-            \tilde{\tilde{E}}_{i+\frac{1}{2}} & = & \tilde{E}_L+\hat{\tilde{A}}^-\left(\tilde{Q}_R-\tilde{Q}_L\right) \\\\
-            \tilde{\tilde{E}}_{i+\frac{1}{2}} & = & \tilde{E}_R-\hat{\tilde{A}}^+\left(\tilde{Q}_R-\tilde{Q}_L\right)
-        \end{array}\right.
-    \end{array}
-    \nomenclature[V]{$\tilde{\tilde{E}}$}{normalized average flux vector}
-\end{equation}
-By way of averaging, the interface flux becomes:
-\begin{equation}
-    \tilde{\tilde{E}}_{i+\frac{1}{2}}=\frac{1}{2}\left(\tilde{E}_L+\tilde{E}_R\right)-\frac{1}{2}\left|\hat{\tilde{A}}\right|\left(\tilde{Q}_R-\tilde{Q}_L\right)
-\end{equation}
-
-\subsubsection{Constructing The Roe Matrix}
-Let $\tilde{H}$ be the normalized total enthalpy:
-\begin{equation*}
-    \tilde{H}=\tilde{h}+\frac{1}{2}\tilde{u}^2=\frac{\tilde{e}+\tilde{p}}{\tilde{\rho}}
-    \nomenclature{$\tilde{H}$}{normalized total enthalpy}
-\end{equation*}
-One can rewrite the vectors $\tilde{Q}$ and $\tilde{E}$ in terms of the normalized total enthalpy instead of the normalized total energy $\tilde{e}$ as follows:
-\begin{equation}
-    \begin{matrix}
-        \tilde{Q}=\begin{pmatrix}
-            \tilde{\rho} \\\\
-            \tilde{\rho}\tilde{u} \\\\
-            \displaystyle\frac{\tilde{\rho}\tilde{H}}{\gamma}+\frac{\gamma-1}{2\gamma}\tilde{\rho}\tilde{u}^2
-        \end{pmatrix},\hspace{1cm} & \tilde{E}=\begin{pmatrix}
-            \tilde{\rho}\tilde{u} \\\\
-            \displaystyle\frac{\gamma-1}{\gamma}\tilde{\rho}\tilde{H}+\frac{\gamma+1}{2\gamma}\tilde{\rho}\tilde{u}^2 \\\\
-            \tilde{\rho}\tilde{u}\tilde{H}
-        \end{pmatrix}
-    \end{matrix}
-\end{equation}
-The jacobian matrix $\tilde{A}$ can also be expressed in terms of the total enthalpy:
-\begin{equation}
-    \tilde{A}=\begin{pmatrix}
-        0 & 1 & 0 \\\\
-        \displaystyle\frac{\gamma-3}{2}\tilde{u}^2 & \left(3-\gamma\right)\tilde{u} & \gamma-1 \\\\
-        \displaystyle\frac{1}{2}\left(\gamma-1\right)\tilde{u}^3-\tilde{u}\tilde{H} & \tilde{H}-\left(\gamma-1\right)\tilde{u}^2 & \gamma\tilde{u}
-    \end{pmatrix}
-\end{equation}
-Let the vector $\tilde{Z}$ be defined as:
-\begin{equation*}
-    \tilde{Z}=\sqrt{\tilde{\rho}}\begin{pmatrix}
-        1 \\
-        \tilde{u} \\
-        \tilde{H}
-    \end{pmatrix}
-\end{equation*}
-The vectors $\tilde{Q}$ and $\tilde{E}$ can be expressed as quadratic functions of the variable $\tilde{Z}$:
-\begin{equation}
-    \begin{matrix}
-        \tilde{Q}=\begin{pmatrix}
-            \tilde{z}_1^2 \\\\
-            \tilde{z}_1\tilde{z}_2 \\\\
-            \displaystyle\frac{\tilde{z}_1\tilde{z}_3}{\gamma}+\frac{\gamma-1}{2\gamma}\tilde{z}_2^2
-        \end{pmatrix},\hspace{1cm} & \tilde{E}=\begin{pmatrix}
-            \tilde{z}_1\tilde{z}_2 \\\\
-            \displaystyle\frac{\gamma-1}{\gamma}\tilde{z}_1\tilde{z}_3+\frac{\gamma+1}{2\gamma}\tilde{z}_2^2 \\\\
-            \tilde{z}_2\tilde{z}_3
-        \end{pmatrix}
-    \end{matrix}
-\end{equation}
-Define:
-\begin{equation}
-    \bar{\tilde{x}}\triangleq\frac{1}{2}\left(\tilde{x}_L+\tilde{x}_R\right)
-\end{equation}
-Applying the above formula results in:
-\begin{equation}
-    \begin{matrix}
-        \left\{\begin{array}{rcl}
-            \tilde{Q}_R-\tilde{Q}_L & = & \tilde{B}\left(\tilde{z}_R-\tilde{z}_L\right) \\\\
-            \tilde{E}_R-\tilde{E}_L & = & \tilde{C}\left(\tilde{z}_R-\tilde{z}_L\right)
-        \end{array}\right. & \Rightarrow & \tilde{E}_R-\tilde{E}_L=\tilde{C}\tilde{B}^{-1}\left(\tilde{Q}_R-\tilde{Q}_L\right)
-        \nomenclature[M]{$\tilde{B},\ \tilde{C}$}{deconstruction of Roe's average matrix}
-    \end{matrix}
-\end{equation}
-Where the matrices $\tilde{B}$ and $\tilde{C}$ have the form:
-\begin{equation}
-    \begin{matrix}
-        
-    \end{matrix}
-\end{equation}
-
 \subsection{FVS -- First Order Explicit Steger-Warming}
 Like the Roe's average matrix the A matrix (from Eq.\ref{eq: A P R}) is a diagonalizable matrix and can be written as:
 \begin{equation}
@@ -534,13 +398,14 @@ Like the Roe's average matrix the A matrix (from Eq.\ref{eq: A P R}) is a diagon
             0 & 0 & \tilde{u}-\tilde{a}
         \end{pmatrix} \\\\
         \tilde{T}^{-1}=\begin{pmatrix}
-            \displaystyle1-\frac{\gamma-1}{2}\frac{\tilde{u}^2}{\tilde{a}^2} & \displaystyle\left(\gamma-1\right)\frac{\tilde{u}^2}{\tilde{a}^2} & -\frac{\gamma-1}{\tilde{a}^2} \\\\
+            \displaystyle1-\frac{\gamma-1}{2}\frac{\tilde{u}^2}{\tilde{a}^2} & \displaystyle\left(\gamma-1\right)\frac{\tilde{u}^2}{\tilde{a}^2} & \displaystyle-\frac{\gamma-1}{\tilde{a}^2} \\\\
             \displaystyle\frac{1}{\tilde{\rho}\tilde{a}}\left(\left(\gamma-1\right)\tilde{u}^2-\tilde{u}\tilde{a}\right) & \displaystyle\frac{1}{\tilde{\rho}\tilde{a}}\left(\tilde{a}-\left(\gamma-1\right)\tilde{u}\right) & \displaystyle\frac{\gamma-1}{\tilde{\rho}\tilde{a}} \\\\
             \displaystyle-\frac{1}{\tilde{\rho}\tilde{a}}\left(\left(\gamma-1\right)\tilde{u}^2+\tilde{u}\tilde{a}\right) & \displaystyle\frac{1}{\tilde{\rho}\tilde{a}}\left(\tilde{a}+\left(\gamma-1\right)\tilde{u}\right) & \displaystyle-\frac{\gamma-1}{\tilde{\rho}\tilde{a}}
         \end{pmatrix}
     \end{array}
     \nomenclature[M]{$\tilde{T}$}{normalized eigenvectors matrix}
     \nomenclature[M]{$\tilde{\Lambda}$}{normalized eigenvalues matrix}
+    \label{eq: T Labmda T^-1}
 \end{equation}
 Where:
 \begin{equation*}
@@ -672,7 +537,6 @@ Where:
                 \displaystyle\tilde{E}_i^{n+1}=\tilde{E}_i^{n}+\tilde{A}_i^n\Delta\tilde{Q}_i^n
             \end{array}
         \end{equation}
-
     \item $\tilde{V_1}_{i}^{n+1}$ Estimation 
         \begin{equation}
             \begin{array}{c}
@@ -784,5 +648,226 @@ For the implicit Steger-Warming scheme a matrix inversion is needed as follows:
             \end{pmatrix},\hspace{1cm} & \displaystyle\left.\parder{\tilde{\mu}}{\tilde{x}}\right|_i=\frac{\tilde{\mu}_{i+1}-\tilde{\mu}_{i-1}}{2\Delta\tilde{x}}
     \end{matrix}
 \end{equation}
+
+\subsection{FDS -- First Order Explicit Roe}
+The normalized Navier-Stokes equations as written in Eq.\ref{eq: normalized N-S}:
+\begin{equation}
+    \parder{\tilde{Q}}{\tilde{t}}+\parder{\tilde{E}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
+\end{equation}
+In linearized form:
+\begin{equation}
+    \parder{\tilde{Q}}{\tilde{t}}+\tilde{A}\parder{\tilde{Q}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
+    \nomenclature[M]{$\hat{\tilde{A}}$}{normalized Roe's average matrix}
+\end{equation}
+The initial conditions are:
+\begin{equation*}
+    \tilde{Q}_{\left(x,0\right)}=\left\{\begin{array}{lr}
+        \tilde{Q}_L & \tilde{x}<\tilde{x}_0 \\\\
+        \tilde{Q}_R & \tilde{x}>\tilde{x}_0
+    \end{array}\right.
+\end{equation*}
+Roe's linear approximation to the 1-D Riemann problem is expressed as:
+\begin{equation}
+    \parder{\tilde{Q}}{\tilde{t}}+\hat{\tilde{A}}\parder{\tilde{Q}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
+\end{equation}
+Where $\hat{\tilde{A}}$ replaces the original jacobian matrix $\tilde{A}$ and referred to as Roe's average matrix. Roe's average matrix is assumed constant in this formulation and therefore the problem is linear. The components of Roe's average matrix are evaluated using average values of $\tilde{Q}$ at the interface separating the two states, $L$ and $R$, namely: $$\hat{\tilde{A}}=\hat{\tilde{A}}_{\left(\tilde{Q}_L,\tilde{Q}_R\right)}$$ By setting certain conditions on the matrix $\hat{\tilde{A}}$ the aforementioned "Property U" is obtained for the system of equations:
+\begin{itemize}
+    \item A linear mapping relates the vector $\tilde{Q}$ to the vector $\tilde{E}$
+    \item $\hat{\tilde{A}}_{\left(\tilde{Q}_L,\tilde{Q}_R\right)}\xrightarrow[\tilde{Q}_L\rightarrow\tilde{Q}_R\rightarrow\tilde{Q}]{}\tilde{A}_{\left(\tilde{Q}\right)}$
+    \item $\tilde{E}_R-\tilde{E}_L=\hat{\tilde{A}}\left(\tilde{Q}_R-\tilde{Q}_L\right)$
+    \item The eigenvalues of Roe's average matrix are real and linearly independent
+\end{itemize}
+The linear approximate problem is then hyperbolic and therefore Roe's average matrix may be diagonalized as follows:
+\begin{equation}
+    \hat{\tilde{A}}=\hat{\tilde{T}}\hat{\tilde{\Lambda}}\hat{\tilde{T}}^{-1}
+    \nomenclature[M]{$\hat{\tilde{T}}$}{normalized eigenvectors matrix of Roe's average matrix}
+    \nomenclature[M]{$\hat{\tilde{\Lambda}}$}{normalized eigenvalues matrix of Roe's average matrix}
+\end{equation}
+One can define now the following:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{cc||ccc||cc}
+        $\hat{\tilde{A}}^+=\hat{\tilde{T}}\hat{\tilde{\Lambda}}^+\hat{\tilde{T}}^{-1}$ &&& $\hat{\tilde{A}}^-=\hat{\tilde{T}}\hat{\tilde{\Lambda}}^-\hat{\tilde{T}}^{-1}$ &&& $\left|\hat{\tilde{A}}\right|=\hat{\tilde{T}}\left|\hat{\tilde{\Lambda}}\right|\hat{\tilde{T}}^{-1}$
+    \end{tabular}
+\end{table}
+\noindent Since Roe's average matrix can be split based on negative and positive waves (eigenvalues), the calculation of the fluxes may be split into contributions across negative and positive waves to determine appropriate formulae for the cell-face fluxes in the linear Riemann problem. \\
+Each interface has a series of waves emanating from it and traveling left and right as follows:
+\begin{equation}
+    \begin{array}{c}
+        \begin{array}{c|c}
+            \begin{array}{c}
+                \text{Starting from the left state, one has:} \\
+                \tilde{\tilde{E}}_{i+\frac{1}{2}}=\tilde{E}_L+\hat{\tilde{A}}^-\left(\tilde{Q}_R-\tilde{Q}_L\right)
+            \end{array} & \begin{array}{c}
+                \text{Starting from the right state results in:} \\
+                \tilde{E}_R=\tilde{\tilde{E}}_{i+\frac{1}{2}}+\hat{\tilde{A}}^+\left(\tilde{Q}_R-\tilde{Q}_L\right)
+            \end{array}
+        \end{array} \\\\
+        \Downarrow\hspace{12pt} \\\\
+        \left\{\begin{array}{rcl}
+            \tilde{\tilde{E}}_{i+\frac{1}{2}} & = & \tilde{E}_L+\hat{\tilde{A}}^-\left(\tilde{Q}_R-\tilde{Q}_L\right) \\\\
+            \tilde{\tilde{E}}_{i+\frac{1}{2}} & = & \tilde{E}_R-\hat{\tilde{A}}^+\left(\tilde{Q}_R-\tilde{Q}_L\right)
+        \end{array}\right.
+    \end{array}
+    \nomenclature[V]{$\tilde{\tilde{E}}$}{normalized average flux vector}
+\end{equation}
+By way of averaging, the interface flux becomes:
+\begin{equation}
+    \tilde{\tilde{E}}_{i+\frac{1}{2}}=\frac{1}{2}\left(\tilde{E}_L+\tilde{E}_R\right)-\frac{1}{2}\left|\hat{\tilde{A}}\right|\left(\tilde{Q}_R-\tilde{Q}_L\right)
+\end{equation}
+
+\subsubsection{Constructing The Roe Matrix}
+Let $\tilde{H}$ be the normalized total enthalpy:
+\begin{equation*}
+    \tilde{H}=\tilde{h}+\frac{1}{2}\tilde{u}^2=\frac{\tilde{e}+\tilde{p}}{\tilde{\rho}}
+    \nomenclature{$\tilde{H}$}{normalized total enthalpy}
+\end{equation*}
+One can rewrite the vectors $\tilde{Q}$ and $\tilde{E}$ in terms of the normalized total enthalpy instead of the normalized total energy $\tilde{e}$ as follows:
+\begin{equation}
+    \begin{matrix}
+        \tilde{Q}=\begin{pmatrix}
+            \tilde{\rho} \\\\
+            \tilde{\rho}\tilde{u} \\\\
+            \displaystyle\frac{\tilde{\rho}\tilde{H}}{\gamma}+\frac{\gamma-1}{2\gamma}\tilde{\rho}\tilde{u}^2
+        \end{pmatrix},\hspace{1cm} & \tilde{E}=\begin{pmatrix}
+            \tilde{\rho}\tilde{u} \\\\
+            \displaystyle\frac{\gamma-1}{\gamma}\tilde{\rho}\tilde{H}+\frac{\gamma+1}{2\gamma}\tilde{\rho}\tilde{u}^2 \\\\
+            \tilde{\rho}\tilde{u}\tilde{H}
+        \end{pmatrix}
+    \end{matrix}
+\end{equation}
+The jacobian matrix $\tilde{A}$ can also be expressed in terms of the total enthalpy:
+\begin{equation}
+    \tilde{A}=\begin{pmatrix}
+        0 & 1 & 0 \\\\
+        \displaystyle\frac{\gamma-3}{2}\tilde{u}^2 & \left(3-\gamma\right)\tilde{u} & \gamma-1 \\\\
+        \displaystyle\frac{1}{2}\left(\gamma-1\right)\tilde{u}^3-\tilde{u}\tilde{H} & \tilde{H}-\left(\gamma-1\right)\tilde{u}^2 & \gamma\tilde{u}
+    \end{pmatrix}
+\end{equation}
+Let the vector $\tilde{Z}$ be defined as:
+\begin{equation*}
+    \tilde{Z}=\sqrt{\tilde{\rho}}\begin{pmatrix}
+        1 \\
+        \tilde{u} \\
+        \tilde{H}
+    \end{pmatrix}
+\end{equation*}
+The vectors $\tilde{Q}$ and $\tilde{E}$ can be expressed as quadratic functions of the variable $\tilde{Z}$:
+\begin{equation}
+    \begin{matrix}
+        \tilde{Q}=\begin{pmatrix}
+            \tilde{z}_1^2 \\\\
+            \tilde{z}_1\tilde{z}_2 \\\\
+            \displaystyle\frac{\tilde{z}_1\tilde{z}_3}{\gamma}+\frac{\gamma-1}{2\gamma}\tilde{z}_2^2
+        \end{pmatrix},\hspace{1cm} & \tilde{E}=\begin{pmatrix}
+            \tilde{z}_1\tilde{z}_2 \\\\
+            \displaystyle\frac{\gamma-1}{\gamma}\tilde{z}_1\tilde{z}_3+\frac{\gamma+1}{2\gamma}\tilde{z}_2^2 \\\\
+            \tilde{z}_2\tilde{z}_3
+        \end{pmatrix}
+    \end{matrix}
+\end{equation}
+Define:
+\begin{equation}
+    \bar{\tilde{x}}\triangleq\frac{1}{2}\left(\tilde{x}_L+\tilde{x}_R\right)
+\end{equation}
+Applying the above formula results in:
+\begin{equation}
+    \begin{matrix}
+        \left\{\begin{array}{rcl}
+            \tilde{Q}_R-\tilde{Q}_L & = & \tilde{B}\left(\tilde{z}_R-\tilde{z}_L\right) \\\\
+            \tilde{E}_R-\tilde{E}_L & = & \tilde{C}\left(\tilde{z}_R-\tilde{z}_L\right)
+        \end{array}\right. & \Rightarrow & \tilde{E}_R-\tilde{E}_L=\tilde{C}\tilde{B}^{-1}\left(\tilde{Q}_R-\tilde{Q}_L\right)
+        \nomenclature[M]{$\tilde{B},\ \tilde{C}$}{deconstruction of Roe's average matrix}
+    \end{matrix}
+\end{equation}
+Where the matrices $\tilde{B}$ and $\tilde{C}$:
+\begin{equation}
+    \begin{matrix}
+        \tilde{B}=\begin{pmatrix}
+            2\bar{\tilde{z}}_1 & 0 & 0 \\\\
+            \bar{\tilde{z}}_2 & \bar{\tilde{z}}_1 & 0 \\\\
+            \displaystyle\frac{\bar{\tilde{z}}_3}{\gamma} & \displaystyle\frac{\gamma-1}{\gamma}\bar{\tilde{z}}_2 & \displaystyle\frac{\bar{\tilde{z}}_1}{\gamma}
+        \end{pmatrix},\hspace{1cm} & \tilde{C}=\begin{pmatrix}
+            \bar{\tilde{z}}_2 & \bar{\tilde{z}}_1 & 0 \\\\
+            \displaystyle\frac{\gamma-1}{\gamma}\bar{\tilde{z}}_3 & \displaystyle\frac{\gamma+1}{\gamma}\bar{\tilde{z}}_2 & \displaystyle\frac{\gamma-1}{\gamma}\bar{\tilde{z}}_1 \\\\
+            0 & \bar{\tilde{z}}_3 & \bar{\tilde{z}}_2
+        \end{pmatrix}
+    \end{matrix}
+\end{equation}
+The matrix $\hat{\tilde{A}}=\tilde{C}\tilde{B}^{-1}$ is identical to the matrix $\tilde{A}$ if the original variables $\left(\tilde{\rho},\ \tilde{u},\text{ and }\tilde{H}\right)$ are replaced by an average weighted by the square root of the density, namely:
+\begin{equation}
+    \left\{\begin{array}{rclcl}
+        \displaystyle\hat{\tilde{\rho}}_{1+\frac{1}{2}} & = & \sqrt{\displaystyle\tilde{\rho}_L\tilde{\rho}_R} & = & \tilde{\mathcal{R}}_{i+\frac{1}{2}}\tilde{\rho}_L\\\\
+        \displaystyle\hat{\tilde{u}}_{i+\frac{1}{2}} & = & \frac{\displaystyle\sqrt{\tilde{\rho}_L}\tilde{u}_L+\sqrt{\tilde{\rho}_R}\tilde{u}_R}{\displaystyle\sqrt{\tilde{\rho}_L}+\sqrt{\tilde{\rho}_R}} & = & \displaystyle\frac{\tilde{u}_L+\tilde{\mathcal{R}}_{i+\frac{1}{2}}\tilde{u}_R}{1+\tilde{\mathcal{R}}_{i+\frac{1}{2}}}\\\\
+        \displaystyle\hat{\tilde{H}}_{i+\frac{1}{2}} & = & \frac{\displaystyle\sqrt{\tilde{\rho}_L}\tilde{H}_L+\sqrt{\tilde{\rho}_R}\tilde{H}_R}{\displaystyle\sqrt{\tilde{\rho}_L}+\sqrt{\tilde{\rho}_R}} & = & \displaystyle\frac{\tilde{H}_L+\tilde{\mathcal{R}}_{i+\frac{1}{2}}\tilde{H}_R}{1+\tilde{\mathcal{R}}_{i+\frac{1}{2}}} 
+    \end{array}\right.
+    \nomenclature[P]{$\hat{\tilde{\rho}}$}{normalized average density}
+    \nomenclature[P]{$\hat{\tilde{u}}$}{normalized average velocity}
+    \nomenclature[P]{$\hat{\tilde{H}}$}{normalized average total enthalpy}
+\end{equation}
+Where:
+\begin{equation*}
+    \tilde{\mathcal{R}}_{i+\frac{1}{2}}=\sqrt{\displaystyle\frac{\tilde{\rho}_R}{\tilde{\rho}_L}}
+\end{equation*}
+
+\subsubsection{The Roe's Average Matrix}
+The Roe average matrix $\hat{\tilde{A}}$ is therefore given by:
+\begin{equation}
+    \hat{\tilde{A}}_{i+\frac{1}{2}}=\begin{pmatrix}
+        0 & 1 & 0 \\\\
+        \displaystyle\frac{\gamma-3}{2}\hat{\tilde{u}}^2 & \left(3-\gamma\right)\hat{\tilde{u}} & \gamma-1 \\\\
+        \displaystyle\frac{1}{2}\left(\gamma-1\right)\hat{\tilde{u}}^3-\hat{\tilde{u}}\hat{\tilde{H}} & \hat{\tilde{H}}-\left(\gamma-1\right)\hat{\tilde{u}}^2 & \gamma\hat{\tilde{u}}
+    \end{pmatrix}
+\end{equation}
+The matrices $\hat{\tilde{T}},\ \hat{\tilde{\Lambda}},\text{ and }\hat{\tilde{T}}^{-1}$ are obtained in the same manner as in Eq.\ref{eq: T Labmda T^-1}:
+\begin{equation}
+    \begin{array}{c}
+        \hat{\tilde{T}}=\begin{pmatrix}
+            1 & \displaystyle\frac{\hat{\tilde{\rho}}}{2\hat{\tilde{a}}} & \displaystyle-\frac{\hat{\tilde{\rho}}}{2\hat{\tilde{a}}} \\\\
+            \hat{\tilde{u}} & \displaystyle\frac{\hat{\tilde{\rho}}}{2\hat{\tilde{a}}}\left(\hat{\tilde{u}}+\hat{\tilde{a}}\right) & \displaystyle-\frac{\hat{\tilde{\rho}}}{2\hat{\tilde{a}}}\left(\hat{\tilde{u}}-\hat{\tilde{a}}\right) \\\\
+            \displaystyle\frac{\hat{\tilde{u}}^2}{2} & \displaystyle\frac{\hat{\tilde{\rho}}}{2\hat{\tilde{a}}}\left(\hat{\tilde{H}}+\hat{\tilde{u}}\hat{\tilde{a}}\right) & \displaystyle-\frac{\hat{\tilde{\rho}}}{2\hat{\tilde{a}}}\left(\hat{\tilde{H}}-\hat{\tilde{u}}\hat{\tilde{a}}\right)
+        \end{pmatrix} \\\\
+        \hat{\tilde{\Lambda}}=\begin{pmatrix}
+            \hat{\tilde{u}} & 0 & 0 \\
+            0 & \hat{\tilde{u}}+\hat{\tilde{a}} & 0 \\
+            0 & 0 & \hat{\tilde{u}}-\hat{\tilde{a}}
+        \end{pmatrix} \\\\
+        \hat{\tilde{T}}^{-1}=\begin{pmatrix}
+            \displaystyle1-\frac{\gamma-1}{2}\frac{\hat{\tilde{u}}^2}{\hat{\tilde{a}}^2} & \displaystyle\left(\gamma-1\right)\frac{\hat{\tilde{u}}^2}{\hat{\tilde{a}}^2} & \displaystyle-\frac{\gamma-1}{\hat{\tilde{a}}^2} \\\\
+            \displaystyle\frac{1}{\hat{\tilde{\rho}}\hat{\tilde{a}}}\left(\left(\gamma-1\right)\hat{\tilde{u}}^2-\hat{\tilde{u}}\hat{\tilde{a}}\right) & \displaystyle\frac{1}{\hat{\tilde{\rho}}\hat{\tilde{a}}}\left(\hat{\tilde{a}}-\left(\gamma-1\right)\hat{\tilde{u}}\right) & \displaystyle\frac{\gamma-1}{\hat{\tilde{\rho}}\hat{\tilde{a}}} \\\\
+            \displaystyle-\frac{1}{\hat{\tilde{\rho}}\hat{\tilde{a}}}\left(\left(\gamma-1\right)\hat{\tilde{u}}^2+\hat{\tilde{u}}\hat{\tilde{a}}\right) & \displaystyle\frac{1}{\hat{\tilde{\rho}}\hat{\tilde{a}}}\left(\hat{\tilde{a}}+\left(\gamma-1\right)\hat{\tilde{u}}\right) & \displaystyle-\frac{\gamma-1}{\hat{\tilde{\rho}}\hat{\tilde{a}}}
+        \end{pmatrix}
+    \end{array}
+\end{equation}
+Where:
+\begin{equation*}
+    \hat{\tilde{a}}=\sqrt{\left(\gamma-1\right)\left(\hat{\tilde{H}}-\frac{1}{2}\hat{\tilde{u}}^2\right)}
+\end{equation*}
+
+\subsubsection{Entropy Fix}
+The formulation of the Roe's scheme admits an expansion shock as a perfectly appropriate solution of the approximate problem. As a consequence, stationary expansion shocks are not dissipated by Roe's scheme. An appropriate entropy fix, but one that does not distinguish between shocks and expansions, is obtained by replacing the eigenvalues by:
+\begin{equation}
+    \begin{matrix}
+        \left|\hat{\tilde{\lambda}}_{i+\frac{1}{2}}\right| & \rightarrow & \beta\left(\hat{\tilde{\lambda}}_{i+\frac{1}{2}}\right) & = & \left\{\begin{array}{cc}
+            \left|\hat{\tilde{\lambda}}_{i+\frac{1}{2}}\right| & \left|\hat{\tilde{\lambda}}_{i+\frac{1}{2}}\right|\ge\varepsilon \\\\
+            \sqrt{\hat{\tilde{\lambda}}_{i+\frac{1}{2}}^2+\varepsilon^2} & \left|\hat{\tilde{\lambda}}_{i+\frac{1}{2}}\right|<\varepsilon
+        \end{array}\right.
+    \end{matrix}
+    \nomenclature{$\beta$}{entropy fixed eigenvalues}
+\end{equation}
+
+\subsubsection{The Scheme}
+A first order (in space), finite volume scheme is easily realized by the following steps:
+\begin{itemize}
+    \item Let the residual be defined as: $\displaystyle\tilde{\mathfrak{R}}_i^n=-\frac{1}{\Delta\tilde{x}}\left(\tilde{\tilde{E}}_{i+\frac{1}{2}}^n-\tilde{\tilde{E}}_{i-\frac{1}{2}}^n-\frac{M_\infty}{Re_{L\infty}}\left(\tilde{V}_{1,i+\frac{1}{2}}^{n}-\tilde{V}_{1,i-\frac{1}{2}}^{n}\right)\right)$
+    \item The numerical flux is: $\displaystyle\tilde{\tilde{E}}_{i+\frac{1}{2}}=\frac{1}{2}\left(\tilde{E}_{i}+\tilde{E}_{i+1}\right)-\frac{1}{2}\hat{\tilde{T}}_{i+\frac{1}{2}}\left|\hat{\tilde{\Lambda}}_{i+\frac{1}{2}}\right|\hat{\tilde{T}}^{-1}_{i+\frac{1}{2}}\left(\tilde{Q}_{i+1}-\tilde{Q}_{i}\right)$
+    \item A first order (in time) explicit scheme is given by: $\Delta\tilde{Q}_i^n=\Delta\tilde{t}\cdot\tilde{\mathfrak{R}}_i^n$
+    \nomenclature[V]{$\tilde{\mathfrak{R}}$}{residual of first order explicit Roe}
+\end{itemize}
+
+\section{The Results}
+\subsection{FVS -- First Order Explicit Steger-Warming}
+\subsection{FVS -- First Order Implicit Steger-Warming}
+\subsection{FDS -- First Order Explicit Roe}
 
 \end{document}
