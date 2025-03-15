@@ -13,6 +13,12 @@
 #define dprintF(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
 #define dprintD(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
 
+typedef enum {
+    EXPLICIT_SW  = (1 << 0),
+    IMPLICIT_SW  = (1 << 1),
+    EXPLICIT_ROE = (1 << 2),
+} t_flag;
+
 #ifdef __linux__
     #include <sys/stat.h>
     #include <dirent.h>
@@ -20,12 +26,15 @@
     int create_empty_dir(char *parent_directory);
 #endif
 
-void read_input(char *input_file, int *N, double *u0, double *u1, double *x_max, double *x_min, double *k, double *b, double *c, double *mu, double *CFL, double *w, double *theta, double *delta_x, double *delta_time, int *iterations, double *final_time);
+void read_input(char *input_file, int *N, double *x_min, double *x_max, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *Pr_inf, int *max_iterations, double *final_time, t_flag *flags);
 
 int main(int argc, char const *argv[])
 {
-/* declerations */
+/* declarations */
     char input_file[MAXDIR], output_dir[MAXDIR], temp_word[MAXWORD];
+    int N, max_iterations;
+    double x_min, x_max, Re_inf, M_inf, CFL, gamma,Pr_inf, final_time;
+    t_flag flags = 0;
 
 /* getting the input file and output file */
     if (--argc != 2 && argc != 4) {
@@ -49,6 +58,7 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* reading the input */
+    read_input(input_file, &N, &x_min, &x_max, &Re_inf, &M_inf, &CFL, &gamma, &Pr_inf, &max_iterations, &final_time, &flags);
 
 /* Checking the input */
     printf("--------------------\n");
@@ -66,7 +76,7 @@ int main(int argc, char const *argv[])
 /* allocating the matrices */
 
 /*------------------------------------------------------------*/
-/* initializtion */
+/* initialization */
 
 /*------------------------------------------------------------*/
 /* the loop */
@@ -82,9 +92,9 @@ int main(int argc, char const *argv[])
 
 #if ON_LINUX
 /* create empty dir at 'parent directory'.
-if allready exisest, delet all the files inside
+// if allready exists, delete all the files inside
 returns 0 on success
-this functin handls the errors so on fail just quit
+this function handles the errors so on fail just quit
 argument list:
 parent_directory - char pointer to the directory name */
 int create_empty_dir(char *parent_directory)
@@ -140,9 +150,9 @@ w          - double pointer
 theta      - double pointer
 delta_x    - double pointer 
 delta_time - double pointer 
-iterations - int pointer max number of desierd iterations 
+iterations - int pointer max number of desired iterations 
 final_time - int pointer to the final time of the program */
-void read_input(char *input_file, int *N, double *u0, double *u1, double *x_max, double *x_min, double *k, double *b, double *c, double *mu, double *CFL, double *w, double *theta, double *delta_x, double *delta_time, int *iterations, double *final_time)
+void read_input(char *input_file, int *N, double *x_min, double *x_max, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *Pr_inf, int *max_iterations, double *final_time, t_flag *flags)
 {
     char current_word[MAXWORD];
     float temp_f;
@@ -155,7 +165,6 @@ void read_input(char *input_file, int *N, double *u0, double *u1, double *x_max,
     while(fscanf(fp, "%s", current_word) != EOF) {
         if (!strcmp(current_word, "N")) {
             fscanf(fp, "%d", N);
-            *N = *N;
         } else if (!strcmp(current_word, "u0")) {
             fscanf(fp, "%g", &temp_f);
             *u0 = (double)temp_f;

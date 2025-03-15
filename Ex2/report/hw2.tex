@@ -28,7 +28,7 @@
   \ifstrequal{#1}{F}{Far--Away Properties}{%
   \ifstrequal{#1}{N}{Dimensionless Numbers}{%
   \ifstrequal{#1}{M}{Matrices}{%
-  \ifstrequal{#1}{D}{Diagonal}{%
+  \ifstrequal{#1}{D}{Diagonals}{%
   \ifstrequal{#1}{V}{Vectors}{%
   \ifstrequal{#1}{P}{Normalized Average Properties}{}}}}}}
 ]}
@@ -383,7 +383,7 @@ and $\textcolor{blue}{\alpha}$ is: $$\textcolor{blue}{\alpha=\frac{\gamma}{Pr_\i
 \nomenclature[M]{$\tilde{R}$}{normalized jacobian matrix of $E_\nu$ w.r.t. $Q_x$}
 
 \subsection{FVS -- First Order Explicit Steger-Warming}
-Like the Roe's average matrix the A matrix (from Eq.\ref{eq: A P R}) is a diagonalizable matrix and can be written as:
+Since the inviscid N-S equations (Euler equations) is a hyperbolic system of equations, the A matrix (from Eq.\ref{eq: A P R}) is a diagonalizable matrix and can be written as:
 \begin{equation}
     \begin{array}{c}
         \tilde{A}=\tilde{T}\tilde{\Lambda}\tilde{T}^{-1} \\
@@ -797,7 +797,7 @@ Where the matrices $\tilde{B}$ and $\tilde{C}$:
 The matrix $\hat{\tilde{A}}=\tilde{C}\tilde{B}^{-1}$ is identical to the matrix $\tilde{A}$ if the original variables $\left(\tilde{\rho},\ \tilde{u},\text{ and }\tilde{H}\right)$ are replaced by an average weighted by the square root of the density, namely:
 \begin{equation}
     \left\{\begin{array}{rclcl}
-        \displaystyle\hat{\tilde{\rho}}_{1+\frac{1}{2}} & = & \sqrt{\displaystyle\tilde{\rho}_L\tilde{\rho}_R} & = & \tilde{\mathcal{R}}_{i+\frac{1}{2}}\tilde{\rho}_L\\\\
+        \displaystyle\hat{\tilde{\rho}}_{1+\frac{1}{2}} & = & \displaystyle\sqrt{\displaystyle\tilde{\rho}_L\tilde{\rho}_R} & = & \tilde{\mathcal{R}}_{i+\frac{1}{2}}\tilde{\rho}_L\\\\
         \displaystyle\hat{\tilde{u}}_{i+\frac{1}{2}} & = & \frac{\displaystyle\sqrt{\tilde{\rho}_L}\tilde{u}_L+\sqrt{\tilde{\rho}_R}\tilde{u}_R}{\displaystyle\sqrt{\tilde{\rho}_L}+\sqrt{\tilde{\rho}_R}} & = & \displaystyle\frac{\tilde{u}_L+\tilde{\mathcal{R}}_{i+\frac{1}{2}}\tilde{u}_R}{1+\tilde{\mathcal{R}}_{i+\frac{1}{2}}}\\\\
         \displaystyle\hat{\tilde{H}}_{i+\frac{1}{2}} & = & \frac{\displaystyle\sqrt{\tilde{\rho}_L}\tilde{H}_L+\sqrt{\tilde{\rho}_R}\tilde{H}_R}{\displaystyle\sqrt{\tilde{\rho}_L}+\sqrt{\tilde{\rho}_R}} & = & \displaystyle\frac{\tilde{H}_L+\tilde{\mathcal{R}}_{i+\frac{1}{2}}\tilde{H}_R}{1+\tilde{\mathcal{R}}_{i+\frac{1}{2}}} 
     \end{array}\right.
@@ -810,7 +810,7 @@ Where:
     \tilde{\mathcal{R}}_{i+\frac{1}{2}}=\sqrt{\displaystyle\frac{\tilde{\rho}_R}{\tilde{\rho}_L}}
 \end{equation*}
 
-\subsubsection{The Roe's Average Matrix}
+\subsubsection{Roe's Average Matrix}
 The Roe average matrix $\hat{\tilde{A}}$ is therefore given by:
 \begin{equation}
     \hat{\tilde{A}}_{i+\frac{1}{2}}=\begin{pmatrix}

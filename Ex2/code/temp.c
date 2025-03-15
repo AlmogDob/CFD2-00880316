@@ -3,8 +3,6 @@
 int main(void)
 {
     printf("Hello, World!\n");
-    printf("E:%d\n", 'E');
-    printf("e:%d\n", 'e');
-    printf("_:%d\n", '_');
+    printf("%g", 1e3);
     return 0;
 }
