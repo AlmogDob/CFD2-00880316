@@ -1,5 +1,5 @@
 N
-101
+100
 
 x_min
 0.2
@@ -21,6 +21,9 @@ EXPLICIT_SW
 
 gamma
 1.4
+
+T_inf
+288.15
 
 Pr_inf
 0.71

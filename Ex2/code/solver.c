@@ -29,14 +29,18 @@ typedef enum {
     int create_empty_dir(char *parent_directory);
 #endif
 
-void read_input(char *input_file, int *N, double *x_min, double *x_max, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *Pr_inf, int *max_iterations, double *final_time, t_flag *flags);
+void read_input(char *input_file, int *N, double *x_min, double *x_max, double* L, double *delta_x, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *T_inf, double *Pr_inf, int *max_iterations, double *final_time, t_flag *flags);
+double calc_norm_mu(double norm_T, double gamma, double T_inf);
+double calc_norm_kappa(double norm_T, double gamma, double T_inf);
+double calc_norm_energy(double norm_p, double norm_rho, double norm_a, double gamma);
+void calc_T_matrix(Mat2D T_matrix, double gamma, double norm_rho, double norm_a, double norm_u);
 
 int main(int argc, char const *argv[])
 {
 /* declarations */
     char input_file[MAXDIR], output_dir[MAXDIR], temp_word[MAXWORD];
     int N, max_iterations;
-    double x_min, x_max, Re_inf, M_inf, CFL, gamma,Pr_inf, final_time;
+    double x_min, x_max, L, delta_x, Re_inf, M_inf, CFL, gamma, T_inf, Pr_inf, final_time;
     t_flag flags = 0;
 
 /* getting the input file and output file */
@@ -61,16 +65,19 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* reading the input */
-    read_input(input_file, &N, &x_min, &x_max, &Re_inf, &M_inf, &CFL, &gamma, &Pr_inf, &max_iterations, &final_time, &flags);
+    read_input(input_file, &N, &x_min, &x_max, &L, &delta_x, &Re_inf, &M_inf, &CFL, &gamma, &T_inf, &Pr_inf, &max_iterations, &final_time, &flags);
 
 /* Checking the input */
     dprintINT(N);
     dprintDOUBLE(x_min);
     dprintDOUBLE(x_max);
+    dprintDOUBLE(L);
+    dprintDOUBLE(delta_x);
     dprintDOUBLE(Re_inf);
     dprintDOUBLE(M_inf);
     dprintDOUBLE(CFL);
     dprintDOUBLE(gamma);
+    dprintDOUBLE(T_inf);
     dprintDOUBLE(Pr_inf);
     dprintDOUBLE(final_time);
     dprintINT(max_iterations);
@@ -161,11 +168,12 @@ Re_inf         - double pointer
 M_inf          - double pointer
 CFL            - double pointer
 gamma          - double pointer
+T_inf          - double pointer
 Pr_inf         - double pointer
 max_iterations - int pointer max number of desired iterations 
 final_time     - double pointer to the final time of the program
 flags          - bit flags */
-void read_input(char *input_file, int *N, double *x_min, double *x_max, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *Pr_inf, int *max_iterations, double *final_time, t_flag *flags)
+void read_input(char *input_file, int *N, double *x_min, double *x_max, double *L, double *delta_x, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *T_inf, double *Pr_inf, int *max_iterations, double *final_time, t_flag *flags)
 {
     char current_word[MAXWORD];
     float temp_f;
@@ -196,6 +204,9 @@ void read_input(char *input_file, int *N, double *x_min, double *x_max, double *
         } else if (!strcmp(current_word, "gamma")) {
             fscanf(fp, "%g", &temp_f);
             *gamma = (double)temp_f;
+        } else if (!strcmp(current_word, "T_inf")) {
+            fscanf(fp, "%g", &temp_f);
+            *T_inf = (double)temp_f;
         } else if (!strcmp(current_word, "Pr_inf")) {
             fscanf(fp, "%g", &temp_f);
             *Pr_inf = (double)temp_f;
@@ -216,6 +227,55 @@ void read_input(char *input_file, int *N, double *x_min, double *x_max, double *
             }
         }
     }
+    assert(*x_max > *x_min);
+    *L = *x_max - * x_min;
+    *delta_x = (*L) / (*N);
+
     fclose(fp);
+}
+
+double calc_norm_mu(double norm_T, double gamma, double T_inf)
+{
+    float constant = 110.4;
+
+    return (sqrt(gamma * norm_T) * norm_T * (T_inf + constant)) / (gamma * T_inf * norm_T + constant);
+}
+
+double calc_norm_kappa(double norm_T, double gamma, double T_inf)
+{
+    float constant = 194;
+
+    return (sqrt(gamma * norm_T) * norm_T * (T_inf + constant)) / (gamma * T_inf * norm_T + constant);
+}
+
+double calc_norm_energy(double norm_p, double norm_rho, double norm_a, double gamma)
+{
+    return (norm_p) / (gamma - 1) + 0.5 * norm_rho * norm_a * norm_a;
+}
+
+void calc_T_matrix(Mat2D T_matrix, double gamma, double norm_rho, double norm_a, double norm_u)
+{
+    MAT2D_AT(T_matrix, 1, 1) = 1;
+    MAT2D_AT(T_matrix, 1, 2) = norm_rho / 2 / norm_a;
+    MAT2D_AT(T_matrix, 1, 3) = - norm_rho / 2 / norm_a;
+    MAT2D_AT(T_matrix, 2, 1) = norm_u;
+    MAT2D_AT(T_matrix, 2, 2) = norm_rho / 2 / norm_a * (norm_u + norm_a);
+    MAT2D_AT(T_matrix, 2, 3) = - norm_rho / 2 / norm_a * (norm_u - norm_a);
+    MAT2D_AT(T_matrix, 3, 1) = norm_u * norm_u / 2;
+    MAT2D_AT(T_matrix, 3, 2) = norm_rho / 2 / norm_a * (norm_u * norm_u / 2 + norm_u * norm_a + norm_a * norm_a / (gamma - 1));
+    MAT2D_AT(T_matrix, 3, 3) = - norm_rho / 2 / norm_a * (norm_u * norm_u / 2 - norm_u * norm_a + norm_a * norm_a / (gamma - 1));
+}
+
+void calc_T_inverse_matrix(Mat2D T_inverse_matrix, double gamma, double norm_rho, double norm_a, double norm_u)
+{
+    MAT2D_AT(T_inverse_matrix, 1, 1) = 1;
+    MAT2D_AT(T_inverse_matrix, 1, 2) = 1;
+    MAT2D_AT(T_inverse_matrix, 1, 3) = 1;
+    MAT2D_AT(T_inverse_matrix, 2, 1) = 1;
+    MAT2D_AT(T_inverse_matrix, 2, 2) = 1;
+    MAT2D_AT(T_inverse_matrix, 2, 3) = 1;
+    MAT2D_AT(T_inverse_matrix, 3, 1) = 1;
+    MAT2D_AT(T_inverse_matrix, 3, 2) = 1;
+    MAT2D_AT(T_inverse_matrix, 3, 3) = 1;
 }
 
