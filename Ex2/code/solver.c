@@ -4,14 +4,17 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <limits.h>
+#define MATRIX2D_IMPLEMENTATION
+#include "Matrix2D.h"
 
 #define MAXDIR 1000
 #define MAXWORD MAXDIR
 #define PI M_PI
 #define dprintSTRING(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %s\n", expr);} while(0)   /* macro for easy debuging*/
 #define dprintINT(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %d\n", expr);} while(0)     /* macro for easy debuging*/
-#define dprintF(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
-#define dprintD(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
+#define dprintFLOUT(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
+#define dprintDOUBLE(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
+#define dprintSCHEME(expr) do{ printf("%s:%d: scheme = ", __FILE__, __LINE__); if (flags & EXPLICIT_SW) { printf("EXPLICIT_SW\n"); } else if (flags & IMPLICIT_SW) { printf("IMPLICIT_SW\n"); } else if (flags & EXPLICIT_ROE) { printf("EXPLICIT_ROE\n"); } } while(0)     /* macro for easy debuging*/
 
 typedef enum {
     EXPLICIT_SW  = (1 << 0),
@@ -61,7 +64,22 @@ int main(int argc, char const *argv[])
     read_input(input_file, &N, &x_min, &x_max, &Re_inf, &M_inf, &CFL, &gamma, &Pr_inf, &max_iterations, &final_time, &flags);
 
 /* Checking the input */
+    dprintINT(N);
+    dprintDOUBLE(x_min);
+    dprintDOUBLE(x_max);
+    dprintDOUBLE(Re_inf);
+    dprintDOUBLE(M_inf);
+    dprintDOUBLE(CFL);
+    dprintDOUBLE(gamma);
+    dprintDOUBLE(Pr_inf);
+    dprintDOUBLE(final_time);
+    dprintINT(max_iterations);
+    dprintSCHEME(flags);
     printf("--------------------\n");
+
+    Mat2D mat = mat2D_alloc(3, 3);
+    mat2D_fill(mat, 3);
+    MAT2D_PRINT(mat);
 
 /*------------------------------------------------------------*/
 /* creating output directory */
@@ -135,23 +153,18 @@ int create_empty_dir(char *parent_directory)
 
 /* read input parameters from input file
 argument list:
-input-file - file pointer to input file
-N          - int pointer
-u0         - double pointer
-u1         - double pointer
-x_max      - double pointer
-x_min      - double pointer
-k          - double pointer
-b          - double pointer
-c          - double pointer
-mu         - double pointer
-CFL        - double pointer
-w          - double pointer
-theta      - double pointer
-delta_x    - double pointer 
-delta_time - double pointer 
-iterations - int pointer max number of desired iterations 
-final_time - int pointer to the final time of the program */
+input-file     - file pointer to input file
+N              - int pointer
+x_min          - double pointer
+x_max          - double pointer
+Re_inf         - double pointer
+M_inf          - double pointer
+CFL            - double pointer
+gamma          - double pointer
+Pr_inf         - double pointer
+max_iterations - int pointer max number of desired iterations 
+final_time     - double pointer to the final time of the program
+flags          - bit flags */
 void read_input(char *input_file, int *N, double *x_min, double *x_max, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *Pr_inf, int *max_iterations, double *final_time, t_flag *flags)
 {
     char current_word[MAXWORD];
@@ -165,35 +178,44 @@ void read_input(char *input_file, int *N, double *x_min, double *x_max, double *
     while(fscanf(fp, "%s", current_word) != EOF) {
         if (!strcmp(current_word, "N")) {
             fscanf(fp, "%d", N);
-        } else if (!strcmp(current_word, "u0")) {
-            fscanf(fp, "%g", &temp_f);
-            *u0 = (double)temp_f;
-        } else if (!strcmp(current_word, "u1")) {
-            fscanf(fp, "%g", &temp_f);
-            *u1 = (double)temp_f;
         } else if (!strcmp(current_word, "x_max")) {
             fscanf(fp, "%g", &temp_f);
             *x_max = (double)temp_f;
         } else if (!strcmp(current_word, "x_min")) {
             fscanf(fp, "%g", &temp_f);
             *x_min = (double)temp_f;
-        } else if (!strcmp(current_word, "delta_x")) {
+        } else if (!strcmp(current_word, "Re_inf")) {
             fscanf(fp, "%g", &temp_f);
-            *delta_x = (double)temp_f;
-        } else if (!strcmp(current_word, "delta_time")) {
+            *Re_inf = (double)temp_f;
+        } else if (!strcmp(current_word, "M_inf")) {
             fscanf(fp, "%g", &temp_f);
-            *delta_time = (double)temp_f;
-        } else if (!strcmp(current_word, "k")) {
+            *M_inf = (double)temp_f;
+        } else if (!strcmp(current_word, "CFL")) {
             fscanf(fp, "%g", &temp_f);
-            *k = (double)temp_f;
-        } else if (!strcmp(current_word, "c")) {
+            *CFL = (double)temp_f;
+        } else if (!strcmp(current_word, "gamma")) {
             fscanf(fp, "%g", &temp_f);
-            *c = (double)temp_f;
-        } else if (!strcmp(current_word, "b")) {
+            *gamma = (double)temp_f;
+        } else if (!strcmp(current_word, "Pr_inf")) {
             fscanf(fp, "%g", &temp_f);
-            *b = (double)temp_f;
+            *Pr_inf = (double)temp_f;
+        } else if (!strcmp(current_word, "iterations")) {
+            fscanf(fp, "%g", &temp_f);
+            *max_iterations = (int)temp_f;
+        } else if (!strcmp(current_word, "final_time")) {
+            fscanf(fp, "%g", &temp_f);
+            *final_time = (double)temp_f;
+        } else if (!strcmp(current_word, "scheme")) {
+            fscanf(fp, "%s", current_word);
+            if (!strcmp(current_word, "EXPLICIT_SW")) {
+                *flags |= EXPLICIT_SW;
+            } else if (!strcmp(current_word, "IMPLICIT_SW")) {
+                *flags |= IMPLICIT_SW;
+            } else if (!strcmp(current_word, "EXPLICIT_ROE")) {
+                *flags |= EXPLICIT_ROE;
+            }
         }
     }
-
     fclose(fp);
 }
+
