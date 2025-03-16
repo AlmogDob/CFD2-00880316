@@ -39,7 +39,8 @@ size_t mat2D_offset2d(Mat2D m, size_t i, size_t j);
 void mat2D_fill(Mat2D m, double x);
 void mat2D_rand(Mat2D m, double low, double high);
 void mat2D_dot(Mat2D dst, Mat2D a, Mat2D b);
-void mat2D_sum(Mat2D dst, Mat2D a);
+void mat2D_add(Mat2D dst, Mat2D a);
+void mat2D_sub(Mat2D dst, Mat2D a);
 void mat2D_mult(Mat2D m, double factor);
 void mat2D_print(Mat2D m, const char *name, size_t padding);
 void mat2D_identity_mat(Mat2D m);
@@ -71,7 +72,7 @@ void mat2D_free(Mat2D m)
 size_t mat2D_offset2d(Mat2D m, size_t i, size_t j)
 {
     assert(i < m.rows && j < m.cols);
-    return i * m.cols + j;
+    return i * m.stride + j;
 }
 
 void mat2D_fill(Mat2D m, double x)
@@ -109,13 +110,24 @@ void mat2D_dot(Mat2D dst, Mat2D a, Mat2D b)
 
 }
 
-void mat2D_sum(Mat2D dst, Mat2D a)
+void mat2D_add(Mat2D dst, Mat2D a)
 {
     MATRIX2D_ASSERT(dst.rows == a.rows);
     MATRIX2D_ASSERT(dst.cols == a.cols);
     for (size_t i = 0; i < dst.rows; ++i) {
         for (size_t j = 0; j < dst.cols; ++j) {
             MAT2D_AT(dst, i, j) += MAT2D_AT(a, i, j);
+        }
+    }
+}
+
+void mat2D_sub(Mat2D dst, Mat2D a)
+{
+    MATRIX2D_ASSERT(dst.rows == a.rows);
+    MATRIX2D_ASSERT(dst.cols == a.cols);
+    for (size_t i = 0; i < dst.rows; ++i) {
+        for (size_t j = 0; j < dst.cols; ++j) {
+            MAT2D_AT(dst, i, j) -= MAT2D_AT(a, i, j);
         }
     }
 }
@@ -158,17 +170,33 @@ void mat2D_identity_mat(Mat2D m)
     }
 }
 
-void mat2D_copy(Mat2D res, Mat2D src)
+void mat2D_copy(Mat2D des, Mat2D src)
 {
-    MATRIX2D_ASSERT(res.cols == src.cols);
-    MATRIX2D_ASSERT(res.rows == src.rows);
+    MATRIX2D_ASSERT(des.cols == src.cols);
+    MATRIX2D_ASSERT(des.rows == src.rows);
 
-    for (size_t i = 0; i < res.rows; ++i) {
-        for (size_t j = 0; j < res.cols; ++j) {
-            MAT2D_AT(res, i, j) = MAT2D_AT(src, i, j);
+    for (size_t i = 0; i < des.rows; ++i) {
+        for (size_t j = 0; j < des.cols; ++j) {
+            MAT2D_AT(des, i, j) = MAT2D_AT(src, i, j);
         }
     }
     
+}
+
+void mat2D_get_col(Mat2D des, Mat2D src, size_t j)
+{
+    MATRIX2D_ASSERT(j < src.cols);
+    MATRIX2D_ASSERT(des.rows == src.rows);
+    MATRIX2D_ASSERT(1 == des.cols);
+
+    for (size_t i = 0; i < des.rows; i++) {
+        MAT2D_AT(des, i, 0) = MAT2D_AT(src, i, j);
+    }
+}
+
+double mat2D_calc_norma(Mat2D m)
+{
+
 }
 
 #endif // MATRIX2D_IMPLEMENTATION

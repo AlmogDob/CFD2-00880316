@@ -14,6 +14,7 @@
 #define dprintINT(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %d\n", expr);} while(0)     /* macro for easy debuging*/
 #define dprintFLOUT(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
 #define dprintDOUBLE(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
+#define dprintSIZE_T(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %zu\n", expr);} while(0)     /* macro for easy debuging*/
 #define dprintSCHEME(expr) do{ printf("%s:%d: scheme = ", __FILE__, __LINE__); if (flags & EXPLICIT_SW) { printf("EXPLICIT_SW\n"); } else if (flags & IMPLICIT_SW) { printf("IMPLICIT_SW\n"); } else if (flags & EXPLICIT_ROE) { printf("EXPLICIT_ROE\n"); } } while(0)     /* macro for easy debuging*/
 
 typedef enum {
@@ -30,11 +31,12 @@ typedef enum {
     int create_empty_dir(char *parent_directory);
 #endif
 
-void read_input(char *input_file, int *N, double *x_min, double *x_max, double* L, double *delta_x, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *T_inf, double *Pr_inf, int *max_iterations, double *final_time, t_flag *flags);
+void read_input(char *input_file, int *N, double *x_min, double *x_max, double *L, double *norm_delta_x, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *Pr_inf, double *R_specific, double *T_inf, int *max_iterations, double *final_time, t_flag *flags);
 double calc_norm_mu(double norm_T, double gamma, double T_inf);
 double calc_norm_kappa(double norm_T, double gamma, double T_inf);
 double calc_norm_energy(double gamma, double norm_rho, double norm_u, double norm_p);
 double calc_norm_p(double gamma, double norm_rho, double norm_u, double norm_e);
+double calc_norm_T(Mat2D Q, double gamma, int i);
 void calc_T_matrix_at_i(Mat2D T_matrix, Mat2D Q, double gamma, int i);
 void calc_T_inverse_matrix_at_i(Mat2D T_inverse_matrix, Mat2D Q, double gamma, int i);
 void calc_lambda_plus_matrix_at_i(Mat2D lambda_plus_matrix, Mat2D Q, double gamma, int i, double epsilon);
@@ -42,16 +44,17 @@ void calc_lambda_minus_matrix_at_i(Mat2D lambda_minus_matrix, Mat2D Q, double ga
 void initialize_Q(char *init_conditions_file, Mat2D Q, double gamma, int N);
 void apply_BC(Mat2D Q, int N);
 void calc_vector_of_E(Mat2D E, Mat2D Q, double gamma, int N);
-void calc_vector_of_tilde_norm_E(Mat2D tilde_norm_E, Mat2D Q, Mat2D norm_T, Mat2D norm_inverse_T, Mat2D norm_lambda, Mat2D norm_A, Mat2D m_temp, Mat2D Q_index, Mat2D temp_3_by_1, Mat2D E_at_index, double gamma, double epsilon, int N);
+void calc_vector_of_tilde_norm_E_at_half(Mat2D tilde_norm_E, Mat2D Q, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double gamma, double epsilon, int N);
+void calc_vector_of_norm_V1_at_half(Mat2D V1, Mat2D Q, double gamma, double Pr_inf, double T_inf, double norm_delta_x, int N);
 
 int main(int argc, char const *argv[])
 {
 /* declarations */
     char input_file[MAXDIR], init_conditions_file[MAXDIR], output_dir[MAXDIR], temp_word[MAXWORD];
     int N, max_iterations;
-    double x_min, x_max, L, delta_x, Re_inf, M_inf, CFL, gamma, T_inf, Pr_inf, final_time, epsilon = 1e-2;
+    double x_min, x_max, L, norm_delta_x, Re_inf, M_inf, CFL, gamma, Pr_inf, R_specific, T_inf, final_time, epsilon = 1e-2;
     t_flag flags = 0;
-    Mat2D init_Q, current_Q, next_Q, work_3_by_N_2_mat1, work_3_by_N_2_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3;
+    Mat2D init_Q, current_Q, next_Q, delta_Q, work_3_by_N_2_mat1, work_3_by_N_2_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3;
 
 /* getting the input file and output file */
     if (--argc != 3) {
@@ -82,20 +85,21 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* reading the input */
-    read_input(input_file, &N, &x_min, &x_max, &L, &delta_x, &Re_inf, &M_inf, &CFL, &gamma, &T_inf, &Pr_inf, &max_iterations, &final_time, &flags);
+    read_input(input_file, &N, &x_min, &x_max, &L, &norm_delta_x, &Re_inf, &M_inf, &CFL, &gamma, &Pr_inf, &R_specific, &T_inf, &max_iterations, &final_time, &flags);
 
 /* Checking the input */
     dprintINT(N);
     dprintDOUBLE(x_min);
     dprintDOUBLE(x_max);
     dprintDOUBLE(L);
-    dprintDOUBLE(delta_x);
+    dprintDOUBLE(norm_delta_x);
     dprintDOUBLE(Re_inf);
     dprintDOUBLE(M_inf);
     dprintDOUBLE(CFL);
     dprintDOUBLE(gamma);
-    dprintDOUBLE(T_inf);
     dprintDOUBLE(Pr_inf);
+    dprintDOUBLE(R_specific);
+    dprintDOUBLE(T_inf);
     dprintDOUBLE(final_time);
     dprintINT(max_iterations);
     dprintSCHEME(flags);
@@ -112,11 +116,13 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* allocating the matrices */
-    mat2D_alloc(&init_Q           , 3, N+2);
-    mat2D_alloc(&current_Q        , 3, N+2);
-    mat2D_alloc(&next_Q           , 3, N+2);
+    mat2D_alloc(&init_Q            , 3, N+2);
+    mat2D_alloc(&current_Q         , 3, N+2);
+    mat2D_alloc(&next_Q            , 3, N+2);
     mat2D_alloc(&work_3_by_N_2_mat1, 3, N+2);
     mat2D_alloc(&work_3_by_N_2_mat2, 3, N+2);
+
+    mat2D_alloc(&delta_Q , 3, N);
 
     mat2D_alloc(&work_3_3_mat1 , 3, 3);
     mat2D_alloc(&work_3_3_mat2 , 3, 3);
@@ -134,7 +140,7 @@ int main(int argc, char const *argv[])
     // mat2D_fill(m1, 3);
     // mat2D_fill(m2, 2);
 
-    // mat2D_sum(m2, m1);
+    // mat2D_add(m2, m1);
     // MAT2D_PRINT(m1);
     // MAT2D_PRINT(m2);
 
@@ -147,10 +153,10 @@ int main(int argc, char const *argv[])
 /*------------------------------------------------------------*/
 /* the loop */
     calc_vector_of_E(work_3_by_N_2_mat1, init_Q, gamma, N);
-    calc_vector_of_tilde_norm_E(work_3_by_N_2_mat2, init_Q, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3, gamma, epsilon, N);
+    calc_vector_of_tilde_norm_E_at_half(work_3_by_N_2_mat2, init_Q, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3, gamma, epsilon, N);
 
     // MAT2D_PRINT(work_3_by_N_2_mat1);
-    MAT2D_PRINT(work_3_by_N_2_mat2);
+    // MAT2D_PRINT(work_3_by_N_2_mat2);
     
     // int i = 15;
     // Mat2D A_p;
@@ -185,8 +191,8 @@ int main(int argc, char const *argv[])
     // mat2D_dot(work_3_3_mat1, work_3_3_mat5, work_3_3_mat4);
     // mat2D_dot(A_m, work_3_3_mat3, work_3_3_mat1);
 
-    // mat2D_sum(A, A_m);
-    // mat2D_sum(A, A_p);
+    // mat2D_add(A, A_m);
+    // mat2D_add(A, A_p);
 
     // MAT2D_PRINT(A_m);
     // MAT2D_PRINT(A_p);
@@ -277,7 +283,7 @@ Pr_inf         - double pointer
 max_iterations - int pointer max number of desired iterations 
 final_time     - double pointer to the final time of the program
 flags          - bit flags */
-void read_input(char *input_file, int *N, double *x_min, double *x_max, double *L, double *delta_x, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *T_inf, double *Pr_inf, int *max_iterations, double *final_time, t_flag *flags)
+void read_input(char *input_file, int *N, double *x_min, double *x_max, double *L, double *norm_delta_x, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *Pr_inf, double *R_specific, double *T_inf, int *max_iterations, double *final_time, t_flag *flags)
 {
     char current_word[MAXWORD];
     float temp_f;
@@ -308,12 +314,15 @@ void read_input(char *input_file, int *N, double *x_min, double *x_max, double *
         } else if (!strcmp(current_word, "gamma")) {
             fscanf(fp, "%g", &temp_f);
             *gamma = (double)temp_f;
-        } else if (!strcmp(current_word, "T_inf")) {
-            fscanf(fp, "%g", &temp_f);
-            *T_inf = (double)temp_f;
         } else if (!strcmp(current_word, "Pr_inf")) {
             fscanf(fp, "%g", &temp_f);
             *Pr_inf = (double)temp_f;
+        } else if (!strcmp(current_word, "R_specific")) {
+            fscanf(fp, "%g", &temp_f);
+            *R_specific = (double)temp_f;
+        } else if (!strcmp(current_word, "T_inf")) {
+            fscanf(fp, "%g", &temp_f);
+            *T_inf = (double)temp_f;
         } else if (!strcmp(current_word, "iterations")) {
             fscanf(fp, "%g", &temp_f);
             *max_iterations = (int)temp_f;
@@ -331,9 +340,10 @@ void read_input(char *input_file, int *N, double *x_min, double *x_max, double *
             }
         }
     }
+
     assert(*x_max > *x_min);
     *L = *x_max - * x_min;
-    *delta_x = (*L) / (*N);
+    *norm_delta_x = (*L) / (*N) / (*L);
 
     fclose(fp);
 }
@@ -360,6 +370,16 @@ double calc_norm_energy(double gamma, double norm_rho, double norm_u, double nor
 double calc_norm_p(double gamma, double norm_rho, double norm_u, double norm_e)
 {
     return (gamma - 1) * (norm_e - 0.5 * norm_rho * norm_u * norm_u);
+}
+
+double calc_norm_T(Mat2D Q, double gamma, int i)
+{
+    double norm_rho = MAT2D_AT(Q, 0, i);
+    double norm_u = MAT2D_AT(Q, 1, i) / norm_rho;
+    double norm_e = MAT2D_AT(Q, 2, i);
+    double norm_p = calc_norm_p(gamma, norm_rho, norm_u, norm_e);
+
+    return norm_p / norm_rho;
 }
 
 void calc_T_matrix_at_i(Mat2D T_matrix, Mat2D Q, double gamma, int i)
@@ -506,8 +526,19 @@ void calc_vector_of_E(Mat2D E, Mat2D Q, double gamma, int N)
     }
 }
 
-void calc_vector_of_tilde_norm_E(Mat2D tilde_norm_E, Mat2D Q, Mat2D norm_T, Mat2D norm_inverse_T, Mat2D norm_lambda, Mat2D norm_A, Mat2D m_temp, Mat2D Q_index, Mat2D temp_3_by_1, Mat2D E_at_index, double gamma, double epsilon, int N)
+void calc_vector_of_tilde_norm_E_at_half(Mat2D tilde_norm_E, Mat2D Q, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double gamma, double epsilon, int N)
 {
+    Mat2D norm_T, norm_inverse_T, norm_lambda, norm_A, m_temp, Q_index, temp_3_by_1, E_at_index;
+
+    norm_T         = work_3_3_mat1;
+    norm_inverse_T = work_3_3_mat2;
+    norm_lambda    = work_3_3_mat3;
+    norm_A         = work_3_3_mat4;
+    m_temp         = work_3_3_mat5;
+    Q_index        = work_3_1_mat1;
+    temp_3_by_1    = work_3_1_mat2;
+    E_at_index     = work_3_1_mat3;
+
     for (int i = 0; i <= N; i++) {
         mat2D_fill(E_at_index, 0);
 
@@ -525,7 +556,7 @@ void calc_vector_of_tilde_norm_E(Mat2D tilde_norm_E, Mat2D Q, Mat2D norm_T, Mat2
         MAT2D_AT(Q_index, 1, 0) = MAT2D_AT(Q, 1, i);
         MAT2D_AT(Q_index, 2, 0) = MAT2D_AT(Q, 2, i);
         mat2D_dot(temp_3_by_1, norm_A, Q_index);
-        mat2D_sum(E_at_index, temp_3_by_1);
+        mat2D_add(E_at_index, temp_3_by_1);
 
         /* norm_A_minus */
         calc_T_matrix_at_i(norm_T, Q, gamma, i+1);
@@ -541,7 +572,7 @@ void calc_vector_of_tilde_norm_E(Mat2D tilde_norm_E, Mat2D Q, Mat2D norm_T, Mat2
         MAT2D_AT(Q_index, 1, 0) = MAT2D_AT(Q, 1, i+1);
         MAT2D_AT(Q_index, 2, 0) = MAT2D_AT(Q, 2, i+1);
         mat2D_dot(temp_3_by_1, norm_A, Q_index);
-        mat2D_sum(E_at_index, temp_3_by_1);
+        mat2D_add(E_at_index, temp_3_by_1);
 
         /* copying to vector of tilde norm E */
         MAT2D_AT(tilde_norm_E, 0, i) = MAT2D_AT(E_at_index, 0, 0);
@@ -549,3 +580,73 @@ void calc_vector_of_tilde_norm_E(Mat2D tilde_norm_E, Mat2D Q, Mat2D norm_T, Mat2
         MAT2D_AT(tilde_norm_E, 2, i) = MAT2D_AT(E_at_index, 2, 0);
     }
 }
+
+void calc_vector_of_norm_V1_at_half(Mat2D V1, Mat2D Q, double gamma, double Pr_inf, double T_inf, double norm_delta_x, int N)
+{
+    double norm_mu_at_half, norm_du_dx_at_half, norm_u_at_half, norm_kappa_at_half, norm_dT_dx_at_half, norm_T_i, norm_T_ip1, norm_u_i, norm_u_ip1;
+
+    for (int i = 0; i <= N; i++) {
+        norm_T_i = calc_norm_T(Q, gamma, i);
+        norm_T_ip1 = calc_norm_T(Q, gamma, i+1);
+        norm_u_i = MAT2D_AT(Q, 1, i) / MAT2D_AT(Q, 0, i);
+        norm_u_ip1 = MAT2D_AT(Q, 1, i+1) / MAT2D_AT(Q, 0, i+1);
+        
+        norm_mu_at_half = (calc_norm_mu(norm_T_ip1, gamma, T_inf) + calc_norm_mu(norm_T_i, gamma, T_inf)) / 2;
+        norm_kappa_at_half = (calc_norm_kappa(norm_T_ip1, gamma, T_inf) + calc_norm_kappa(norm_T_i, gamma, T_inf)) / 2;
+        norm_u_at_half = (norm_u_ip1 - norm_u_i) / 2;
+        norm_du_dx_at_half = (norm_u_ip1 - norm_u_i) / norm_delta_x;
+        norm_dT_dx_at_half = (norm_T_ip1 - norm_T_i) / norm_delta_x;
+
+        MAT2D_AT(V1, 0, i) = 0;
+        MAT2D_AT(V1, 1, i) = (double)4/3 * norm_mu_at_half * norm_du_dx_at_half;
+        MAT2D_AT(V1, 2, i) = (double)4/3 * norm_mu_at_half * norm_u_at_half * norm_du_dx_at_half + gamma / (Pr_inf * (gamma - 1)) * norm_kappa_at_half * norm_dT_dx_at_half;
+    }
+} 
+
+double calc_delta_Q(Mat2D delta_Q, Mat2D tilde_norm_E, Mat2D V1, Mat2D Q, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double gamma, double epsilon, double M_inf, double Re_inf, double Pr_inf, double T_inf, double norm_delta_t, double  norm_delta_x, int N)
+{
+    Mat2D norm_T, norm_inverse_T, norm_lambda, norm_A, m_temp, Q_index, temp_3_by_1, E_at_index, tilde_norm_E_at_half, V1_at_half, temp_3_1;
+
+    norm_T         = work_3_3_mat1;
+    norm_inverse_T = work_3_3_mat2;
+    norm_lambda    = work_3_3_mat3;
+    norm_A         = work_3_3_mat4;
+    m_temp         = work_3_3_mat5;
+    Q_index        = work_3_1_mat1;
+    temp_3_by_1    = work_3_1_mat2;
+    E_at_index     = work_3_1_mat3;
+
+    calc_vector_of_tilde_norm_E_at_half(tilde_norm_E, Q, norm_T, norm_inverse_T, norm_lambda, norm_A, m_temp, Q_index, temp_3_by_1, E_at_index, gamma, epsilon, N);
+    calc_vector_of_norm_V1_at_half(V1, Q, gamma, Pr_inf, T_inf, norm_delta_x, N);
+
+    tilde_norm_E_at_half = work_3_1_mat1;
+    V1_at_half = work_3_1_mat2;
+    temp_3_1 = work_3_1_mat3; 
+
+    for (int i = 1; i <= N; i++) {
+        mat2D_fill(temp_3_1, 0);
+
+        mat2D_get_col(V1_at_half, V1, i);
+        mat2D_add(temp_3_1, V1_at_half);
+
+        mat2D_get_col(V1_at_half, V1, i-1);
+        mat2D_sub(temp_3_1, V1_at_half);
+
+        mat2D_mult(temp_3_1, - M_inf / Re_inf);
+
+        mat2D_get_col(tilde_norm_E_at_half, tilde_norm_E, i);
+        mat2D_add(temp_3_1, tilde_norm_E_at_half);
+
+        mat2D_get_col(tilde_norm_E_at_half, tilde_norm_E, i-1);
+        mat2D_sub(temp_3_1, tilde_norm_E_at_half);
+
+        mat2D_mult(temp_3_1, - norm_delta_t / norm_delta_x);
+
+        MAT2D_AT(delta_Q, 0, i) = MAT2D_AT(temp_3_1, 0, 0);
+        MAT2D_AT(delta_Q, 1, i) = MAT2D_AT(temp_3_1, 1, 0);
+        MAT2D_AT(delta_Q, 2, i) = MAT2D_AT(temp_3_1, 2, 0);
+    }
+
+    
+}
+
