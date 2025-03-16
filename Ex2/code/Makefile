@@ -8,7 +8,7 @@ build_solver: solver.c
 
 run_solver:
 	@echo
-	@./solver $(IN_FILE) $(OUT_DIR) 
+	@./solver $(INPUT_FILE) $(INIT_COND_FILE) $(OUT_DIR) 
 
 clean_solver:
 	@echo

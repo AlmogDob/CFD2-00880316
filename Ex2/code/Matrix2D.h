@@ -29,12 +29,13 @@ typedef struct {
     
 } Mat2D;
 
-#define MAT2D_AT(m, i, j) (m).elements[(i)*(m).cols + (j)]
+#define MAT2D_AT(m, i, j) (m).elements[mat2D_offset2d((m), (i), (j))]
 #define MAT2D_PRINT(m) mat2D_print(m, #m, 0)
 
 double rand_double(void);
-Mat2D mat2D_alloc(size_t rows, size_t cols);
+void mat2D_alloc(Mat2D *m, size_t rows, size_t cols);
 void mat2D_free(Mat2D m);
+size_t mat2D_offset2d(Mat2D m, size_t i, size_t j);
 void mat2D_fill(Mat2D m, double x);
 void mat2D_rand(Mat2D m, double low, double high);
 void mat2D_dot(Mat2D dst, Mat2D a, Mat2D b);
@@ -53,20 +54,24 @@ double rand_double(void)
     return (double) rand() / (double) RAND_MAX;
 }
 
-Mat2D mat2D_alloc(size_t rows, size_t cols)
+void mat2D_alloc(Mat2D *m, size_t rows, size_t cols)
 {
-    Mat2D m;
-    m.rows = rows;
-    m.cols = cols;
-    m.stride = cols;
-    m.elements = (double*)MATRIX2D_MALLOC(sizeof(*m.elements)*rows*cols);
-    MATRIX2D_ASSERT(m.elements != NULL);
-    return m;    
+    m->rows = rows;
+    m->cols = cols;
+    m->stride = cols;
+    m->elements = (double*)MATRIX2D_MALLOC(sizeof(*(m->elements))*rows*cols);
+    MATRIX2D_ASSERT(m->elements != NULL);
 }
 
 void mat2D_free(Mat2D m)
 {
     free(m.elements);
+}
+
+size_t mat2D_offset2d(Mat2D m, size_t i, size_t j)
+{
+    assert(i < m.rows && j < m.cols);
+    return i * m.cols + j;
 }
 
 void mat2D_fill(Mat2D m, double x)
@@ -142,12 +147,13 @@ void mat2D_identity_mat(Mat2D m)
     MATRIX2D_ASSERT(m.cols == m.rows);
     for (size_t i = 0; i < m.rows; ++i) {
         for (size_t j = 0; j < m.cols; ++j) {
-            if (i == j) {
-                MAT2D_AT(m, i, j) = 1;
-            }
-            else {
-                MAT2D_AT(m, i, j) = 0;
-            }
+            MAT2D_AT(m, i, j) = i == j ? 1 : 0;
+            // if (i == j) {
+            //     MAT2D_AT(m, i, j) = 1;
+            // }
+            // else {
+            //     MAT2D_AT(m, i, j) = 0;
+            // }
         }
     }
 }
