@@ -1,4 +1,4 @@
-CFLAGS = -Wall -Wextra -lm 
+CFLAGS = -std=c99 -Wall -Wextra -lm 
 
 solver: build_solver run_solver clean_solver  
 	@echo solver done
@@ -14,7 +14,7 @@ clean_solver:
 	@echo
 	rm solver
 
-sanitize_solver: build_solver run_solver clean_solver
+sanitize_solver: sanitize_build_solver run_solver clean_solver
 	@echo sanitized solver done
 
 sanitize_build_solver: solver.c

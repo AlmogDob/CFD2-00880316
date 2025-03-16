@@ -59,7 +59,7 @@ void mat2D_alloc(Mat2D *m, size_t rows, size_t cols)
     m->rows = rows;
     m->cols = cols;
     m->stride = cols;
-    m->elements = (double*)MATRIX2D_MALLOC(sizeof(*(m->elements))*rows*cols);
+    m->elements = (double*)MATRIX2D_MALLOC(sizeof(double)*rows*cols);
     MATRIX2D_ASSERT(m->elements != NULL);
 }
 

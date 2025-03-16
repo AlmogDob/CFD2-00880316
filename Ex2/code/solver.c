@@ -24,6 +24,7 @@ typedef enum {
 
 #ifdef __linux__
     #include <sys/stat.h>
+    #define __USE_MISC
     #include <dirent.h>
     #define ON_LINUX 1
     int create_empty_dir(char *parent_directory);
@@ -34,21 +35,23 @@ double calc_norm_mu(double norm_T, double gamma, double T_inf);
 double calc_norm_kappa(double norm_T, double gamma, double T_inf);
 double calc_norm_energy(double gamma, double norm_rho, double norm_u, double norm_p);
 double calc_norm_p(double gamma, double norm_rho, double norm_u, double norm_e);
-void calc_T_matrix(Mat2D T_matrix, double gamma, double norm_rho, double norm_a, double norm_u);
-void calc_T_inverse_matrix(Mat2D T_inverse_matrix, double gamma, double norm_rho, double norm_p, double norm_u);
-void calc_lambda_plus_matrix(Mat2D lambda_plus_matrix, double gamma, double norm_rho, double norm_p, double norm_u, double epsilon);
-void calc_lambda_minus_matrix(Mat2D lambda_minus_matrix, double gamma, double norm_rho, double norm_p, double norm_u, double epsilon);
+void calc_T_matrix_at_i(Mat2D T_matrix, Mat2D Q, double gamma, int i);
+void calc_T_inverse_matrix_at_i(Mat2D T_inverse_matrix, Mat2D Q, double gamma, int i);
+void calc_lambda_plus_matrix_at_i(Mat2D lambda_plus_matrix, Mat2D Q, double gamma, int i, double epsilon);
+void calc_lambda_minus_matrix_at_i(Mat2D lambda_minus_matrix, Mat2D Q, double gamma, int i, double epsilon);
 void initialize_Q(char *init_conditions_file, Mat2D Q, double gamma, int N);
+void apply_BC(Mat2D Q, int N);
 void calc_vector_of_E(Mat2D E, Mat2D Q, double gamma, int N);
+void calc_vector_of_tilde_norm_E(Mat2D tilde_norm_E, Mat2D Q, Mat2D norm_T, Mat2D norm_inverse_T, Mat2D norm_lambda, Mat2D norm_A, Mat2D m_temp, Mat2D Q_index, Mat2D temp_3_by_1, Mat2D E_at_index, double gamma, double epsilon, int N);
 
 int main(int argc, char const *argv[])
 {
 /* declarations */
     char input_file[MAXDIR], init_conditions_file[MAXDIR], output_dir[MAXDIR], temp_word[MAXWORD];
     int N, max_iterations;
-    double x_min, x_max, L, delta_x, Re_inf, M_inf, CFL, gamma, T_inf, Pr_inf, final_time, epsilon = 1e-10;
+    double x_min, x_max, L, delta_x, Re_inf, M_inf, CFL, gamma, T_inf, Pr_inf, final_time, epsilon = 1e-9;
     t_flag flags = 0;
-    Mat2D init_Q, current_Q, next_Q, work_mat_3_by_N_2;
+    Mat2D init_Q, current_Q, next_Q, work_3_by_N_2_mat1, work_3_by_N_2_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3;
 
 /* getting the input file and output file */
     if (--argc != 3) {
@@ -109,19 +112,98 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* allocating the matrices */
-    mat2D_alloc(&init_Q         , 3, N+2);
-    mat2D_alloc(&current_Q      , 3, N+2);
-    mat2D_alloc(&next_Q         , 3, N+2);
-    mat2D_alloc(&work_mat_3_by_N_2, 3, N+2);
+    mat2D_alloc(&init_Q           , 3, N+2);
+    mat2D_alloc(&current_Q        , 3, N+2);
+    mat2D_alloc(&next_Q           , 3, N+2);
+    mat2D_alloc(&work_3_by_N_2_mat1, 3, N+2);
+    mat2D_alloc(&work_3_by_N_2_mat2, 3, N+2);
+
+    mat2D_alloc(&work_3_3_mat1 , 3, 3);
+    mat2D_alloc(&work_3_3_mat2 , 3, 3);
+    mat2D_alloc(&work_3_3_mat3 , 3, 3);
+    mat2D_alloc(&work_3_3_mat4 , 3, 3);
+    mat2D_alloc(&work_3_3_mat5 , 3, 3);
+
+    mat2D_alloc(&work_3_1_mat1 , 3, 1);
+    mat2D_alloc(&work_3_1_mat2 , 3, 1);
+    mat2D_alloc(&work_3_1_mat3 , 3, 1);
+
+    // Mat2D m1, m2;
+    // mat2D_alloc(&m1, 3, 5);
+    // mat2D_alloc(&m2, 3, 5);
+    // mat2D_fill(m1, 3);
+    // mat2D_fill(m2, 2);
+
+    // mat2D_sum(m2, m1);
+    // MAT2D_PRINT(m1);
+    // MAT2D_PRINT(m2);
 
 /*------------------------------------------------------------*/
 /* initialization */
     initialize_Q(init_conditions_file, init_Q, gamma, N);
+    apply_BC(init_Q, N);
     // MAT2D_PRINT(init_Q);
 
 /*------------------------------------------------------------*/
 /* the loop */
+    calc_vector_of_E(work_3_by_N_2_mat1, init_Q, gamma, N);
+    calc_vector_of_tilde_norm_E(work_3_by_N_2_mat2, init_Q, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3, gamma, epsilon, N);
+
+    MAT2D_PRINT(work_3_by_N_2_mat1);
+    MAT2D_PRINT(work_3_by_N_2_mat2);
     
+    // int i = N;
+    // Mat2D A_p;
+    // Mat2D A_m;
+    // Mat2D A;
+    // Mat2D E;
+    // mat2D_alloc(&A_m , 3, 3);
+    // mat2D_alloc(&A_p , 3, 3);
+    // mat2D_alloc(&A , 3, 3);
+    // mat2D_alloc(&E , 3, 1);
+
+    // mat2D_fill(work_3_3_mat1, 0);
+    // mat2D_fill(A_p, 0);
+
+    // calc_T_matrix_at_i(work_3_3_mat3, init_Q, gamma, i);
+    // calc_T_inverse_matrix_at_i(work_3_3_mat4, init_Q, gamma, i);
+
+    // /* work_3_3_mat2_plus */
+    // calc_lambda_plus_matrix_at_i(work_3_3_mat5, init_Q, gamma, i, epsilon);
+    // mat2D_dot(work_3_3_mat1, work_3_3_mat5, work_3_3_mat4);
+    // mat2D_dot(A_p, work_3_3_mat3, work_3_3_mat1);
+
+
+    // mat2D_fill(work_3_3_mat1, 0);
+    // mat2D_fill(A_m, 0);
+
+    // /* work_3_3_mat2_plus */
+    // calc_lambda_minus_matrix_at_i(work_3_3_mat5, init_Q, gamma, i, epsilon);
+    // mat2D_dot(work_3_3_mat1, work_3_3_mat5, work_3_3_mat4);
+    // mat2D_dot(A_m, work_3_3_mat3, work_3_3_mat1);
+
+    // mat2D_sum(A, A_m);
+    // mat2D_sum(A, A_p);
+
+    // MAT2D_PRINT(A_m);
+    // MAT2D_PRINT(A_p);
+    // MAT2D_PRINT(A);
+
+    // MAT2D_AT(E, 0, 0) = MAT2D_AT(work_3_by_N_2_mat1, 0, i);
+    // MAT2D_AT(E, 1, 0) = MAT2D_AT(work_3_by_N_2_mat1, 1, i);
+    // MAT2D_AT(E, 2, 0) = MAT2D_AT(work_3_by_N_2_mat1, 2, i);
+
+    // MAT2D_PRINT(E);
+
+    // mat2D_fill(work_3_1_mat2, 0);
+    // MAT2D_AT(work_3_1_mat1, 0, 0) = MAT2D_AT(init_Q, 0, i);
+    // MAT2D_AT(work_3_1_mat1, 1, 0) = MAT2D_AT(init_Q, 1, i);
+    // MAT2D_AT(work_3_1_mat1, 2, 0) = MAT2D_AT(init_Q, 2, i);
+    // mat2D_dot(work_3_1_mat2, A_m, work_3_1_mat1);
+    // mat2D_dot(work_3_1_mat2, A_p, work_3_1_mat1);
+    // MAT2D_PRINT(work_3_1_mat2);
+
+
 /*------------------------------------------------------------*/
 /* output */
 
@@ -274,8 +356,12 @@ double calc_norm_p(double gamma, double norm_rho, double norm_u, double norm_e)
     return (gamma - 1) * (norm_e - 0.5 * norm_rho * norm_u * norm_u);
 }
 
-void calc_T_matrix(Mat2D T_matrix, double gamma, double norm_rho, double norm_p, double norm_u)
+void calc_T_matrix_at_i(Mat2D T_matrix, Mat2D Q, double gamma, int i)
 {
+    double norm_rho = MAT2D_AT(Q, 0, i);
+    double norm_u = MAT2D_AT(Q, 1, i) / norm_rho;
+    double norm_e = MAT2D_AT(Q, 2, i);
+    double norm_p = calc_norm_p(gamma, norm_rho, norm_u, norm_e);
     double norm_a = sqrt(gamma * norm_p / norm_rho);
 
     MAT2D_AT(T_matrix, 0, 0) = 1;
@@ -289,8 +375,12 @@ void calc_T_matrix(Mat2D T_matrix, double gamma, double norm_rho, double norm_p,
     MAT2D_AT(T_matrix, 2, 2) = - norm_rho / 2 / norm_a * (norm_u * norm_u / 2 - norm_u * norm_a + norm_a * norm_a / (gamma - 1));
 }
 
-void calc_T_inverse_matrix(Mat2D T_inverse_matrix, double gamma, double norm_rho, double norm_p, double norm_u)
+void calc_T_inverse_matrix_at_i(Mat2D T_inverse_matrix, Mat2D Q, double gamma, int i)
 {
+    double norm_rho = MAT2D_AT(Q, 0, i);
+    double norm_u = MAT2D_AT(Q, 1, i) / norm_rho;
+    double norm_e = MAT2D_AT(Q, 2, i);
+    double norm_p = calc_norm_p(gamma, norm_rho, norm_u, norm_e);
     double norm_a = sqrt(gamma * norm_p / norm_rho);
 
     MAT2D_AT(T_inverse_matrix, 0, 0) = 1 - (gamma - 1) / 2 * norm_u * norm_u / norm_a / norm_a;
@@ -304,9 +394,16 @@ void calc_T_inverse_matrix(Mat2D T_inverse_matrix, double gamma, double norm_rho
     MAT2D_AT(T_inverse_matrix, 2, 2) = - (gamma - 1) / norm_rho / norm_a;
 }
 
-void calc_lambda_plus_matrix(Mat2D lambda_plus_matrix, double gamma, double norm_rho, double norm_p, double norm_u, double epsilon)
+void calc_lambda_plus_matrix_at_i(Mat2D lambda_plus_matrix, Mat2D Q, double gamma, int i, double epsilon)
 {
+    double norm_rho = MAT2D_AT(Q, 0, i);
+    double norm_u = MAT2D_AT(Q, 1, i) / norm_rho;
+    double norm_e = MAT2D_AT(Q, 2, i);
+    double norm_p = calc_norm_p(gamma, norm_rho, norm_u, norm_e);
     double norm_a = sqrt(gamma * norm_p / norm_rho);
+    
+    // dprintDOUBLE(norm_u);
+    // dprintDOUBLE(norm_a);
 
     mat2D_identity_mat(lambda_plus_matrix);
     mat2D_mult(lambda_plus_matrix, norm_u);
@@ -318,8 +415,12 @@ void calc_lambda_plus_matrix(Mat2D lambda_plus_matrix, double gamma, double norm
     }
 }
 
-void calc_lambda_minus_matrix(Mat2D lambda_minus_matrix, double gamma, double norm_rho, double norm_p, double norm_u, double epsilon)
+void calc_lambda_minus_matrix_at_i(Mat2D lambda_minus_matrix, Mat2D Q, double gamma, int i, double epsilon)
 {
+    double norm_rho = MAT2D_AT(Q, 0, i);
+    double norm_u = MAT2D_AT(Q, 1, i) / norm_rho;
+    double norm_e = MAT2D_AT(Q, 2, i);
+    double norm_p = calc_norm_p(gamma, norm_rho, norm_u, norm_e);
     double norm_a = sqrt(gamma * norm_p / norm_rho);
 
     mat2D_identity_mat(lambda_minus_matrix);
@@ -334,9 +435,8 @@ void calc_lambda_minus_matrix(Mat2D lambda_minus_matrix, double gamma, double no
 
 void initialize_Q(char *init_conditions_file, Mat2D Q, double gamma, int N)
 {
-    char current_word[MAXWORD], current_line[MAXWORD];
+    char current_word[MAXWORD];
     float norm_rho, norm_u, norm_e, norm_p;
-    float temp_d;
 
     FILE *fp = fopen(init_conditions_file, "rt");
     if (fp == NULL) {
@@ -354,19 +454,16 @@ void initialize_Q(char *init_conditions_file, Mat2D Q, double gamma, int N)
 
 
         fscanf(fp, "%s", current_word);
-        double x = atof(current_word);
         fscanf(fp, "%s", current_word);
         norm_rho = atof(current_word);
         fscanf(fp, "%s", current_word);
         norm_u = atof(current_word);
         fscanf(fp, "%s", current_word);
         norm_p = atof(current_word);
-        printf("%g, %g, %g, %g\n", x, norm_rho, norm_u, norm_p);
+        // printf("%g, %g, %g\n", norm_rho, norm_u, norm_p);
 
         norm_e = calc_norm_energy(gamma, norm_rho, norm_u, norm_p);
 
-        Q.elements[i] = norm_rho;
-        (Q).elements[mat2D_offset2d((Q), (0), (i))];
         MAT2D_AT(Q, 0, i) = norm_rho;
         MAT2D_AT(Q, 1, i) = norm_rho * norm_u;
         MAT2D_AT(Q, 2, i) = norm_e;
@@ -375,11 +472,23 @@ void initialize_Q(char *init_conditions_file, Mat2D Q, double gamma, int N)
     fclose(fp);
 }
 
+void apply_BC(Mat2D Q, int N)
+{
+    MAT2D_AT(Q, 0, 0) =   MAT2D_AT(Q, 0, 1);
+    MAT2D_AT(Q, 1, 0) = - MAT2D_AT(Q, 1, 1);
+    MAT2D_AT(Q, 2, 0) =   MAT2D_AT(Q, 2, 1);
+
+    MAT2D_AT(Q, 0, N+1) =   MAT2D_AT(Q, 0, N);
+    MAT2D_AT(Q, 1, N+1) = - MAT2D_AT(Q, 1, N);
+    MAT2D_AT(Q, 2, N+1) =   MAT2D_AT(Q, 2, N);
+}
+
 void calc_vector_of_E(Mat2D E, Mat2D Q, double gamma, int N)
 {
     double norm_rho, norm_u, norm_e, norm_p;
 
     for (int i = 0; i < N+2; i++) {
+        // dprintINT(i);
         norm_rho = MAT2D_AT(Q, 0, i);
         norm_u   = MAT2D_AT(Q, 1, i) / norm_rho;
         norm_e   = MAT2D_AT(Q, 2, i);
@@ -388,5 +497,45 @@ void calc_vector_of_E(Mat2D E, Mat2D Q, double gamma, int N)
         MAT2D_AT(E, 0, i) = norm_rho * norm_u;
         MAT2D_AT(E, 1, i) = norm_p + norm_rho * norm_u * norm_u;
         MAT2D_AT(E, 2, i) = (norm_e + norm_p) * norm_u;
+    }
+}
+
+void calc_vector_of_tilde_norm_E(Mat2D tilde_norm_E, Mat2D Q, Mat2D norm_T, Mat2D norm_inverse_T, Mat2D norm_lambda, Mat2D norm_A, Mat2D m_temp, Mat2D Q_index, Mat2D temp_3_by_1, Mat2D E_at_index, double gamma, double epsilon, int N)
+{
+    for (int i = 0; i <= N; i++) {
+        mat2D_fill(E_at_index, 0);
+        calc_T_matrix_at_i(norm_T, Q, gamma, i);
+        calc_T_inverse_matrix_at_i(norm_inverse_T, Q, gamma, i);
+
+        /* norm_A_plus */
+        mat2D_fill(m_temp, 0);
+        mat2D_fill(norm_A, 0);
+        mat2D_fill(temp_3_by_1, 0);
+        calc_lambda_plus_matrix_at_i(norm_lambda, Q, gamma, i, epsilon);
+        mat2D_dot(m_temp, norm_lambda, norm_inverse_T);
+        mat2D_dot(norm_A, norm_T, m_temp);
+        MAT2D_AT(Q_index, 0, 0) = MAT2D_AT(Q, 0, i);
+        MAT2D_AT(Q_index, 1, 0) = MAT2D_AT(Q, 1, i);
+        MAT2D_AT(Q_index, 2, 0) = MAT2D_AT(Q, 2, i);
+        mat2D_dot(temp_3_by_1, norm_A, Q_index);
+        mat2D_sum(E_at_index, temp_3_by_1);
+
+        /* norm_A_minus */
+        mat2D_fill(m_temp, 0);
+        mat2D_fill(norm_A, 0);
+        mat2D_fill(temp_3_by_1, 0);
+        calc_lambda_minus_matrix_at_i(norm_lambda, Q, gamma, i+1, epsilon);
+        mat2D_dot(m_temp, norm_lambda, norm_inverse_T);
+        mat2D_dot(norm_A, norm_T, m_temp);
+        MAT2D_AT(Q_index, 0, 0) = MAT2D_AT(Q, 0, i+1);
+        MAT2D_AT(Q_index, 1, 0) = MAT2D_AT(Q, 1, i+1);
+        MAT2D_AT(Q_index, 2, 0) = MAT2D_AT(Q, 2, i+1);
+        mat2D_dot(temp_3_by_1, norm_A, Q_index);
+        mat2D_sum(E_at_index, temp_3_by_1);
+
+        /* copying to vector of tilde norm E */
+        MAT2D_AT(tilde_norm_E, 0, i) = MAT2D_AT(E_at_index, 0, 0);
+        MAT2D_AT(tilde_norm_E, 1, i) = MAT2D_AT(E_at_index, 1, 0);
+        MAT2D_AT(tilde_norm_E, 2, i) = MAT2D_AT(E_at_index, 2, 0);
     }
 }
