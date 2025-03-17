@@ -45,6 +45,8 @@ void mat2D_mult(Mat2D m, double factor);
 void mat2D_print(Mat2D m, const char *name, size_t padding);
 void mat2D_identity_mat(Mat2D m);
 void mat2D_copy(Mat2D res, Mat2D src);
+void mat2D_get_col(Mat2D des, Mat2D src, size_t j);
+double mat2D_calc_norma(Mat2D m);
 
 #endif // MATRIX2D_H_
 
@@ -196,7 +198,14 @@ void mat2D_get_col(Mat2D des, Mat2D src, size_t j)
 
 double mat2D_calc_norma(Mat2D m)
 {
+    double sum = 0;
 
+    for (size_t i = 0; i < m.rows; ++i) {
+        for (size_t j = 0; j < m.cols; ++j) {
+            sum += MAT2D_AT(m, i, j) * MAT2D_AT(m, i, j);
+        }
+    }
+    return sqrt(sum);
 }
 
 #endif // MATRIX2D_IMPLEMENTATION
