@@ -24,14 +24,16 @@ legend({'Density ratio', 'Velocity ratio', 'Pressure ratio'},'FontSize',20 ,'Loc
 
 %%
 
-xI = 0.2;
-xF = 1;
+x_min = 0.2;
+x_max = 1;
 N = 100;
-delta_x = (xF - xI)/(N);
-
+L = x_max - x_min; 
+delta_x = (x_max - x_min)/(N);
 x_new = [];
 for i = 1:N
-    x_new(i+1) = 0.2 + delta_x/2 + delta_x*(i-1);
+    x_new(i+1) = x_min + delta_x/2 + delta_x*(i-1);
 end 
-x_new(1) = x_new(2)-delta_x;
-x_new(end+1) = x_new(end)+delta_x;
+% x_new(1) = x_new(2)-delta_x;
+% x_new(end+1) = x_new(end)+delta_x;
+x_new = x_new ./ L;
+

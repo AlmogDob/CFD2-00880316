@@ -30,7 +30,7 @@
   \ifstrequal{#1}{M}{Matrices}{%
   \ifstrequal{#1}{D}{Diagonals}{%
   \ifstrequal{#1}{V}{Vectors}{%
-  \ifstrequal{#1}{P}{Normalized Average Properties}{}}}}}}
+  \ifstrequal{#1}{P}{Dimensionless Average Properties}{}}}}}}
 ]}
 
 \title{Computational Fluid Dynamics \\ HW2}
@@ -138,70 +138,8 @@ On each side of the tube there is an adiabatic, solid wall boundary conditions.
     \end{tabular}
 \end{table}
 
-\section{The Computational Domain}
-\subsection{Discretization}
-The physical domain $\left[x_I,x_F\right]$ is discretized into N equispaced cells. The size of each cell is there for:
-\nomenclature{$x_I$}{x coordinate of the start of the domain}
-\nomenclature{$x_F$}{x coordinate of the end of the domain}
-\begin{equation}
-    \Delta x=\frac{x_F-x_I}{N}=\frac{L}{N}
-    \nomenclature{$\Delta x$}{size of each cell in the domain}
-    \nomenclature{$L$}{characteristic length}
-\end{equation}
-so the x coordinate of the i-th cell $x_i$ is:
-\nomenclature{$x_i$}{x coordinate of the i-th cell}
-\begin{equation}
-    \begin{matrix}
-        \displaystyle x_i=x_I+\frac{1}{2}\Delta x+\Delta x\cdot\left(i-1\right) && \text{when starting from $i=1$}
-    \end{matrix}
-\end{equation}
-
-\subsection{Boundary Conditions}
-In order to set the boundary conditions on the edge faces we will define ghost cells that will be calculated as follows:
-\begin{equation}
-    \begin{array}{lcl}
-        u_{\left(i=0\right)} &=& -u_{\left(i=1\right)} \\
-        u_{\left(i=N+1\right)} &=& -u_{\left(i=N\right)}
-    \end{array}
-    \label{eq: velocity boundary}
-\end{equation}
-in order to maintain velocity zero on the boundary and like so:
-\begin{equation}
-    \begin{array}{lcl}
-        T_{\left(i=0\right)} &=& T_{\left(i=1\right)} \\
-        T_{\left(i=N+1\right)} &=& T_{\left(i=N\right)}
-    \end{array}
-    \label{eq: temp boundary}
-\end{equation}
-in order to maintain adiabatic boundary conditions.
-Since the gradient of the pressure on the wall is zero, we get:
-\begin{equation}
-    \begin{array}{lcl}
-        p_{\left(i=0\right)} &=& p_{\left(i=1\right)} \\
-        p_{\left(i=N+1\right)} &=& p_{\left(i=N\right)}
-    \end{array}
-    \label{eq: pressure boundary}
-\end{equation}
-From equations \ref{eq: definitions}, \ref{eq: temp boundary}, and \ref{eq: pressure boundary} we can conclude:
-\begin{equation}
-    \begin{array}{lcl}
-        \rho_{\left(i=0\right)} &=& \rho_{\left(i=1\right)} \\
-        \rho_{\left(i=N+1\right)} &=& \rho_{\left(i=N\right)}
-    \end{array}
-    \label{eq: density boundary}
-\end{equation}
-and from equations \ref{eq: definitions}, \ref{eq: velocity boundary}, \ref{eq: pressure boundary}, and \ref{eq: density boundary} we can conclude:
-\begin{equation}
-    \begin{array}{lcl}
-        e_{\left(i=0\right)} &=& e_{\left(i=1\right)} \\
-        e_{\left(i=N+1\right)} &=& e_{\left(i=N\right)}
-    \end{array}
-    \label{eq: energy boundary}
-\end{equation}
-\newpage
-
-\section{Normalizing The Navier-Stokes Equations}
-Since the initial conditions are normalized, there is a need to normalize the N-S equations. We will use the following normalizations:
+\section{The Dimensionless Navier-Stokes Equations}
+Since the initial conditions are dimensionless, there is a need to use the dimensionless N-S equations. We will use the following normalizations:
 \begin{equation}
     \begin{matrix}
         \rho=\rho_\infty\tilde{\rho}, & u=a_\infty\tilde{u}, & p=\gamma p_\infty\tilde{p}, & T=\gamma T_\infty\tilde{T}, & x=L\tilde{x}, & \displaystyle t=\frac{L}{a_\infty}\tilde{t}, & \mu=\mu_\infty\tilde{\mu}, & \kappa=\kappa_\infty\tilde{\kappa}
@@ -315,7 +253,7 @@ The Prandtl number far away is defined as:
     \end{array}
     \nomenclature[N]{$Pr_\infty$}{Prandtl number far away}
 \end{equation}
-Substituting into the normalized N-S equations:
+Substituting into the dimensionless N-S equations:
 \begin{equation}
     \parder{\tilde{Q}}{\tilde{t}}+\parder{\tilde{E}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{E}_\nu}{\tilde{x}}
 \end{equation}
@@ -337,7 +275,7 @@ Where:
         \end{pmatrix}
     \end{matrix}
 \end{equation}
-The normalized Navier-Stokes equations are:
+The dimensionless Navier-Stokes equations are:
 \begin{equation}
     \parder{\tilde{Q}}{\tilde{t}}+\parder{\tilde{E}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
     \label{eq: normalized N-S}
@@ -346,6 +284,74 @@ Where:
 \begin{equation*}
     \tilde{V}_1=\tilde{V}_{1\left(\tilde{Q},\tilde{Q}_x\right)}=\tilde{E}_\nu
 \end{equation*}
+
+\section{The Computational Domain}
+\subsection{Discretization}
+The physical domain $\left[x_I,x_F\right]$ is discretized into N equispaced cells. The size of each cell is there for:
+\nomenclature{$x_I$}{x coordinate of the start of the domain}
+\nomenclature{$x_F$}{x coordinate of the end of the domain}
+\begin{equation}
+    \Delta x=\frac{x_F-x_I}{N}=\frac{L}{N}
+    \nomenclature{$\Delta x$}{size of each cell in the domain}
+    \nomenclature{$L$}{characteristic length}
+\end{equation}
+so the x coordinate of the i-th cell $x_i$ is:
+\nomenclature{$x_i$}{x coordinate of the i-th cell}
+\begin{equation}
+    \begin{matrix}
+        \displaystyle x_i=x_I+\frac{1}{2}\Delta x+\Delta x\cdot\left(i-1\right) && \text{when starting from $i=1$}
+    \end{matrix}
+\end{equation}
+And in dimensionless way:
+\begin{equation}
+    \begin{matrix}
+        \displaystyle\Delta\tilde{x}=\frac{1}{N},\hspace{1cm} & \displaystyle\tilde{x}_i=\frac{1}{L}\left(x_I+\frac{1}{2}\Delta x+\Delta x\cdot\left(i-1\right)\right)
+    \end{matrix}
+\end{equation}
+
+\subsection{Boundary Conditions}
+In order to set the boundary conditions on the edge faces we will define ghost cells that will be calculated as follows:
+\begin{equation}
+    \begin{array}{lcl}
+        u_{\left(i=0\right)} &=& -u_{\left(i=1\right)} \\
+        u_{\left(i=N+1\right)} &=& -u_{\left(i=N\right)}
+    \end{array}
+    \label{eq: velocity boundary}
+\end{equation}
+in order to maintain velocity zero on the boundary and like so:
+\begin{equation}
+    \begin{array}{lcl}
+        T_{\left(i=0\right)} &=& T_{\left(i=1\right)} \\
+        T_{\left(i=N+1\right)} &=& T_{\left(i=N\right)}
+    \end{array}
+    \label{eq: temp boundary}
+\end{equation}
+in order to maintain adiabatic boundary conditions.
+Since the gradient of the pressure on the wall is zero, we get:
+\begin{equation}
+    \begin{array}{lcl}
+        p_{\left(i=0\right)} &=& p_{\left(i=1\right)} \\
+        p_{\left(i=N+1\right)} &=& p_{\left(i=N\right)}
+    \end{array}
+    \label{eq: pressure boundary}
+\end{equation}
+From equations \ref{eq: definitions}, \ref{eq: temp boundary}, and \ref{eq: pressure boundary} we can conclude:
+\begin{equation}
+    \begin{array}{lcl}
+        \rho_{\left(i=0\right)} &=& \rho_{\left(i=1\right)} \\
+        \rho_{\left(i=N+1\right)} &=& \rho_{\left(i=N\right)}
+    \end{array}
+    \label{eq: density boundary}
+\end{equation}
+and from equations \ref{eq: definitions}, \ref{eq: velocity boundary}, \ref{eq: pressure boundary}, and \ref{eq: density boundary} we can conclude:
+\begin{equation}
+    \begin{array}{lcl}
+        e_{\left(i=0\right)} &=& e_{\left(i=1\right)} \\
+        e_{\left(i=N+1\right)} &=& e_{\left(i=N\right)}
+    \end{array}
+    \label{eq: energy boundary}
+\end{equation}
+\newpage
 
 \section{The Numerical Schemes}
 \subsection{Jacobian Matrices of The Navier-Stokes Equations}
@@ -379,9 +385,9 @@ Where:
     \label{eq: A P R}
 \end{equation}
 and $\textcolor{blue}{\alpha}$ is: $$\textcolor{blue}{\alpha=\frac{\gamma}{Pr_\infty\left(\gamma-1\right)}}$$
-\nomenclature[M]{$\tilde{A}$}{normalized jacobian matrix of E w.r.t. Q}
-\nomenclature[M]{$\tilde{P}$}{normalized jacobian matrix of $E_\nu$ w.r.t. Q}
-\nomenclature[M]{$\tilde{R}$}{normalized jacobian matrix of $E_\nu$ w.r.t. $Q_x$}
+\nomenclature[M]{$\tilde{A}$}{dimensionless jacobian matrix of E w.r.t. Q}
+\nomenclature[M]{$\tilde{P}$}{dimensionless jacobian matrix of $E_\nu$ w.r.t. Q}
+\nomenclature[M]{$\tilde{R}$}{dimensionless jacobian matrix of $E_\nu$ w.r.t. $Q_x$}
 
 \subsection{FVS -- First Order Explicit Steger-Warming}
 Since the inviscid N-S equations (Euler equations) is a hyperbolic system of equations, the A matrix (from Eq.\ref{eq: A P R}) is a diagonalizable matrix and can be written as:
@@ -404,8 +410,8 @@ Since the inviscid N-S equations (Euler equations) is a hyperbolic system of equ
             \displaystyle-\frac{1}{\tilde{\rho}\tilde{a}}\left(\left(\gamma-1\right)\tilde{u}^2+\tilde{u}\tilde{a}\right) & \displaystyle\frac{1}{\tilde{\rho}\tilde{a}}\left(\tilde{a}+\left(\gamma-1\right)\tilde{u}\right) & \displaystyle-\frac{\gamma-1}{\tilde{\rho}\tilde{a}}
         \end{pmatrix}
     \end{array}
-    \nomenclature[M]{$\tilde{T}$}{normalized eigenvectors matrix}
-    \nomenclature[M]{$\tilde{\Lambda}$}{normalized eigenvalues matrix}
+    \nomenclature[M]{$\tilde{T}$}{dimensionless eigenvectors matrix}
+    \nomenclature[M]{$\tilde{\Lambda}$}{dimensionless eigenvalues matrix}
     \label{eq: T Labmda T^-1}
 \end{equation}
 Where:
@@ -474,8 +480,8 @@ A simple, explicit, first order (in space and time) scheme in delta form is obta
 \begin{equation}
     \Delta\tilde{Q}_i^n=\displaystyle-\frac{\Delta\tilde{t}}{\Delta\tilde{x}}\left(\nabla\tilde{E}_i^{+n}+\Delta\tilde{E}_i^{-n}-\frac{M_\infty}{Re_{L\infty}}\delta\tilde{V}_{1,i}^{n}\right)
     \label{eq: explicit S-W delta form}
-    \nomenclature{$\Delta\tilde{t}$}{normalized step size in time}
-    \nomenclature{$\Delta\tilde{x}$}{normalized step size in space}
+    \nomenclature{$\Delta\tilde{t}$}{dimensionless step size in time}
+    \nomenclature{$\Delta\tilde{x}$}{dimensionless step size in space}
 \end{equation}
 And advancing the solution by:
 \begin{equation}
@@ -651,14 +657,14 @@ For the implicit Steger-Warming scheme a matrix inversion is needed as follows:
 \end{equation}
 
 \subsection{FDS -- First Order Explicit Roe}
-The normalized Navier-Stokes equations as written in Eq.\ref{eq: normalized N-S}:
+The dimensionless Navier-Stokes equations as written in Eq.\ref{eq: normalized N-S}:
 \begin{equation}
     \parder{\tilde{Q}}{\tilde{t}}+\parder{\tilde{E}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
 \end{equation}
 In linearized form:
 \begin{equation}
     \parder{\tilde{Q}}{\tilde{t}}+\tilde{A}\parder{\tilde{Q}}{\tilde{x}}=\frac{M_\infty}{Re_{L\infty}}\parder{\tilde{V}_1}{\tilde{x}}
-    \nomenclature[M]{$\hat{\tilde{A}}$}{normalized Roe's average matrix}
+    \nomenclature[M]{$\hat{\tilde{A}}$}{dimensionless Roe's average matrix}
 \end{equation}
 The initial conditions are:
 \begin{equation*}
@@ -681,8 +687,8 @@ Where $\hat{\tilde{A}}$ replaces the original jacobian matrix $\tilde{A}$ and re
 The linear approximate problem is then hyperbolic and therefore Roe's average matrix may be diagonalized as follows:
 \begin{equation}
     \hat{\tilde{A}}=\hat{\tilde{T}}\hat{\tilde{\Lambda}}\hat{\tilde{T}}^{-1}
-    \nomenclature[M]{$\hat{\tilde{T}}$}{normalized eigenvectors matrix of Roe's average matrix}
-    \nomenclature[M]{$\hat{\tilde{\Lambda}}$}{normalized eigenvalues matrix of Roe's average matrix}
+    \nomenclature[M]{$\hat{\tilde{T}}$}{dimensionless eigenvectors matrix of Roe's average matrix}
+    \nomenclature[M]{$\hat{\tilde{\Lambda}}$}{dimensionless eigenvalues matrix of Roe's average matrix}
 \end{equation}
 One can define now the following:
 \begin{table}[H]
@@ -710,7 +716,7 @@ Each interface has a series of waves emanating from it and traveling left and ri
             \tilde{\tilde{E}}_{i+\frac{1}{2}} & = & \tilde{E}_R-\hat{\tilde{A}}^+\left(\tilde{Q}_R-\tilde{Q}_L\right)
         \end{array}\right.
     \end{array}
-    \nomenclature[V]{$\tilde{\tilde{E}}$}{normalized average flux vector}
+    \nomenclature[V]{$\tilde{\tilde{E}}$}{dimensionless average flux vector}
 \end{equation}
 By way of averaging, the interface flux becomes:
 \begin{equation}
@@ -718,12 +724,12 @@ By way of averaging, the interface flux becomes:
 \end{equation}
 
 \subsubsection{Constructing The Roe Matrix}
-Let $\tilde{H}$ be the normalized total enthalpy:
+Let $\tilde{H}$ be the dimensionless total enthalpy:
 \begin{equation*}
     \tilde{H}=\tilde{h}+\frac{1}{2}\tilde{u}^2=\frac{\tilde{e}+\tilde{p}}{\tilde{\rho}}
-    \nomenclature{$\tilde{H}$}{normalized total enthalpy}
+    \nomenclature{$\tilde{H}$}{dimensionless total enthalpy}
 \end{equation*}
-One can rewrite the vectors $\tilde{Q}$ and $\tilde{E}$ in terms of the normalized total enthalpy instead of the normalized total energy $\tilde{e}$ as follows:
+One can rewrite the vectors $\tilde{Q}$ and $\tilde{E}$ in terms of the dimensionless total enthalpy instead of the dimensionless total energy $\tilde{e}$ as follows:
 \begin{equation}
     \begin{matrix}
         \tilde{Q}=\begin{pmatrix}
@@ -802,9 +808,9 @@ The matrix $\hat{\tilde{A}}=\tilde{C}\tilde{B}^{-1}$ is identical to the matrix 
         \displaystyle\hat{\tilde{u}}_{i+\frac{1}{2}} & = & \frac{\displaystyle\sqrt{\tilde{\rho}_L}\tilde{u}_L+\sqrt{\tilde{\rho}_R}\tilde{u}_R}{\displaystyle\sqrt{\tilde{\rho}_L}+\sqrt{\tilde{\rho}_R}} & = & \displaystyle\frac{\tilde{u}_L+\tilde{\mathcal{R}}_{i+\frac{1}{2}}\tilde{u}_R}{1+\tilde{\mathcal{R}}_{i+\frac{1}{2}}}\\\\
         \displaystyle\hat{\tilde{H}}_{i+\frac{1}{2}} & = & \frac{\displaystyle\sqrt{\tilde{\rho}_L}\tilde{H}_L+\sqrt{\tilde{\rho}_R}\tilde{H}_R}{\displaystyle\sqrt{\tilde{\rho}_L}+\sqrt{\tilde{\rho}_R}} & = & \displaystyle\frac{\tilde{H}_L+\tilde{\mathcal{R}}_{i+\frac{1}{2}}\tilde{H}_R}{1+\tilde{\mathcal{R}}_{i+\frac{1}{2}}} 
     \end{array}\right.
-    \nomenclature[P]{$\hat{\tilde{\rho}}$}{normalized average density}
-    \nomenclature[P]{$\hat{\tilde{u}}$}{normalized average velocity}
-    \nomenclature[P]{$\hat{\tilde{H}}$}{normalized average total enthalpy}
+    \nomenclature[P]{$\hat{\tilde{\rho}}$}{dimensionless average density}
+    \nomenclature[P]{$\hat{\tilde{u}}$}{dimensionless average velocity}
+    \nomenclature[P]{$\hat{\tilde{H}}$}{dimensionless average total enthalpy}
 \end{equation}
 Where:
 \begin{equation*}
@@ -865,6 +871,11 @@ A first order (in space), finite volume scheme is easily realized by the followi
     \item A first order (in time) explicit scheme is given by: $\Delta\tilde{Q}_i^n=\Delta\tilde{t}\cdot\tilde{\mathfrak{R}}_i^n$
     \nomenclature[V]{$\tilde{\mathfrak{R}}$}{residual of first order explicit Roe}
 \end{itemize}
+
+\subsection{Stability}
+The numerical stability of the Navier-Stokes equations depends on the size of the time step $\Delta t$. The N-S equations are a combination of convective (hyperbolic) and viscous (parabolic) elements. The relation between the time step and the numerical stability is determined in different ways for each element.
+
+\subsubsection{Convective }
 
 \section{The Results}
 \subsection{FVS -- First Order Explicit Steger-Warming}

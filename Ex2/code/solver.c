@@ -32,6 +32,7 @@ typedef enum {
 #endif
 
 void read_input(char *input_file, int *N, double *x_min, double *x_max, double *L, double *norm_delta_x, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *Pr_inf, double *R_specific, double *T_inf, int *max_iterations, double *final_time, t_flag *flags);
+void output_metadata(char *output_dir, int N, double x_min, double x_max, double Re_inf, double M_inf, double CFL, double gamma, double Pr_inf, double R_specific, double T_inf, int max_iterations, double final_time, t_flag flags);
 void print_mat2D_to_file(FILE *fp, Mat2D m);
 double calc_norm_mu(double norm_T, double gamma, double T_inf);
 double calc_norm_kappa(double norm_T, double gamma, double T_inf);
@@ -116,6 +117,13 @@ int main(int argc, char const *argv[])
             fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
             return -1;
         }
+        if (flags & EXPLICIT_SW) {
+            strcat(output_dir, "/EXPLICIT_SW");
+            if (create_empty_dir(output_dir) != 0) {
+                fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
+                return -1;
+            }
+        }
     }
 
     strcpy(temp_word, output_dir);
@@ -172,6 +180,7 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* output */
+    output_metadata(output_dir, N, x_min, x_max, Re_inf, M_inf, CFL, gamma, Pr_inf, R_specific, T_inf, max_iterations, final_time, flags);
 
 /*------------------------------------------------------------*/
 /* freeing the memory */
@@ -322,6 +331,30 @@ void read_input(char *input_file, int *N, double *x_min, double *x_max, double *
     fclose(fp);
 }
 
+void output_metadata(char *output_dir, int N, double x_min, double x_max, double Re_inf, double M_inf, double CFL, double gamma, double Pr_inf, double R_specific, double T_inf, int max_iterations, double final_time, t_flag flags)
+{
+    char temp_word[MAXWORD], scheme[MAXWORD];
+    FILE *metadata_file;
+
+    strcpy(temp_word, output_dir);
+    strcat(temp_word, "/metadata.txt");
+    metadata_file = fopen(temp_word, "wt");
+
+    if (flags & EXPLICIT_SW) {
+        strcpy(scheme, "EXPLICIT SW");
+    } else if(flags & IMPLICIT_SW) {
+        strcpy(scheme, "IMPLICIT SW");
+    } else if(flags & EXPLICIT_ROE) {
+        strcpy(scheme, "EXPLICIT ROE");
+    }
+
+    fprintf(metadata_file, "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n" , "N", "x_min", "x_max", "Re_inf", "M_inf", "CFL", "scheme", "gamma", "Pr_inf", "R_specific", "T_inf", "iterations", "final_time");
+    fprintf(metadata_file, "%d, %g, %g, %g, %g, %g, %s, %g, %g, %g, %g, %d, %g" , N, x_min, x_max, Re_inf, M_inf, CFL, scheme, gamma, Pr_inf, R_specific, T_inf, max_iterations, final_time);
+
+
+    fclose(metadata_file);
+}
+
 void print_mat2D_to_file(FILE *fp, Mat2D m)
 {
     fprintf(fp, "\n");
@@ -370,7 +403,7 @@ double calc_norm_T(Mat2D Q, double gamma, int i)
 
 double calc_norm_delta_t(Mat2D Q, double gamma, double norm_delta_x, double CFL, int N)
 {
-    return 1e-3;
+    return 1e-4;
 }
 
 void calc_T_matrix_at_i(Mat2D T_matrix, Mat2D Q, double gamma, int i)
@@ -454,12 +487,17 @@ void initialize_Q(char *init_conditions_file, Mat2D Q, double gamma, int N)
 {
     char current_word[MAXWORD];
     float norm_rho, norm_u, norm_e, norm_p;
+    double buffer, temp;
+    int i;
 
     FILE *fp = fopen(init_conditions_file, "rt");
     if (fp == NULL) {
         fprintf(stderr, "%s:%d:[Error] problem opening input file: %s\n", __FILE__, __LINE__, strerror(errno));
         exit(1);
     }
+    
+    buffer = (N - 100) / 2;
+    assert(!(buffer - (int)buffer));
 
     for (int i = 0; i < 5; i++) {
         fscanf(fp, "%s", current_word);
@@ -484,6 +522,32 @@ void initialize_Q(char *init_conditions_file, Mat2D Q, double gamma, int N)
         MAT2D_AT(Q, 0, i) = norm_rho;
         MAT2D_AT(Q, 1, i) = norm_rho * norm_u;
         MAT2D_AT(Q, 2, i) = norm_e;
+
+        if (1 == i) {
+            temp = buffer;
+            while (1) {
+                i++;
+                MAT2D_AT(Q, 0, i) = norm_rho;
+                MAT2D_AT(Q, 1, i) = norm_rho * norm_u;
+                MAT2D_AT(Q, 2, i) = norm_e;
+                if (!temp) {
+                    break;
+                }
+                temp--;
+            }
+        }
+    }
+    temp = buffer;
+    i = buffer + 100;
+    while (1) {
+        i++;
+        MAT2D_AT(Q, 0, i) = MAT2D_AT(Q, 0, i-1);
+        MAT2D_AT(Q, 1, i) = MAT2D_AT(Q, 1, i-1);
+        MAT2D_AT(Q, 2, i) = MAT2D_AT(Q, 2, i-1);
+        if (!temp) {
+            break;
+        }
+        temp--;
     }
 
     fclose(fp);
