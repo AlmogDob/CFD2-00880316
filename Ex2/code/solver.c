@@ -158,10 +158,11 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* the loop */
-    for (int i = 0; i < 100; i++) {
-        norm_delta_t = calc_norm_delta_t(init_Q, gamma, norm_delta_x, CFL, N);
+    for (int i = 0; i < 1200; i++) {
+        apply_BC(current_Q, N);
+        norm_delta_t = calc_norm_delta_t(current_Q, gamma, norm_delta_x, CFL, N);
 
-        current_norma = calc_delta_Q_explicit_steger_warming(delta_Q, init_Q, work_3_N_1_mat1, work_3_N_1_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3, gamma, epsilon, M_inf, Re_inf, Pr_inf, T_inf, norm_delta_t, norm_delta_x, N);
+        current_norma = calc_delta_Q_explicit_steger_warming(delta_Q, current_Q, work_3_N_1_mat1, work_3_N_1_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3, gamma, epsilon, M_inf, Re_inf, Pr_inf, T_inf, norm_delta_t, norm_delta_x, N);
 
         mat2D_add(next_Q, delta_Q);
         mat2D_copy(current_Q, next_Q);
@@ -369,7 +370,7 @@ double calc_norm_T(Mat2D Q, double gamma, int i)
 
 double calc_norm_delta_t(Mat2D Q, double gamma, double norm_delta_x, double CFL, int N)
 {
-    return 1e-4;
+    return 1e-3;
 }
 
 void calc_T_matrix_at_i(Mat2D T_matrix, Mat2D Q, double gamma, int i)
