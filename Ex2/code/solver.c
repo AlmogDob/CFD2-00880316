@@ -700,6 +700,8 @@ void calc_vector_of_tilde_norm_E_at_half(Mat2D tilde_norm_E, Mat2D Q, Mat2D work
         calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'p', i);
 
         mat2D_fill(temp_3_by_1, 0);
+        calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'p', i);
+
         MAT2D_AT(Q_index, 0, 0) = MAT2D_AT(Q, 0, i);
         MAT2D_AT(Q_index, 1, 0) = MAT2D_AT(Q, 1, i);
         MAT2D_AT(Q_index, 2, 0) = MAT2D_AT(Q, 2, i);
@@ -707,8 +709,9 @@ void calc_vector_of_tilde_norm_E_at_half(Mat2D tilde_norm_E, Mat2D Q, Mat2D work
         mat2D_add(E_at_index, temp_3_by_1);
 
         /* norm_A_minus */
-        calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'm', i+1);
         mat2D_fill(temp_3_by_1, 0);
+        calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat5, gamma, epsilon, 'm', i+1);
+
         MAT2D_AT(Q_index, 0, 0) = MAT2D_AT(Q, 0, i+1);
         MAT2D_AT(Q_index, 1, 0) = MAT2D_AT(Q, 1, i+1);
         MAT2D_AT(Q_index, 2, 0) = MAT2D_AT(Q, 2, i+1);
