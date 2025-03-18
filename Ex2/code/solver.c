@@ -45,6 +45,7 @@ void calc_T_matrix_at_i(Mat2D T_matrix, Mat2D Q, double gamma, int i);
 void calc_T_inverse_matrix_at_i(Mat2D T_inverse_matrix, Mat2D Q, double gamma, int i);
 void calc_lambda_plus_matrix_at_i(Mat2D lambda_plus_matrix, Mat2D Q, double gamma, int i, double epsilon);
 void calc_lambda_minus_matrix_at_i(Mat2D lambda_minus_matrix, Mat2D Q, double gamma, int i, double epsilon);
+void calc_A_plus_or_minus_at_i(Mat2D Q, Mat2D norm_A, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat5, double gamma, double epsilon, char sign, int i);
 void initialize_Q(char *init_conditions_file, Mat2D Q, double gamma, int N);
 void apply_BC(Mat2D Q, int N);
 void calc_vector_of_E(Mat2D E, Mat2D Q, double gamma, int N);
@@ -184,7 +185,7 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* the loop */
-    for (int i = 0; i < 20000; i++) {
+    for (int i = 0; i < 10000; i++) {
         apply_BC(current_Q, N);
 
         norm_delta_t = calc_norm_delta_t(current_Q, gamma, R_specific, T_inf, norm_delta_x, CFL, N);
@@ -194,8 +195,6 @@ int main(int argc, char const *argv[])
         mat2D_add(next_Q, delta_Q);
         mat2D_copy(current_Q, next_Q);
 
-        print_mat2D_to_file(output_Q_file, current_Q);
-
         if (i % 100 == 0) {
             printf("%d\n",i);
         }
@@ -203,7 +202,10 @@ int main(int argc, char const *argv[])
             fprintf(output_iter_data_file, "%d, %g, %g, %g\n", i+1, current_norma, norm_delta_t, elapsed_time);
         }
         elapsed_time += norm_delta_t;
-        fprintf(output_iter_data_file, "%d, %g, %g, %g\n", i+2, current_norma, norm_delta_t, elapsed_time);
+        if (i % 1 == 0) {
+            print_mat2D_to_file(output_Q_file, current_Q);
+            fprintf(output_iter_data_file, "%d, %g, %g, %g\n", i+2, current_norma, norm_delta_t, elapsed_time);
+        }
     }
 
 /*------------------------------------------------------------*/
@@ -551,6 +553,31 @@ void calc_lambda_minus_matrix_at_i(Mat2D lambda_minus_matrix, Mat2D Q, double ga
     }
 }
 
+void calc_A_plus_or_minus_at_i(Mat2D Q, Mat2D norm_A, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, double gamma, double epsilon, char sign, int i)
+{
+    assert('p' == sign || 'm' == sign);
+
+    Mat2D norm_T, norm_inverse_T, norm_lambda, m_temp;
+
+    norm_T         = work_3_3_mat1;
+    norm_inverse_T = work_3_3_mat2;
+    norm_lambda    = work_3_3_mat3;
+    m_temp         = work_3_3_mat4;
+
+    calc_T_matrix_at_i(norm_T, Q, gamma, i);
+    calc_T_inverse_matrix_at_i(norm_inverse_T, Q, gamma, i);
+
+    mat2D_fill(m_temp, 0);
+    mat2D_fill(norm_A, 0);
+    if ('p' == sign) {
+        calc_lambda_plus_matrix_at_i(norm_lambda, Q, gamma, i, epsilon);
+    } else if ('m' == sign) {
+        calc_lambda_minus_matrix_at_i(norm_lambda, Q, gamma, i, epsilon);
+    }
+    mat2D_dot(m_temp, norm_lambda, norm_inverse_T);
+    mat2D_dot(norm_A, norm_T, m_temp);
+}
+
 void calc_norm_P_minus_Rx_matrix_at_i(Mat2D norm_P_minus_Rx)
 {
     ;
@@ -658,11 +685,7 @@ void calc_vector_of_tilde_norm_E_at_half(Mat2D tilde_norm_E, Mat2D Q, Mat2D work
 {
     Mat2D norm_T, norm_inverse_T, norm_lambda, norm_A, m_temp, Q_index, temp_3_by_1, E_at_index;
 
-    norm_T         = work_3_3_mat1;
-    norm_inverse_T = work_3_3_mat2;
-    norm_lambda    = work_3_3_mat3;
-    norm_A         = work_3_3_mat4;
-    m_temp         = work_3_3_mat5;
+    norm_A         = work_3_3_mat5;
     Q_index        = work_3_1_mat1;
     temp_3_by_1    = work_3_1_mat2;
     E_at_index     = work_3_1_mat3;
@@ -671,15 +694,9 @@ void calc_vector_of_tilde_norm_E_at_half(Mat2D tilde_norm_E, Mat2D Q, Mat2D work
         mat2D_fill(E_at_index, 0);
 
         /* norm_A_plus */
-        calc_T_matrix_at_i(norm_T, Q, gamma, i);
-        calc_T_inverse_matrix_at_i(norm_inverse_T, Q, gamma, i);
-
-        mat2D_fill(m_temp, 0);
-        mat2D_fill(norm_A, 0);
         mat2D_fill(temp_3_by_1, 0);
-        calc_lambda_plus_matrix_at_i(norm_lambda, Q, gamma, i, epsilon);
-        mat2D_dot(m_temp, norm_lambda, norm_inverse_T);
-        mat2D_dot(norm_A, norm_T, m_temp);
+        calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'p', i);
+
         MAT2D_AT(Q_index, 0, 0) = MAT2D_AT(Q, 0, i);
         MAT2D_AT(Q_index, 1, 0) = MAT2D_AT(Q, 1, i);
         MAT2D_AT(Q_index, 2, 0) = MAT2D_AT(Q, 2, i);
@@ -687,15 +704,9 @@ void calc_vector_of_tilde_norm_E_at_half(Mat2D tilde_norm_E, Mat2D Q, Mat2D work
         mat2D_add(E_at_index, temp_3_by_1);
 
         /* norm_A_minus */
-        calc_T_matrix_at_i(norm_T, Q, gamma, i+1);
-        calc_T_inverse_matrix_at_i(norm_inverse_T, Q, gamma, i+1);
-
-        mat2D_fill(m_temp, 0);
-        mat2D_fill(norm_A, 0);
         mat2D_fill(temp_3_by_1, 0);
-        calc_lambda_minus_matrix_at_i(norm_lambda, Q, gamma, i+1, epsilon);
-        mat2D_dot(m_temp, norm_lambda, norm_inverse_T);
-        mat2D_dot(norm_A, norm_T, m_temp);
+        calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat5, gamma, epsilon, 'm', i+1);
+
         MAT2D_AT(Q_index, 0, 0) = MAT2D_AT(Q, 0, i+1);
         MAT2D_AT(Q_index, 1, 0) = MAT2D_AT(Q, 1, i+1);
         MAT2D_AT(Q_index, 2, 0) = MAT2D_AT(Q, 2, i+1);
@@ -789,41 +800,12 @@ double calc_delta_Q_implicit_steger_warming(Mat2D delta_Q, Mat2D Q, Mat2D work_3
     theta          = work_N_by_3_3_array1;
     phi            = work_N_by_3_3_array2;
     psi            = work_N_by_3_3_array3;
-    norm_T         = work_3_3_mat1;
-    norm_inverse_T = work_3_3_mat2;
-    norm_lambda    = work_3_3_mat3;
-    norm_A         = work_3_3_mat4;
-    m_temp         = work_3_3_mat5;
-    vec_temp       = work_3_1_mat1;
 
     calc_delta_Q_explicit_steger_warming(RHS, Q, work_3_N_1_mat1, work_3_N_1_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3, gamma, epsilon, M_inf, Re_inf, Pr_inf, T_inf, norm_delta_t, norm_delta_x, N);
 
-    int i = 0;
+    int i = 1;
     /* norm_A_plus */
-    calc_T_matrix_at_i(norm_T, Q, gamma, i);
-    calc_T_inverse_matrix_at_i(norm_inverse_T, Q, gamma, i);
-
-    mat2D_fill(m_temp, 0);
-    mat2D_fill(norm_A, 0);
-    mat2D_fill(vec_temp, 0);
-    calc_lambda_plus_matrix_at_i(norm_lambda, Q, gamma, i, epsilon);
-    mat2D_dot(m_temp, norm_lambda, norm_inverse_T);
-    mat2D_dot(norm_A, norm_T, m_temp);
-}
-
-double calc_delta_Q(Mat2D delta_Q, Mat2D Q, Mat2D work_3_N_1_mat1, Mat2D work_3_N_1_mat2, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double gamma, double epsilon, double M_inf, double Re_inf, double Pr_inf, double T_inf, double norm_delta_t, double  norm_delta_x, int N, t_flag flags)
-{
-    double current_norma;
-
-    if (flags & EXPLICIT_SW) {
-        current_norma = calc_delta_Q_explicit_steger_warming(delta_Q, Q, work_3_N_1_mat1, work_3_N_1_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3, gamma, epsilon, M_inf, Re_inf, Pr_inf, T_inf, norm_delta_t, norm_delta_x, N);
-    } else if (flags & IMPLICIT_SW) {
-        ;
-    } else if (flags & EXPLICIT_ROE) {
-        ;
-    }
-    
-    return current_norma;
+    calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'p', i-1);
 }
 
 /* 3x3 block tri-diagonal matrix solver 
@@ -955,5 +937,20 @@ int btri3s(float *a, float *b, float *c, float *f, int kd, int ks, int ke)
   
   return 0;
   
+}
+
+double calc_delta_Q(Mat2D delta_Q, Mat2D Q, Mat2D work_3_N_1_mat1, Mat2D work_3_N_1_mat2, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double gamma, double epsilon, double M_inf, double Re_inf, double Pr_inf, double T_inf, double norm_delta_t, double  norm_delta_x, int N, t_flag flags)
+{
+    double current_norma;
+
+    if (flags & EXPLICIT_SW) {
+        current_norma = calc_delta_Q_explicit_steger_warming(delta_Q, Q, work_3_N_1_mat1, work_3_N_1_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3, gamma, epsilon, M_inf, Re_inf, Pr_inf, T_inf, norm_delta_t, norm_delta_x, N);
+    } else if (flags & IMPLICIT_SW) {
+        ;
+    } else if (flags & EXPLICIT_ROE) {
+        ;
+    }
+    
+    return current_norma;
 }
 
