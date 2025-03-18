@@ -873,9 +873,43 @@ A first order (in space), finite volume scheme is easily realized by the followi
 \end{itemize}
 
 \subsection{Stability}
-The numerical stability of the Navier-Stokes equations depends on the size of the time step $\Delta t$. The N-S equations are a combination of convective (hyperbolic) and viscous (parabolic) elements. The relation between the time step and the numerical stability is determined in different ways for each element.
+The numerical stability of the Navier-Stokes equations depends on the size of the time step $\Delta t$. The N-S equations are a combination of convective (hyperbolic) and viscous (parabolic) terms. The relation between the time step and the numerical stability is determined in different ways for each term.
 
-\subsubsection{Convective }
+\subsubsection{Convective Terms}
+The stability of the convective terms is mainly determined by the Courant-Friedrichs-Lewy condition namely:
+\begin{equation}
+    \begin{matrix}
+        \text{CFL}=\displaystyle\frac{\Delta{\tilde{t}}\cdot{\tilde{u}}_\text{max}}{\Delta{\tilde{x}}}\hspace{1cm} & {u}_\text{max}=\max\left(\left|{\tilde{u}}\right|,\left|{\tilde{u}}+{\tilde{a}}\right|,\left|{\tilde{u}}-{\tilde{a}}\right|\right)
+    \end{matrix}
+\end{equation}
+The condition is:
+\begin{equation*}
+    CFL<1
+\end{equation*}
+The condition on the dimensionless time step is therefor:
+\begin{equation*}
+    \Delta\tilde{t}=\frac{\text{CFL}\cdot\Delta\tilde{x}}{\tilde{u}_\text{max}}<\frac{\Delta\tilde{x}}{\tilde{u}_\text{max}}
+\end{equation*}
+
+\subsubsection{Viscous Terms}
+The stability of the viscous terms is mainly determined by the stability parameter \emph{r} namely:
+\begin{equation}
+    r=\frac{\tilde{\mu}_\text{max}\cdot\Delta\tilde{t}}{\left(\Delta\tilde{x}\right)^2}
+\end{equation}
+The condition is:
+\begin{equation*}
+    r<\frac{1}{2}
+\end{equation*}
+The condition on the time step is therefor:
+\begin{equation*}
+    \Delta\tilde{t}=\frac{r\cdot\left(\Delta\tilde{x}\right)^2}{\tilde{\mu}_\text{max}}<\frac{\left(\Delta\tilde{x}\right)^2}{2\tilde{\mu}_\text{max}}
+\end{equation*}
+
+\subsubsection{Conditions on Dimensionless Step Time}
+The dimensionless time step will me the minimum of both conditions:
+\begin{equation}
+    \Delta\tilde{t}<\min\left(\frac{\Delta\tilde{x}}{\tilde{u}_\text{max}},\frac{\left(\Delta\tilde{x}\right)^2}{2\tilde{\mu}_\text{max}}\right)
+\end{equation}
 
 \section{The Results}
 \subsection{FVS -- First Order Explicit Steger-Warming}
