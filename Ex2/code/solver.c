@@ -31,7 +31,7 @@ typedef enum {
     int create_empty_dir(char *parent_directory);
 #endif
 
-void read_input(char *input_file, int *N, double *x_min, double *x_max, double *L, double *norm_delta_x, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *Pr_inf, double *R_specific, double *T_inf, int *max_iterations, double *final_time, t_flag *flags);
+void read_input(char *input_file, int *N, double *x_min, double *x_max, double *L, double *norm_delta_x, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *Pr_inf, double *R_specific, double *c_v, double *T_inf, int *max_iterations, double *final_time, t_flag *flags);
 void output_metadata(char *output_dir, int N, double x_min, double x_max, double Re_inf, double M_inf, double CFL, double gamma, double Pr_inf, double R_specific, double T_inf, int max_iterations, double final_time, t_flag flags);
 void print_mat2D_to_file(FILE *fp, Mat2D m);
 int offset3d(int i, int j, int k, int cols, int rows, int layers);
@@ -46,6 +46,8 @@ void calc_T_inverse_matrix_at_i(Mat2D T_inverse_matrix, Mat2D Q, double gamma, i
 void calc_lambda_plus_matrix_at_i(Mat2D lambda_plus_matrix, Mat2D Q, double gamma, int i, double epsilon);
 void calc_lambda_minus_matrix_at_i(Mat2D lambda_minus_matrix, Mat2D Q, double gamma, int i, double epsilon);
 void calc_A_plus_or_minus_at_i(Mat2D Q, Mat2D norm_A, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat5, double gamma, double epsilon, char sign, int i);
+void calc_norm_P_minus_Rx_matrix_at_i(Mat2D norm_P_minus_Rx, Mat2D Q, double norm_delta_x, double gamma, double T_inf, int i);
+void calc_norm_R_matrix_at_i(Mat2D norm_R, Mat2D Q, double gamma, double T_inf, double Pr_inf, double c_v, int i);
 void initialize_Q(char *init_conditions_file, Mat2D Q, double gamma, int N);
 void apply_BC(Mat2D Q, int N);
 void calc_vector_of_E(Mat2D E, Mat2D Q, double gamma, int N);
@@ -60,7 +62,7 @@ int main(int argc, char const *argv[])
 /* declarations */
     char input_file[MAXDIR], init_conditions_file[MAXDIR], output_dir[MAXDIR], temp_word[MAXWORD];
     int N, max_iterations;
-    double x_min, x_max, L, norm_delta_x, Re_inf, M_inf, CFL, gamma, Pr_inf, R_specific, T_inf, final_time, epsilon = 1e-2, norm_delta_t, current_norma, elapsed_time = 0, *work_N_by_3_3_array1, *work_N_by_3_3_array2, *work_N_by_3_3_array3;
+    double x_min, x_max, L, norm_delta_x, Re_inf, M_inf, CFL, gamma, Pr_inf, R_specific, c_v, T_inf, final_time, epsilon = 1e-2, norm_delta_t, current_norma, elapsed_time = 0, *work_N_by_3_3_array1, *work_N_by_3_3_array2, *work_N_by_3_3_array3;
     t_flag flags = 0;
     Mat2D init_Q, current_Q, next_Q, delta_Q, work_3_N_2_mat1, work_3_N_1_mat1, work_3_N_1_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3;
     FILE *output_Q_file, *output_iter_data_file;
@@ -94,7 +96,7 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* reading the input */
-    read_input(input_file, &N, &x_min, &x_max, &L, &norm_delta_x, &Re_inf, &M_inf, &CFL, &gamma, &Pr_inf, &R_specific, &T_inf, &max_iterations, &final_time, &flags);
+    read_input(input_file, &N, &x_min, &x_max, &L, &norm_delta_x, &Re_inf, &M_inf, &CFL, &gamma, &Pr_inf, &R_specific, &c_v, &T_inf, &max_iterations, &final_time, &flags);
 
 /* Checking the input */
     dprintINT(N);
@@ -108,6 +110,7 @@ int main(int argc, char const *argv[])
     dprintDOUBLE(gamma);
     dprintDOUBLE(Pr_inf);
     dprintDOUBLE(R_specific);
+    dprintDOUBLE(c_v);
     dprintDOUBLE(T_inf);
     dprintDOUBLE(final_time);
     dprintINT(max_iterations);
@@ -188,10 +191,11 @@ int main(int argc, char const *argv[])
     mat2D_copy(next_Q, init_Q);
 
     print_mat2D_to_file(output_Q_file, current_Q);
+    fprintf(output_iter_data_file, "%d, %g, %g, %g\n", 0, current_norma, norm_delta_t, elapsed_time);
 
 /*------------------------------------------------------------*/
 /* the loop */
-    for (int i = 0; i < 5000; i++) {
+    for (int i = 0; i < 10000; i++) {
         apply_BC(current_Q, N);
 
         norm_delta_t = calc_norm_delta_t(current_Q, gamma, R_specific, T_inf, norm_delta_x, CFL, N);
@@ -201,6 +205,8 @@ int main(int argc, char const *argv[])
         mat2D_add(next_Q, delta_Q);
         mat2D_copy(current_Q, next_Q);
 
+        elapsed_time += norm_delta_t;
+
         if (i % 100 == 0) {
             printf("%d\n",i);
         }
@@ -208,7 +214,6 @@ int main(int argc, char const *argv[])
             fprintf(output_iter_data_file, "%d, %g, %g, %g\n", i+1, current_norma, norm_delta_t, elapsed_time);
             print_mat2D_to_file(output_Q_file, current_Q);
         }
-        elapsed_time += norm_delta_t;
         if (i % 1 == 0) {
             print_mat2D_to_file(output_Q_file, current_Q);
             fprintf(output_iter_data_file, "%d, %g, %g, %g\n", i+2, current_norma, norm_delta_t, elapsed_time);
@@ -307,7 +312,7 @@ Pr_inf         - double pointer
 max_iterations - int pointer max number of desired iterations 
 final_time     - double pointer to the final time of the program
 flags          - bit flags */
-void read_input(char *input_file, int *N, double *x_min, double *x_max, double *L, double *norm_delta_x, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *Pr_inf, double *R_specific, double *T_inf, int *max_iterations, double *final_time, t_flag *flags)
+void read_input(char *input_file, int *N, double *x_min, double *x_max, double *L, double *norm_delta_x, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *Pr_inf, double *R_specific, double *c_v, double *T_inf, int *max_iterations, double *final_time, t_flag *flags)
 {
     char current_word[MAXWORD];
     float temp_f;
@@ -344,6 +349,9 @@ void read_input(char *input_file, int *N, double *x_min, double *x_max, double *
         } else if (!strcmp(current_word, "R_specific")) {
             fscanf(fp, "%g", &temp_f);
             *R_specific = (double)temp_f;
+        } else if (!strcmp(current_word, "c_v")) {
+            fscanf(fp, "%g", &temp_f);
+            *c_v = (double)temp_f;
         } else if (!strcmp(current_word, "T_inf")) {
             fscanf(fp, "%g", &temp_f);
             *T_inf = (double)temp_f;
@@ -421,7 +429,7 @@ int offset3d(int i, int j, int k, int cols, int rows, int layers)
     assert(j < rows);
     assert(k < layers);
 
-    return (k * layers + i) * cols + j;
+    return (k * rows + j) * cols + i;
 }
 
 double calc_norm_mu(double norm_T, double gamma, double T_inf)
@@ -533,9 +541,6 @@ void calc_lambda_plus_matrix_at_i(Mat2D lambda_plus_matrix, Mat2D Q, double gamm
     double norm_p = calc_norm_p(gamma, norm_rho, norm_u, norm_e);
     double norm_a = sqrt(gamma * norm_p / norm_rho);
     
-    // dprintDOUBLE(norm_u);
-    // dprintDOUBLE(norm_a);
-
     mat2D_identity_mat(lambda_plus_matrix);
     mat2D_mult(lambda_plus_matrix, norm_u);
     MAT2D_AT(lambda_plus_matrix, 1, 1) += norm_a;
@@ -589,9 +594,54 @@ void calc_A_plus_or_minus_at_i(Mat2D Q, Mat2D norm_A, Mat2D work_3_3_mat1, Mat2D
     mat2D_dot(norm_A, norm_T, m_temp);
 }
 
-void calc_norm_P_minus_Rx_matrix_at_i(Mat2D norm_P_minus_Rx)
+void calc_norm_P_minus_Rx_matrix_at_i(Mat2D norm_P_minus_Rx, Mat2D Q, double norm_delta_x, double gamma, double T_inf, int i)
 {
-    ;
+    double norm_mu_ip1, norm_mu_im1, d_norm_mu_d_norm_x, norm_u_i, norm_T_i, norm_T_ip1, norm_rho;
+
+    norm_rho = MAT2D_AT(Q, 0, i);
+    norm_u_i = MAT2D_AT(Q, 1, i)/norm_rho;
+    norm_T_i = calc_norm_T(Q, gamma, i);
+    norm_T_ip1 = calc_norm_T(Q, gamma, i+1);
+
+    d_norm_mu_d_norm_x = (calc_norm_mu(norm_T_ip1, gamma, T_inf) - calc_norm_mu(norm_T_i, gamma, T_inf)) / (2 * norm_delta_x);
+
+    MAT2D_AT(norm_P_minus_Rx, 0, 0) = 0;
+    MAT2D_AT(norm_P_minus_Rx, 0, 1) = 0;
+    MAT2D_AT(norm_P_minus_Rx, 0, 2) = 0;
+    MAT2D_AT(norm_P_minus_Rx, 1, 0) = norm_u_i * (double)4/3 * d_norm_mu_d_norm_x;
+    MAT2D_AT(norm_P_minus_Rx, 1, 1) = - (double)4/3 * d_norm_mu_d_norm_x;
+    MAT2D_AT(norm_P_minus_Rx, 1, 2) = 0;
+    MAT2D_AT(norm_P_minus_Rx, 2, 0) = norm_u_i * norm_u_i * (double)4/3 * d_norm_mu_d_norm_x;
+    MAT2D_AT(norm_P_minus_Rx, 2, 1) = - norm_u_i * (double)4/3 * d_norm_mu_d_norm_x;
+    MAT2D_AT(norm_P_minus_Rx, 2, 2) = 0;
+
+    mat2D_mult(norm_P_minus_Rx, (double)1/norm_rho);
+}
+
+void calc_norm_R_matrix_at_i(Mat2D norm_R, Mat2D Q, double gamma, double T_inf, double Pr_inf, double c_v, int i)
+{
+    double norm_rho_i, norm_u_i, norm_T_i, norm_mu_i, norm_kappa_i, norm_e_i, alpha;
+
+    alpha = gamma / (Pr_inf * (gamma - 1));
+
+    norm_rho_i   = MAT2D_AT(Q, 0, i);
+    norm_u_i     = MAT2D_AT(Q, 1, i) / norm_rho_i;
+    norm_e_i     = MAT2D_AT(Q, 2, i);
+    norm_T_i     = calc_norm_T(Q, gamma, i);
+    norm_mu_i    = calc_norm_mu(norm_T_i, gamma, T_inf);
+    norm_kappa_i = calc_norm_kappa(norm_T_i, gamma, T_inf);
+
+    MAT2D_AT(norm_R, 0, 0) = 0;
+    MAT2D_AT(norm_R, 0, 1) = 0;
+    MAT2D_AT(norm_R, 0, 2) = 0;
+    MAT2D_AT(norm_R, 1, 0) = (double)4/3 * norm_u_i * norm_mu_i;
+    MAT2D_AT(norm_R, 1, 1) = - (double)4/3 * norm_mu_i;
+    MAT2D_AT(norm_R, 1, 2) = 0;
+    MAT2D_AT(norm_R, 2, 0) = norm_u_i * norm_u_i * ((double)4/3 * norm_mu_i - alpha * norm_kappa_i / c_v) + alpha * norm_kappa_i / c_v * norm_e_i / norm_rho_i;
+    MAT2D_AT(norm_R, 2, 1) = - norm_u_i * ((double)4/3 * norm_mu_i - alpha * norm_kappa_i / c_v);
+    MAT2D_AT(norm_R, 2, 2) = - alpha * norm_kappa_i / c_v;
+
+    mat2D_mult(norm_R, - (double)1/norm_rho_i);
 }
 
 void initialize_Q(char *init_conditions_file, Mat2D Q, double gamma, int N)
@@ -615,10 +665,6 @@ void initialize_Q(char *init_conditions_file, Mat2D Q, double gamma, int N)
     }
 
     for (int i = 1; i <= N; i++) {
-        // fscanf(fp, "%g %g %g %g", &temp_d, &norm_rho, &norm_u, &norm_p);
-        // printf("%g, %g, %g, %g\n", temp_d, norm_rho, norm_u, norm_p);
-
-
         fscanf(fp, "%s", current_word);
         fscanf(fp, "%s", current_word);
         norm_rho = atof(current_word);
@@ -626,7 +672,6 @@ void initialize_Q(char *init_conditions_file, Mat2D Q, double gamma, int N)
         norm_u = atof(current_word);
         fscanf(fp, "%s", current_word);
         norm_p = atof(current_word);
-        // printf("%g, %g, %g\n", norm_rho, norm_u, norm_p);
 
         norm_e = calc_norm_energy(gamma, norm_rho, norm_u, norm_p);
 
@@ -802,27 +847,58 @@ double calc_delta_Q_explicit_steger_warming(Mat2D delta_Q, Mat2D Q, Mat2D work_3
     return mat2D_calc_norma(delta_Q);
 }
 
-double calc_delta_Q_implicit_steger_warming(Mat2D delta_Q, Mat2D Q, Mat2D work_3_N_1_mat1, Mat2D work_3_N_1_mat2, Mat2D work_3_N_mat1, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double *work_N_by_3_3_array1, double *work_N_by_3_3_array2, double *work_N_by_3_3_array3, double gamma, double epsilon, double M_inf, double Re_inf, double Pr_inf, double T_inf, double norm_delta_t, double  norm_delta_x, int N)
+double calc_delta_Q_implicit_steger_warming(Mat2D delta_Q, Mat2D Q, Mat2D work_3_N_1_mat1, Mat2D work_3_N_1_mat2, Mat2D work_3_N_mat1, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double *work_N_by_3_3_array1, double *work_N_by_3_3_array2, double *work_N_by_3_3_array3, double gamma, double epsilon, double M_inf, double Re_inf, double Pr_inf, double c_v, double T_inf, double norm_delta_t, double  norm_delta_x, int N)
 {
-    Mat2D RHS, norm_A;
+    Mat2D RHS, norm_A, norm_P_minus_Rx_matrix, norm_R_matrix;
     double *theta, *phi, *psi;
 
     RHS            = work_3_N_mat1;
     theta          = work_N_by_3_3_array1;
     phi            = work_N_by_3_3_array2;
     psi            = work_N_by_3_3_array3;
+    
+    /* zeroing theta, phi, psi */
+    for (int i = 0; i < N; i++) {
+        for (int m = 0; m < 3; m++) {
+            for (int  n = 0; n < 3; n++) {
+                theta[offset3d(i, m, n, N, 3, 3)] = 0;
+            }
+        }
+    }
 
     calc_delta_Q_explicit_steger_warming(RHS, Q, work_3_N_1_mat1, work_3_N_1_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3, gamma, epsilon, M_inf, Re_inf, Pr_inf, T_inf, norm_delta_t, norm_delta_x, N);
 
     norm_A = work_3_3_mat5;
+    mat2D_fill(norm_A, 0);
 
     int i = 1;
     /* norm_A_plus */
     calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'p', i-1);
+    for (size_t m = 0; m < norm_A.rows; m++) {
+        for (size_t n = 0; n < norm_A.cols; n++) {
+            theta[offset3d(i, m, n, N, 3, 3)] += - norm_delta_t / norm_delta_x * MAT2D_AT(norm_A, m, n);    /* my i index is the row and the btri3s i index in the column */
+        }
+    }
+
+    norm_P_minus_Rx_matrix = work_3_3_mat5;
+    mat2D_fill(norm_P_minus_Rx_matrix, 0);
+    calc_norm_P_minus_Rx_matrix_at_i(norm_P_minus_Rx_matrix, Q, norm_delta_x, gamma, T_inf, i-1);
+    for (size_t m = 0; m < norm_A.rows; m++) {
+        for (size_t n = 0; n < norm_A.cols; n++) {
+            theta[offset3d(i, m, n, N, 3, 3)] += norm_delta_t / (2 * norm_delta_x) * M_inf / Re_inf * MAT2D_AT(norm_P_minus_Rx_matrix, m, n);    /* my i index is the row and the btri3s i index in the column */
+        }
+    }
+
+    norm_R_matrix = work_3_3_mat5;
+    mat2D_fill(norm_R_matrix, 0);
+    calc_norm_R_matrix_at_i(norm_R_matrix, Q, gamma, T_inf, Pr_inf, c_v, i-1);
+    for (size_t m = 0; m < norm_A.rows; m++) {
+        for (size_t n = 0; n < norm_A.cols; n++) {
+            theta[offset3d(i, m, n, N, 3, 3)] += - norm_delta_t / (norm_delta_x * norm_delta_x) * M_inf / Re_inf * MAT2D_AT(norm_R_matrix, m, n);    /* my i index is the row and the btri3s i index in the column */
+        }
+    }
 
 
-
-    theta = (void*)theta;
     phi = (void*)phi;
     psi = (void*)psi;
     mat2D_fill(delta_Q, 0);

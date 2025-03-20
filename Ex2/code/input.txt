@@ -28,6 +28,9 @@ Pr_inf
 R_specific
 287
 
+c_v
+715
+
 T_inf
 288.15
 
