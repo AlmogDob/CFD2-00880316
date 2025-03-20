@@ -121,6 +121,12 @@ int main(int argc, char const *argv[])
             fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
             return -1;
         }
+        sprintf(temp_word, "/N%d", N);
+        strcat(output_dir, temp_word);
+        if (create_empty_dir(output_dir) != 0) {
+            fprintf(stderr, "%s:%d: [Error] creating ouput directory\n", __FILE__, __LINE__);
+            return -1;
+        }
         if (flags & EXPLICIT_SW) {
             strcat(output_dir, "/EXPLICIT_SW");
             if (create_empty_dir(output_dir) != 0) {
@@ -185,7 +191,7 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* the loop */
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 5000; i++) {
         apply_BC(current_Q, N);
 
         norm_delta_t = calc_norm_delta_t(current_Q, gamma, R_specific, T_inf, norm_delta_x, CFL, N);
@@ -200,6 +206,7 @@ int main(int argc, char const *argv[])
         }
         if (0 == i) {
             fprintf(output_iter_data_file, "%d, %g, %g, %g\n", i+1, current_norma, norm_delta_t, elapsed_time);
+            print_mat2D_to_file(output_Q_file, current_Q);
         }
         elapsed_time += norm_delta_t;
         if (i % 1 == 0) {
@@ -710,7 +717,7 @@ void calc_vector_of_tilde_norm_E_at_half(Mat2D tilde_norm_E, Mat2D Q, Mat2D work
 
         /* norm_A_minus */
         mat2D_fill(temp_3_by_1, 0);
-        calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat5, gamma, epsilon, 'm', i+1);
+        calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'm', i+1);
 
         MAT2D_AT(Q_index, 0, 0) = MAT2D_AT(Q, 0, i+1);
         MAT2D_AT(Q_index, 1, 0) = MAT2D_AT(Q, 1, i+1);

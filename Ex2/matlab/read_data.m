@@ -1,8 +1,9 @@
-function [result] = read_data(scheme)
+function [result] = read_data(N, scheme, M_inf, CFL)
     
     
-    data     = readmatrix(sprintf('results\\%s\\output_Q.txt', scheme));
-    metadata = readtable(sprintf('results\\%s\\metadata.txt', scheme));
+    data      = readmatrix(sprintf('results\\N%d\\%s\\M%g\\CFL%g\\output_Q.txt', N, scheme, M_inf, CFL));
+    metadata  = readtable(sprintf('results\\N%d\\%s\\M%g\\CFL%g\\metadata.txt', N, scheme, M_inf, CFL));
+    iter_data = readtable(sprintf('results\\N%d\\%s\\M%g\\CFL%g\\output_iter_data.txt', N, scheme, M_inf, CFL));
 
 
     Qs = {};
@@ -12,6 +13,7 @@ function [result] = read_data(scheme)
     
     data = {};
     for i = 1:length(Qs(:,1))
+        i
         data{i,1}.norm_rho = Qs{i,1}(1,:);
         data{i,1}.norm_u = Qs{i,1}(2,:) ./ Qs{i,1}(1,:);
         data{i,1}.norm_e = Qs{i,1}(3,:);
@@ -34,6 +36,7 @@ function [result] = read_data(scheme)
     result.x = x;
     result.data = data;
     result.metadata = metadata;
+    result.iter_data = iter_data;
 
 end
 
