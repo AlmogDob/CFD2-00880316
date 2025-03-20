@@ -185,7 +185,7 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* the loop */
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 1000; i++) {
         apply_BC(current_Q, N);
 
         norm_delta_t = calc_norm_delta_t(current_Q, gamma, R_specific, T_inf, norm_delta_x, CFL, N);
@@ -686,7 +686,7 @@ void calc_vector_of_E(Mat2D E, Mat2D Q, double gamma, int N)
 
 void calc_vector_of_tilde_norm_E_at_half(Mat2D tilde_norm_E, Mat2D Q, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double gamma, double epsilon, int N)
 {
-    Mat2D norm_T, norm_inverse_T, norm_lambda, norm_A, m_temp, Q_index, temp_3_by_1, E_at_index;
+    Mat2D norm_A, Q_index, temp_3_by_1, E_at_index;
 
     norm_A         = work_3_3_mat5;
     Q_index        = work_3_1_mat1;
@@ -697,9 +697,9 @@ void calc_vector_of_tilde_norm_E_at_half(Mat2D tilde_norm_E, Mat2D Q, Mat2D work
         mat2D_fill(E_at_index, 0);
 
         /* norm_A_plus */
-        mat2D_fill(temp_3_by_1, 0);
         calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'p', i);
 
+        mat2D_fill(temp_3_by_1, 0);
         MAT2D_AT(Q_index, 0, 0) = MAT2D_AT(Q, 0, i);
         MAT2D_AT(Q_index, 1, 0) = MAT2D_AT(Q, 1, i);
         MAT2D_AT(Q_index, 2, 0) = MAT2D_AT(Q, 2, i);
@@ -707,9 +707,8 @@ void calc_vector_of_tilde_norm_E_at_half(Mat2D tilde_norm_E, Mat2D Q, Mat2D work
         mat2D_add(E_at_index, temp_3_by_1);
 
         /* norm_A_minus */
+        calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'm', i+1);
         mat2D_fill(temp_3_by_1, 0);
-        calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat5, gamma, epsilon, 'm', i+1);
-
         MAT2D_AT(Q_index, 0, 0) = MAT2D_AT(Q, 0, i+1);
         MAT2D_AT(Q_index, 1, 0) = MAT2D_AT(Q, 1, i+1);
         MAT2D_AT(Q_index, 2, 0) = MAT2D_AT(Q, 2, i+1);
@@ -794,21 +793,32 @@ double calc_delta_Q_explicit_steger_warming(Mat2D delta_Q, Mat2D Q, Mat2D work_3
     return mat2D_calc_norma(delta_Q);
 }
 
-double calc_delta_Q_implicit_steger_warming(Mat2D delta_Q, Mat2D Q, Mat2D work_3_N_2_mat1, Mat2D work_3_N_1_mat1, Mat2D work_3_N_1_mat2, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double *work_N_by_3_3_array1, double *work_N_by_3_3_array2, double *work_N_by_3_3_array3, double gamma, double epsilon, double M_inf, double Re_inf, double Pr_inf, double T_inf, double norm_delta_t, double  norm_delta_x, int N)
+double calc_delta_Q_implicit_steger_warming(Mat2D delta_Q, Mat2D Q, Mat2D work_3_N_1_mat1, Mat2D work_3_N_1_mat2, Mat2D work_3_N_mat1, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double *work_N_by_3_3_array1, double *work_N_by_3_3_array2, double *work_N_by_3_3_array3, double gamma, double epsilon, double M_inf, double Re_inf, double Pr_inf, double T_inf, double norm_delta_t, double  norm_delta_x, int N)
 {
-    Mat2D RHS, norm_T, norm_inverse_T, norm_lambda, norm_A, m_temp, vec_temp;
+    Mat2D RHS, norm_A;
     double *theta, *phi, *psi;
 
-    RHS            = work_3_N_2_mat1;
+    RHS            = work_3_N_mat1;
     theta          = work_N_by_3_3_array1;
     phi            = work_N_by_3_3_array2;
     psi            = work_N_by_3_3_array3;
 
     calc_delta_Q_explicit_steger_warming(RHS, Q, work_3_N_1_mat1, work_3_N_1_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3, gamma, epsilon, M_inf, Re_inf, Pr_inf, T_inf, norm_delta_t, norm_delta_x, N);
 
+    norm_A = work_3_3_mat5;
+
     int i = 1;
     /* norm_A_plus */
     calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'p', i-1);
+
+
+
+    theta = (void*)theta;
+    phi = (void*)phi;
+    psi = (void*)psi;
+    mat2D_fill(delta_Q, 0);
+
+    return -1;
 }
 
 /* 3x3 block tri-diagonal matrix solver 
