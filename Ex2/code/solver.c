@@ -185,7 +185,7 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* the loop */
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < 1; i++) {
         apply_BC(current_Q, N);
 
         norm_delta_t = calc_norm_delta_t(current_Q, gamma, R_specific, T_inf, norm_delta_x, CFL, N);
@@ -207,6 +207,9 @@ int main(int argc, char const *argv[])
             fprintf(output_iter_data_file, "%d, %g, %g, %g\n", i+2, current_norma, norm_delta_t, elapsed_time);
         }
     }
+
+
+    
 
 /*------------------------------------------------------------*/
 /* output */
