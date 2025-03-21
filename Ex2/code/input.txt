@@ -1,5 +1,5 @@
 N
-200
+101
 
 x_min
 0.2
@@ -14,10 +14,10 @@ M_inf
 0.9
 
 CFL
-0.7
+0.1
 
 scheme
-EXPLICIT_SW
+IMPLICIT_SW
 
 gamma
 1.4

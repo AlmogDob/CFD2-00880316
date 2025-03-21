@@ -40,7 +40,7 @@ double calc_norm_kappa(double norm_T, double gamma, double T_inf);
 double calc_norm_energy(double gamma, double norm_rho, double norm_u, double norm_p);
 double calc_norm_p(double gamma, double norm_rho, double norm_u, double norm_e);
 double calc_norm_T(Mat2D Q, double gamma, int i);
-double calc_norm_delta_t(Mat2D Q, double gamma, double R_specific, double T_inf, double norm_delta_x, double CFL, int N);
+double calc_norm_delta_t(Mat2D Q, double gamma, double R_specific, double T_inf, double norm_delta_x, double CFL, int N, t_flag flags);
 void calc_T_matrix_at_i(Mat2D T_matrix, Mat2D Q, double gamma, int i);
 void calc_T_inverse_matrix_at_i(Mat2D T_inverse_matrix, Mat2D Q, double gamma, int i);
 void calc_lambda_plus_matrix_at_i(Mat2D lambda_plus_matrix, Mat2D Q, double gamma, int i, double epsilon);
@@ -201,7 +201,7 @@ int main(int argc, char const *argv[])
     mat2D_copy(current_Q, init_Q);
     mat2D_copy(next_Q, init_Q);
 
-    norm_delta_t = calc_norm_delta_t(current_Q, gamma, R_specific, T_inf, norm_delta_x, CFL, N);
+    norm_delta_t = calc_norm_delta_t(current_Q, gamma, R_specific, T_inf, norm_delta_x, CFL, N, flags);
 
     print_mat2D_to_file(output_Q_file, current_Q);
     fprintf(output_iter_data_file, "%d, %g, %g, %g\n", 0, current_norma, norm_delta_t, elapsed_time);
@@ -211,7 +211,7 @@ int main(int argc, char const *argv[])
     for (int i = 0; i < 10000; i++) {
         apply_BC(current_Q, N);
 
-        norm_delta_t = calc_norm_delta_t(current_Q, gamma, R_specific, T_inf, norm_delta_x, CFL, N);
+        norm_delta_t = calc_norm_delta_t(current_Q, gamma, R_specific, T_inf, norm_delta_x, CFL, N, flags);
 
         current_norma = calc_delta_Q(delta_Q, current_Q, work_3_Np2_mat1, work_3_Np1_mat1, work_3_Np1_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3, work_Np2_3_3_array1, work_Np2_3_3_array2, work_Np2_3_3_array3, work_3_Np2_array1, gamma, epsilon, M_inf, Re_inf, Pr_inf, c_v, T_inf, norm_delta_t, norm_delta_x, N, flags);
 
@@ -502,7 +502,7 @@ double calc_norm_T(Mat2D Q, double gamma, int i)
     return norm_p / norm_rho;
 }
 
-double calc_norm_delta_t(Mat2D Q, double gamma, double R_specific, double T_inf, double norm_delta_x, double CFL, int N)
+double calc_norm_delta_t(Mat2D Q, double gamma, double R_specific, double T_inf, double norm_delta_x, double CFL, int N, t_flag flags)
 {
     double delta_t_CFL, delta_t_r, norm_rho, norm_u, norm_e, norm_p, norm_T, norm_a; 
     double maximum, norm_u_max = 0, norm_T_max = 0;
@@ -698,7 +698,7 @@ double initialize_Q(char *init_conditions_file, Mat2D Q, double gamma, int N)
         exit(1);
     }
     
-    buffer = (N - 100) / 2;
+    buffer = (double)(N - 100) / 2;
     assert(!(buffer - (int)buffer));
 
     for (int i = 0; i < 5; i++) {
