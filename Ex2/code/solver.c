@@ -53,16 +53,16 @@ void apply_BC(Mat2D Q, int N);
 void calc_vector_of_E(Mat2D E, Mat2D Q, double gamma, int N);
 void calc_vector_of_tilde_norm_E_at_half(Mat2D tilde_norm_E, Mat2D Q, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double gamma, double epsilon, int N);
 void calc_vector_of_norm_V1_at_half(Mat2D V1, Mat2D Q, double gamma, double Pr_inf, double T_inf, double norm_delta_x, int N);
-double calc_delta_Q_implicit_steger_warming(Mat2D delta_Q, Mat2D Q, Mat2D work_3_Np2_mat1, Mat2D work_3_Np1_mat1, Mat2D work_3_Np1_mat2, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double *work_3_Np2_array1, double *work_N_3_3_array1, double *work_N_3_3_array2, double *work_N_3_3_array3, double gamma, double epsilon, double M_inf, double Re_inf, double Pr_inf, double c_v, double T_inf, double norm_delta_t, double  norm_delta_x, int N);
+double calc_delta_Q_implicit_steger_warming(Mat2D delta_Q, Mat2D Q, Mat2D work_3_Np2_mat1, Mat2D work_3_Np1_mat1, Mat2D work_3_Np1_mat2, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double *work_Np2_3_3_array1, double *work_Np2_3_3_array2, double *work_Np2_3_3_array3, double *work_3_Np2_array1, double gamma, double epsilon, double M_inf, double Re_inf, double Pr_inf, double c_v, double T_inf, double norm_delta_t, double  norm_delta_x, int N);
 int btri3s(double *a, double *b, double *c, double *f, int kd, int ks, int ke);
-double calc_delta_Q(Mat2D delta_Q, Mat2D Q, Mat2D work_3_Np2_mat1, Mat2D work_3_Np1_mat1, Mat2D work_3_Np1_mat2, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double *work_3_Np2_array1, double *work_N_3_3_array1, double *work_N_3_3_array2, double *work_N_3_3_array3, double gamma, double epsilon, double M_inf, double Re_inf, double Pr_inf, double c_v, double T_inf, double norm_delta_t, double  norm_delta_x, int N, t_flag flags);
+double calc_delta_Q(Mat2D delta_Q, Mat2D Q, Mat2D work_3_Np2_mat1, Mat2D work_3_Np1_mat1, Mat2D work_3_Np1_mat2, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double *work_Np2_3_3_array1, double *work_Np2_3_3_array2, double *work_Np2_3_3_array3, double *work_3_Np2_array1, double gamma, double epsilon, double M_inf, double Re_inf, double Pr_inf, double c_v, double T_inf, double norm_delta_t, double  norm_delta_x, int N, t_flag flags);
 
 int main(int argc, char const *argv[])
 {
 /* declarations */
     char input_file[MAXDIR], init_conditions_file[MAXDIR], output_dir[MAXDIR], temp_word[MAXWORD];
     int N, max_iterations;
-    double x_min, x_max, L, norm_delta_x, Re_inf, M_inf, CFL, gamma, Pr_inf, R_specific, c_v, T_inf, final_time, epsilon = 1e-2, norm_delta_t, current_norma, elapsed_time = 0, *work_N_3_3_array1, *work_N_3_3_array2, *work_N_3_3_array3, *work_3_Np2_array1;
+    double x_min, x_max, L, norm_delta_x, Re_inf, M_inf, CFL, gamma, Pr_inf, R_specific, c_v, T_inf, final_time, epsilon = 1e-2, norm_delta_t, current_norma, elapsed_time = 0, *work_Np2_3_3_array1, *work_Np2_3_3_array2, *work_Np2_3_3_array3, *work_3_Np2_array1;
     t_flag flags = 0;
     Mat2D init_Q, current_Q, next_Q, delta_Q, work_3_Np2_mat1, work_3_Np2_mat2, work_3_Np1_mat1, work_3_Np1_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3;
     FILE *output_Q_file, *output_iter_data_file;
@@ -188,10 +188,10 @@ int main(int argc, char const *argv[])
     mat2D_alloc(&work_3_1_mat2, 3, 1);
     mat2D_alloc(&work_3_1_mat3, 3, 1);
 
-    work_N_3_3_array1 = (double *)calloc(N * 3 * 3, sizeof(double));
-    work_N_3_3_array2 = (double *)calloc(N * 3 * 3, sizeof(double));
-    work_N_3_3_array3 = (double *)calloc(N * 3 * 3, sizeof(double));
-    work_3_Np2_array1 = (double *)calloc((N + 2) * 3, sizeof(double));
+    work_Np2_3_3_array1 = (double *)calloc((N + 2) * 3 * 3, sizeof(double));
+    work_Np2_3_3_array2 = (double *)calloc((N + 2) * 3 * 3, sizeof(double));
+    work_Np2_3_3_array3 = (double *)calloc((N + 2) * 3 * 3, sizeof(double));
+    work_3_Np2_array1   = (double *)calloc((N + 2) * 3, sizeof(double));
 
 /*------------------------------------------------------------*/
 /* initialization */
@@ -213,7 +213,7 @@ int main(int argc, char const *argv[])
 
         norm_delta_t = calc_norm_delta_t(current_Q, gamma, R_specific, T_inf, norm_delta_x, CFL, N);
 
-        current_norma = calc_delta_Q(delta_Q, current_Q, work_3_Np2_mat1, work_3_Np1_mat1, work_3_Np1_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3, work_3_Np2_array1, work_N_3_3_array1, work_N_3_3_array2, work_N_3_3_array3, gamma, epsilon, M_inf, Re_inf, Pr_inf, c_v, T_inf, norm_delta_t, norm_delta_x, N, flags);
+        current_norma = calc_delta_Q(delta_Q, current_Q, work_3_Np2_mat1, work_3_Np1_mat1, work_3_Np1_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3, work_Np2_3_3_array1, work_Np2_3_3_array2, work_Np2_3_3_array3, work_3_Np2_array1, gamma, epsilon, M_inf, Re_inf, Pr_inf, c_v, T_inf, norm_delta_t, norm_delta_x, N, flags);
 
         mat2D_add(next_Q, delta_Q);
         mat2D_copy(current_Q, next_Q);
@@ -263,9 +263,11 @@ int main(int argc, char const *argv[])
     mat2D_free(work_3_1_mat2);
     mat2D_free(work_3_1_mat3);
 
-    free(work_N_3_3_array1);
-    free(work_N_3_3_array2);
-    free(work_N_3_3_array3);
+    free(work_Np2_3_3_array1);
+    free(work_Np2_3_3_array2);
+    free(work_Np2_3_3_array3);
+
+    free(work_3_Np2_array1);
 
     fclose(output_Q_file);
     fclose(output_iter_data_file);
@@ -630,14 +632,19 @@ void calc_A_plus_or_minus_at_i(Mat2D Q, Mat2D norm_A, Mat2D work_3_3_mat1, Mat2D
 
 void calc_norm_P_minus_Rx_matrix_at_i(Mat2D norm_P_minus_Rx, Mat2D Q, double norm_delta_x, double gamma, double T_inf, int i)
 {
-    double d_norm_mu_d_norm_x, norm_u_i, norm_T_i, norm_T_ip1, norm_rho;
+    double d_norm_mu_d_norm_x, norm_u_i, norm_T_i, norm_T_ipm1, norm_rho;
 
     norm_rho = MAT2D_AT(Q, 0, i);
     norm_u_i = MAT2D_AT(Q, 1, i)/norm_rho;
     norm_T_i = calc_norm_T(Q, gamma, i);
-    norm_T_ip1 = calc_norm_T(Q, gamma, i+1);
 
-    d_norm_mu_d_norm_x = (calc_norm_mu(norm_T_ip1, gamma, T_inf) - calc_norm_mu(norm_T_i, gamma, T_inf)) / (2 * norm_delta_x);
+    if ((int)Q.cols-1 == i) {
+        norm_T_ipm1 = calc_norm_T(Q, gamma, i-1);
+        d_norm_mu_d_norm_x = (calc_norm_mu(norm_T_i, gamma, T_inf) - calc_norm_mu(norm_T_ipm1, gamma, T_inf)) / (2 * norm_delta_x);
+    } else {
+        norm_T_ipm1 = calc_norm_T(Q, gamma, i+1);
+        d_norm_mu_d_norm_x = (calc_norm_mu(norm_T_ipm1, gamma, T_inf) - calc_norm_mu(norm_T_i, gamma, T_inf)) / (2 * norm_delta_x);
+    }
 
     MAT2D_AT(norm_P_minus_Rx, 0, 0) = 0;
     MAT2D_AT(norm_P_minus_Rx, 0, 1) = 0;
@@ -883,22 +890,24 @@ double calc_delta_Q_explicit_steger_warming(Mat2D delta_Q, Mat2D Q, Mat2D work_3
     return mat2D_calc_norma(delta_Q);
 }
 
-double calc_delta_Q_implicit_steger_warming(Mat2D delta_Q, Mat2D Q, Mat2D work_3_Np2_mat1, Mat2D work_3_Np1_mat1, Mat2D work_3_Np1_mat2, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double *work_3_Np2_array1, double *work_N_3_3_array1, double *work_N_3_3_array2, double *work_N_3_3_array3, double gamma, double epsilon, double M_inf, double Re_inf, double Pr_inf, double c_v, double T_inf, double norm_delta_t, double  norm_delta_x, int N)
+double calc_delta_Q_implicit_steger_warming(Mat2D delta_Q, Mat2D Q, Mat2D work_3_Np2_mat1, Mat2D work_3_Np1_mat1, Mat2D work_3_Np1_mat2, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double *work_Np2_3_3_array1, double *work_Np2_3_3_array2, double *work_Np2_3_3_array3, double *work_3_Np2_array1, double gamma, double epsilon, double M_inf, double Re_inf, double Pr_inf, double c_v, double T_inf, double norm_delta_t, double  norm_delta_x, int N)
 {
     Mat2D temp_RHS, norm_A, norm_P_minus_Rx_matrix, norm_R_matrix, I;
     double *RHS, *theta, *phi, *psi;
 
     temp_RHS = work_3_Np2_mat1;
     RHS      = work_3_Np2_array1;
-    theta    = work_N_3_3_array1;
-    phi      = work_N_3_3_array2;
-    psi      = work_N_3_3_array3;
+    theta    = work_Np2_3_3_array1;
+    phi      = work_Np2_3_3_array2;
+    psi      = work_Np2_3_3_array3;
     
     /* zeroing theta, phi, psi */
-    for (int i = 0; i < N+1; i++) {
+    for (int i = 0; i < N+2; i++) {
         for (int m = 0; m < 3; m++) {
             for (int  n = 0; n < 3; n++) {
-                theta[offset3d(i, m, n, N, 3, 3)] = 0;
+                theta[offset3d(i, m, n, N+2, 3, 3)] = 0;
+                phi[offset3d(i, m, n, N+2, 3, 3)] = 0;
+                psi[offset3d(i, m, n, N+2, 3, 3)] = 0;
             }
         }
     }
@@ -912,95 +921,90 @@ double calc_delta_Q_implicit_steger_warming(Mat2D delta_Q, Mat2D Q, Mat2D work_3
         }
     }
 
-    int i = 1;
+    for (int i = 1; i <= N; i++) {
+        /* Theta */
+        norm_A = work_3_3_mat5;
+        mat2D_fill(norm_A, 0);
+        calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'p', i-1);
+        for (size_t m = 0; m < norm_A.rows; m++) {
+            for (size_t n = 0; n < norm_A.cols; n++) {
+                theta[offset3d(i, m, n, N+2, 3, 3)] += - norm_delta_t / norm_delta_x * MAT2D_AT(norm_A, m, n);
+            }
+        }
+        norm_P_minus_Rx_matrix = work_3_3_mat5;
+        mat2D_fill(norm_P_minus_Rx_matrix, 0);
+        calc_norm_P_minus_Rx_matrix_at_i(norm_P_minus_Rx_matrix, Q, norm_delta_x, gamma, T_inf, i-1);
+        for (size_t m = 0; m < norm_P_minus_Rx_matrix.rows; m++) {
+            for (size_t n = 0; n < norm_P_minus_Rx_matrix.cols; n++) {
+                theta[offset3d(i, m, n, N+2, 3, 3)] += norm_delta_t / (2 * norm_delta_x) * M_inf / Re_inf * MAT2D_AT(norm_P_minus_Rx_matrix, m, n);
+            }
+        }
+        norm_R_matrix = work_3_3_mat5;
+        mat2D_fill(norm_R_matrix, 0);
+        calc_norm_R_matrix_at_i(norm_R_matrix, Q, gamma, T_inf, Pr_inf, c_v, i-1);
+        for (size_t m = 0; m < norm_R_matrix.rows; m++) {
+            for (size_t n = 0; n < norm_R_matrix.cols; n++) {
+                theta[offset3d(i, m, n, N+2, 3, 3)] += - norm_delta_t / (norm_delta_x * norm_delta_x) * M_inf / Re_inf * MAT2D_AT(norm_R_matrix, m, n);
+            }
+        }
 
-    /* Theta */
-    norm_A = work_3_3_mat5;
-    mat2D_fill(norm_A, 0);
-    calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'p', i-1);
-    for (size_t m = 0; m < norm_A.rows; m++) {
-        for (size_t n = 0; n < norm_A.cols; n++) {
-            theta[offset3d(i, m, n, N, 3, 3)] += - norm_delta_t / norm_delta_x * MAT2D_AT(norm_A, m, n);
+        /* Phi */
+        norm_A = work_3_3_mat5;
+        mat2D_fill(norm_A, 0);
+        calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'p', i);
+        for (size_t m = 0; m < norm_A.rows; m++) {
+            for (size_t n = 0; n < norm_A.cols; n++) {
+                phi[offset3d(i, m, n, N+2, 3, 3)] += norm_delta_t / norm_delta_x * MAT2D_AT(norm_A, m, n);
+            }
         }
-    }
-    norm_P_minus_Rx_matrix = work_3_3_mat5;
-    mat2D_fill(norm_P_minus_Rx_matrix, 0);
-    calc_norm_P_minus_Rx_matrix_at_i(norm_P_minus_Rx_matrix, Q, norm_delta_x, gamma, T_inf, i-1);
-    for (size_t m = 0; m < norm_P_minus_Rx_matrix.rows; m++) {
-        for (size_t n = 0; n < norm_P_minus_Rx_matrix.cols; n++) {
-            theta[offset3d(i, m, n, N, 3, 3)] += norm_delta_t / (2 * norm_delta_x) * M_inf / Re_inf * MAT2D_AT(norm_P_minus_Rx_matrix, m, n);
+        norm_A = work_3_3_mat5;
+        mat2D_fill(norm_A, 0);
+        calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'm', i);
+        for (size_t m = 0; m < norm_A.rows; m++) {
+            for (size_t n = 0; n < norm_A.cols; n++) {
+                phi[offset3d(i, m, n, N+2, 3, 3)] += - norm_delta_t / norm_delta_x * MAT2D_AT(norm_A, m, n);
+            }
         }
-    }
-    norm_R_matrix = work_3_3_mat5;
-    mat2D_fill(norm_R_matrix, 0);
-    calc_norm_R_matrix_at_i(norm_R_matrix, Q, gamma, T_inf, Pr_inf, c_v, i-1);
-    for (size_t m = 0; m < norm_R_matrix.rows; m++) {
-        for (size_t n = 0; n < norm_R_matrix.cols; n++) {
-            theta[offset3d(i, m, n, N, 3, 3)] += - norm_delta_t / (norm_delta_x * norm_delta_x) * M_inf / Re_inf * MAT2D_AT(norm_R_matrix, m, n);
+        I = work_3_3_mat5;
+        mat2D_identity_mat(I);
+        for (size_t m = 0; m < I.rows; m++) {
+            for (size_t n = 0; n < I.cols; n++) {
+                phi[offset3d(i, m, n, N+2, 3, 3)] += MAT2D_AT(I, m, n);
+            }
         }
-    }
+        norm_R_matrix = work_3_3_mat5;
+        mat2D_fill(norm_R_matrix, 0);
+        calc_norm_R_matrix_at_i(norm_R_matrix, Q, gamma, T_inf, Pr_inf, c_v, i);
+        for (size_t m = 0; m < norm_R_matrix.rows; m++) {
+            for (size_t n = 0; n < norm_R_matrix.cols; n++) {
+                phi[offset3d(i, m, n, N+2, 3, 3)] += 2 * norm_delta_t / (norm_delta_x * norm_delta_x) * M_inf / Re_inf * MAT2D_AT(norm_R_matrix, m, n);
+            }
+        }
 
-    /* Phi */
-    norm_A = work_3_3_mat5;
-    mat2D_fill(norm_A, 0);
-    calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'p', i);
-    for (size_t m = 0; m < norm_A.rows; m++) {
-        for (size_t n = 0; n < norm_A.cols; n++) {
-            phi[offset3d(i, m, n, N, 3, 3)] += MAT2D_AT(norm_A, m, n);
+        /* Psi */
+        norm_A = work_3_3_mat5;
+        mat2D_fill(norm_A, 0);
+        calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'm', i+1);
+        for (size_t m = 0; m < norm_A.rows; m++) {
+            for (size_t n = 0; n < norm_A.cols; n++) {
+                psi[offset3d(i, m, n, N+2, 3, 3)] += norm_delta_t / norm_delta_x * MAT2D_AT(norm_A, m, n);
+            }
         }
-    }
-    norm_A = work_3_3_mat5;
-    mat2D_fill(norm_A, 0);
-    calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'm', i);
-    for (size_t m = 0; m < norm_A.rows; m++) {
-        for (size_t n = 0; n < norm_A.cols; n++) {
-            phi[offset3d(i, m, n, N, 3, 3)] += - MAT2D_AT(norm_A, m, n);
+        norm_P_minus_Rx_matrix = work_3_3_mat5;
+        mat2D_fill(norm_P_minus_Rx_matrix, 0);
+        calc_norm_P_minus_Rx_matrix_at_i(norm_P_minus_Rx_matrix, Q, norm_delta_x, gamma, T_inf, i+1);
+        for (size_t m = 0; m < norm_P_minus_Rx_matrix.rows; m++) {
+            for (size_t n = 0; n < norm_P_minus_Rx_matrix.cols; n++) {
+                psi[offset3d(i, m, n, N+2, 3, 3)] += - norm_delta_t / (2 * norm_delta_x) * M_inf / Re_inf * MAT2D_AT(norm_P_minus_Rx_matrix, m, n);
+            }
         }
-    }
-    for (size_t m = 0; m < norm_A.rows; m++) {
-        for (size_t n = 0; n < norm_A.cols; n++) {
-            phi[offset3d(i, m, n, N, 3, 3)] = norm_delta_t / norm_delta_x * theta[offset3d(i, m, n, N, 3, 3)];
-        }
-    }
-    I = work_3_3_mat5;
-    mat2D_identity_mat(I);
-    for (size_t m = 0; m < I.rows; m++) {
-        for (size_t n = 0; n < I.cols; n++) {
-            phi[offset3d(i, m, n, N, 3, 3)] += MAT2D_AT(I, m, n);
-        }
-    }
-    norm_R_matrix = work_3_3_mat5;
-    mat2D_fill(norm_R_matrix, 0);
-    calc_norm_R_matrix_at_i(norm_R_matrix, Q, gamma, T_inf, Pr_inf, c_v, i);
-    for (size_t m = 0; m < norm_R_matrix.rows; m++) {
-        for (size_t n = 0; n < norm_R_matrix.cols; n++) {
-            phi[offset3d(i, m, n, N, 3, 3)] += 2 * norm_delta_t / norm_delta_x /norm_delta_x * M_inf / Re_inf * MAT2D_AT(norm_R_matrix, m, n);
-        }
-    }
-
-    /* Psi */
-    norm_A = work_3_3_mat5;
-    mat2D_fill(norm_A, 0);
-    calc_A_plus_or_minus_at_i(Q, norm_A, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, gamma, epsilon, 'm', i+1);
-    for (size_t m = 0; m < norm_A.rows; m++) {
-        for (size_t n = 0; n < norm_A.cols; n++) {
-            psi[offset3d(i, m, n, N, 3, 3)] += norm_delta_t / norm_delta_x * MAT2D_AT(norm_A, m, n);
-        }
-    }
-    norm_P_minus_Rx_matrix = work_3_3_mat5;
-    mat2D_fill(norm_P_minus_Rx_matrix, 0);
-    calc_norm_P_minus_Rx_matrix_at_i(norm_P_minus_Rx_matrix, Q, norm_delta_x, gamma, T_inf, i+1);
-    for (size_t m = 0; m < norm_P_minus_Rx_matrix.rows; m++) {
-        for (size_t n = 0; n < norm_P_minus_Rx_matrix.cols; n++) {
-            psi[offset3d(i, m, n, N, 3, 3)] += - norm_delta_t / (2 * norm_delta_x) * M_inf / Re_inf * MAT2D_AT(norm_P_minus_Rx_matrix, m, n);
-        }
-    }
-    norm_R_matrix = work_3_3_mat5;
-    mat2D_fill(norm_R_matrix, 0);
-    calc_norm_R_matrix_at_i(norm_R_matrix, Q, gamma, T_inf, Pr_inf, c_v, i+1);
-    for (size_t m = 0; m < norm_R_matrix.rows; m++) {
-        for (size_t n = 0; n < norm_R_matrix.cols; n++) {
-            psi[offset3d(i, m, n, N, 3, 3)] += - norm_delta_t / (norm_delta_x * norm_delta_x) * M_inf / Re_inf * MAT2D_AT(norm_R_matrix, m, n);
+        norm_R_matrix = work_3_3_mat5;
+        mat2D_fill(norm_R_matrix, 0);
+        calc_norm_R_matrix_at_i(norm_R_matrix, Q, gamma, T_inf, Pr_inf, c_v, i+1);
+        for (size_t m = 0; m < norm_R_matrix.rows; m++) {
+            for (size_t n = 0; n < norm_R_matrix.cols; n++) {
+                psi[offset3d(i, m, n, N+2, 3, 3)] += - norm_delta_t / (norm_delta_x * norm_delta_x) * M_inf / Re_inf * MAT2D_AT(norm_R_matrix, m, n);
+            }
         }
     }
 
@@ -1147,14 +1151,14 @@ int btri3s(double *a, double *b, double *c, double *f, int kd, int ks, int ke)
   
 }
 
-double calc_delta_Q(Mat2D delta_Q, Mat2D Q, Mat2D work_3_Np2_mat1, Mat2D work_3_Np1_mat1, Mat2D work_3_Np1_mat2, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double *work_3_Np2_array1, double *work_N_3_3_array1, double *work_N_3_3_array2, double *work_N_3_3_array3, double gamma, double epsilon, double M_inf, double Re_inf, double Pr_inf, double c_v, double T_inf, double norm_delta_t, double  norm_delta_x, int N, t_flag flags)
+double calc_delta_Q(Mat2D delta_Q, Mat2D Q, Mat2D work_3_Np2_mat1, Mat2D work_3_Np1_mat1, Mat2D work_3_Np1_mat2, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double *work_Np2_3_3_array1, double *work_Np2_3_3_array2, double *work_Np2_3_3_array3, double *work_3_Np2_array1, double gamma, double epsilon, double M_inf, double Re_inf, double Pr_inf, double c_v, double T_inf, double norm_delta_t, double  norm_delta_x, int N, t_flag flags)
 {
     double current_norma;
 
     if (flags & EXPLICIT_SW) {
         current_norma = calc_delta_Q_explicit_steger_warming(delta_Q, Q, work_3_Np1_mat1, work_3_Np1_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3, gamma, epsilon, M_inf, Re_inf, Pr_inf, T_inf, norm_delta_t, norm_delta_x, N);
     } else if (flags & IMPLICIT_SW) {
-        current_norma = calc_delta_Q_implicit_steger_warming(delta_Q, Q, work_3_Np2_mat1, work_3_Np1_mat1, work_3_Np1_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3, work_3_Np2_array1, work_N_3_3_array1, work_N_3_3_array2, work_N_3_3_array3, gamma, epsilon, M_inf, Re_inf, Pr_inf, c_v, T_inf, norm_delta_t, norm_delta_x, N);
+        current_norma = calc_delta_Q_implicit_steger_warming(delta_Q, Q, work_3_Np2_mat1, work_3_Np1_mat1, work_3_Np1_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3, work_Np2_3_3_array1, work_Np2_3_3_array2, work_Np2_3_3_array3, work_3_Np2_array1, gamma, epsilon, M_inf, Re_inf, Pr_inf, c_v, T_inf, norm_delta_t, norm_delta_x, N);
     } else if (flags & EXPLICIT_ROE) {
         ;
     }
