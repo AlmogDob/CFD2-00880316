@@ -11,6 +11,7 @@ https://youtu.be/L1TbWe8bVOc?list=PLpM-Dvs8t0VZPZKggcql-MmjaBdZKeDMw .*/
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #ifndef MATRIX2D_MALLOC
 #define MATRIX2D_MALLOC malloc
