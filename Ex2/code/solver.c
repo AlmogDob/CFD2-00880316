@@ -15,12 +15,13 @@
 #define dprintFLOUT(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
 #define dprintDOUBLE(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %g\n", expr);} while(0)     /* macro for easy debuging*/
 #define dprintSIZE_T(expr) do{printf("%s:%d: ", __FILE__, __LINE__); printf(#expr " = %zu\n", expr);} while(0)     /* macro for easy debuging*/
-#define dprintSCHEME(expr) do{ printf("%s:%d: scheme = ", __FILE__, __LINE__); if (flags & EXPLICIT_SW) { printf("EXPLICIT_SW\n"); } else if (flags & IMPLICIT_SW) { printf("IMPLICIT_SW\n"); } else if (flags & EXPLICIT_ROE) { printf("EXPLICIT_ROE\n"); } } while(0)     /* macro for easy debuging*/
+#define dprintSCHEME(expr) do{ printf("%s:%d: scheme = ", __FILE__, __LINE__); if (flags & EXPLICIT_SW) { printf("EXPLICIT_SW -> "); } else if (flags & IMPLICIT_SW) { printf("IMPLICIT_SW -> "); } else if (flags & EXPLICIT_ROE) { printf("EXPLICIT_ROE -> "); } if (flags & CONST_DELTA_TIME) { printf("CONST DELTA TIME\n"); } else { printf("VARIABLE DELTA TIME\n"); }} while(0)     /* macro for easy debuging*/
 
 typedef enum {
-    EXPLICIT_SW  = (1 << 0),
-    IMPLICIT_SW  = (1 << 1),
-    EXPLICIT_ROE = (1 << 2),
+    EXPLICIT_SW      = (1 << 0),
+    IMPLICIT_SW      = (1 << 1),
+    EXPLICIT_ROE     = (1 << 2),
+    CONST_DELTA_TIME = (1 << 3),
 } t_flag;
 
 #ifdef __linux__
@@ -31,7 +32,7 @@ typedef enum {
     int create_empty_dir(char *parent_directory);
 #endif
 
-void read_input(char *input_file, int *N, double *x_min, double *x_max, double *L, double *norm_delta_x, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *Pr_inf, double *R_specific, double *c_v, double *T_inf, int *max_iterations, double *final_time, t_flag *flags);
+void read_input(char *input_file, int *N, double *x_min, double *x_max, double *L, double *norm_delta_x, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *Pr_inf, double *R_specific, double *c_v, double *T_inf, int *max_iterations, double *const_norm_delta_time, double *final_time, t_flag *flags);
 void output_metadata(char *output_dir, int N, double x_min, double x_max, double Re_inf, double M_inf, double CFL, double gamma, double Pr_inf, double R_specific, double T_inf, int max_iterations, double final_time, t_flag flags);
 void print_mat2D_to_file(FILE *fp, Mat2D m);
 int offset3d(int i, int j, int k, int cols, int rows, int layers);
@@ -40,7 +41,7 @@ double calc_norm_kappa(double norm_T, double gamma, double T_inf);
 double calc_norm_energy(double gamma, double norm_rho, double norm_u, double norm_p);
 double calc_norm_p(double gamma, double norm_rho, double norm_u, double norm_e);
 double calc_norm_T(Mat2D Q, double gamma, int i);
-double calc_norm_delta_t(Mat2D Q, double gamma, double R_specific, double T_inf, double norm_delta_x, double CFL, int N, t_flag flags);
+double calc_norm_delta_t(Mat2D Q, double gamma, double R_specific, double T_inf, double norm_delta_x, double const_norm_delta_time, double CFL, int N, t_flag flags);
 void calc_T_matrix_at_i(Mat2D T_matrix, Mat2D Q, double gamma, int i);
 void calc_T_inverse_matrix_at_i(Mat2D T_inverse_matrix, Mat2D Q, double gamma, int i);
 void calc_lambda_plus_matrix_at_i(Mat2D lambda_plus_matrix, Mat2D Q, double gamma, int i, double epsilon);
@@ -62,7 +63,7 @@ int main(int argc, char const *argv[])
 /* declarations */
     char input_file[MAXDIR], init_conditions_file[MAXDIR], output_dir[MAXDIR], temp_word[MAXWORD];
     int N, max_iterations;
-    double x_min, x_max, L, norm_delta_x, Re_inf, M_inf, CFL, gamma, Pr_inf, R_specific, c_v, T_inf, final_time, epsilon = 1e-2, norm_delta_t, current_norma, elapsed_time = 0, *work_Np2_3_3_array1, *work_Np2_3_3_array2, *work_Np2_3_3_array3, *work_3_Np2_array1;
+    double x_min, x_max, L, norm_delta_x, Re_inf, M_inf, CFL, gamma, Pr_inf, R_specific, c_v, T_inf, const_norm_delta_time, final_time, epsilon = 1e-2, norm_delta_t, current_norma, elapsed_norm_time = 0, *work_Np2_3_3_array1, *work_Np2_3_3_array2, *work_Np2_3_3_array3, *work_3_Np2_array1;
     t_flag flags = 0;
     Mat2D init_Q, current_Q, next_Q, delta_Q, work_3_Np2_mat1, work_3_Np2_mat2, work_3_Np1_mat1, work_3_Np1_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3;
     FILE *output_Q_file, *output_iter_data_file;
@@ -96,7 +97,7 @@ int main(int argc, char const *argv[])
 
 /*------------------------------------------------------------*/
 /* reading the input */
-    read_input(input_file, &N, &x_min, &x_max, &L, &norm_delta_x, &Re_inf, &M_inf, &CFL, &gamma, &Pr_inf, &R_specific, &c_v, &T_inf, &max_iterations, &final_time, &flags);
+    read_input(input_file, &N, &x_min, &x_max, &L, &norm_delta_x, &Re_inf, &M_inf, &CFL, &gamma, &Pr_inf, &R_specific, &c_v, &T_inf, &max_iterations, &const_norm_delta_time, &final_time, &flags);
 
 /* Checking the input */
     dprintINT(N);
@@ -113,6 +114,7 @@ int main(int argc, char const *argv[])
     dprintDOUBLE(c_v);
     dprintDOUBLE(T_inf);
     dprintDOUBLE(final_time);
+    dprintDOUBLE(const_norm_delta_time);
     dprintINT(max_iterations);
     dprintSCHEME(flags);
     printf("--------------------\n");
@@ -164,7 +166,7 @@ int main(int argc, char const *argv[])
     strcpy(temp_word, output_dir);
     strcat(temp_word, "/output_iter_data.txt");
     output_iter_data_file = fopen(temp_word, "wt");
-    fprintf(output_iter_data_file, "%s, %s, %s, %s\n", "No", "norma", "norm_delta_time", "elapsed_time");
+    fprintf(output_iter_data_file, "%s, %s, %s, %s\n", "No", "norma", "norm_delta_time", "elapsed_norm_time");
 
 /*------------------------------------------------------------*/
 /* allocating the matrices */
@@ -201,38 +203,37 @@ int main(int argc, char const *argv[])
     mat2D_copy(current_Q, init_Q);
     mat2D_copy(next_Q, init_Q);
 
-    norm_delta_t = calc_norm_delta_t(current_Q, gamma, R_specific, T_inf, norm_delta_x, CFL, N, flags);
+    norm_delta_t = calc_norm_delta_t(current_Q, gamma, R_specific, T_inf, norm_delta_x, const_norm_delta_time, CFL, N, flags);
 
     print_mat2D_to_file(output_Q_file, current_Q);
-    fprintf(output_iter_data_file, "%d, %g, %g, %g\n", 0, current_norma, norm_delta_t, elapsed_time);
+    fprintf(output_iter_data_file, "%d, %g, %g, %g\n", 0, current_norma, norm_delta_t, elapsed_norm_time);
 
 /*------------------------------------------------------------*/
 /* the loop */
     for (int i = 0; i < 10000; i++) {
         apply_BC(current_Q, N);
 
-        norm_delta_t = calc_norm_delta_t(current_Q, gamma, R_specific, T_inf, norm_delta_x, CFL, N, flags);
+        norm_delta_t = calc_norm_delta_t(current_Q, gamma, R_specific, T_inf, norm_delta_x, const_norm_delta_time, CFL, N, flags);
 
         current_norma = calc_delta_Q(delta_Q, current_Q, work_3_Np2_mat1, work_3_Np1_mat1, work_3_Np1_mat2, work_3_3_mat1, work_3_3_mat2, work_3_3_mat3, work_3_3_mat4, work_3_3_mat5, work_3_1_mat1, work_3_1_mat2, work_3_1_mat3, work_Np2_3_3_array1, work_Np2_3_3_array2, work_Np2_3_3_array3, work_3_Np2_array1, gamma, epsilon, M_inf, Re_inf, Pr_inf, c_v, T_inf, norm_delta_t, norm_delta_x, N, flags);
 
         mat2D_add(next_Q, delta_Q);
         mat2D_copy(current_Q, next_Q);
 
-        elapsed_time += norm_delta_t;
+        elapsed_norm_time += norm_delta_t;
 
         if (i % 100 == 0) {
             printf("%d\n",i);
         }
         if (0 == i) {
-            fprintf(output_iter_data_file, "%d, %g, %g, %g\n", i+1, current_norma, norm_delta_t, elapsed_time);
+            fprintf(output_iter_data_file, "%d, %g, %g, %g\n", i+1, current_norma, norm_delta_t, elapsed_norm_time);
             print_mat2D_to_file(output_Q_file, current_Q);
-        }
-        if (i % 1 == 0) {
+        } else if (i % 1 == 0) {
+            fprintf(output_iter_data_file, "%d, %g, %g, %g\n", i+1, current_norma, norm_delta_t, elapsed_norm_time);
             print_mat2D_to_file(output_Q_file, current_Q);
-            fprintf(output_iter_data_file, "%d, %g, %g, %g\n", i+2, current_norma, norm_delta_t, elapsed_time);
         }
 
-        if (1.5 < elapsed_time) {
+        if (1.5 < elapsed_norm_time) {
             break;
         }
     }
@@ -333,7 +334,7 @@ Pr_inf         - double pointer
 max_iterations - int pointer max number of desired iterations 
 final_time     - double pointer to the final time of the program
 flags          - bit flags */
-void read_input(char *input_file, int *N, double *x_min, double *x_max, double *L, double *norm_delta_x, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *Pr_inf, double *R_specific, double *c_v, double *T_inf, int *max_iterations, double *final_time, t_flag *flags)
+void read_input(char *input_file, int *N, double *x_min, double *x_max, double *L, double *norm_delta_x, double *Re_inf, double *M_inf, double *CFL, double *gamma, double *Pr_inf, double *R_specific, double *c_v, double *T_inf, int *max_iterations, double *const_norm_delta_time, double *final_time, t_flag *flags)
 {
     char current_word[MAXWORD];
     float temp_f;
@@ -379,6 +380,9 @@ void read_input(char *input_file, int *N, double *x_min, double *x_max, double *
         } else if (!strcmp(current_word, "iterations")) {
             fscanf(fp, "%g", &temp_f);
             *max_iterations = (int)temp_f;
+        } else if (!strcmp(current_word, "norm_delta_time")) {
+            fscanf(fp, "%g", &temp_f);
+            *const_norm_delta_time = (double)temp_f;
         } else if (!strcmp(current_word, "final_time")) {
             fscanf(fp, "%g", &temp_f);
             *final_time = (double)temp_f;
@@ -397,6 +401,10 @@ void read_input(char *input_file, int *N, double *x_min, double *x_max, double *
     assert(*x_max > *x_min);
     *L = *x_max - * x_min;
     *norm_delta_x = (*L) / (*N) / (*L);
+
+    if (*const_norm_delta_time) {
+        *flags |= CONST_DELTA_TIME;
+    }
 
     fclose(fp);
 }
@@ -502,9 +510,9 @@ double calc_norm_T(Mat2D Q, double gamma, int i)
     return norm_p / norm_rho;
 }
 
-double calc_norm_delta_t(Mat2D Q, double gamma, double R_specific, double T_inf, double norm_delta_x, double CFL, int N, t_flag flags)
+double calc_norm_delta_t(Mat2D Q, double gamma, double R_specific, double T_inf, double norm_delta_x, double const_norm_delta_time, double CFL, int N, t_flag flags)
 {
-    double delta_t_CFL, delta_t_r, norm_rho, norm_u, norm_e, norm_p, norm_T, norm_a; 
+    double delta_t_CFL, delta_t_r, norm_rho, norm_u, norm_e, norm_p, norm_T, norm_a, max_allowed_norm_delta_time; 
     double maximum, norm_u_max = 0, norm_T_max = 0;
 
     for (int i = 1; i <= N; i++) {
@@ -528,7 +536,27 @@ double calc_norm_delta_t(Mat2D Q, double gamma, double R_specific, double T_inf,
     delta_t_CFL = (CFL * norm_delta_x) / norm_u_max;
     delta_t_r = (norm_delta_x * norm_delta_x) / (2 * calc_norm_mu(norm_T_max, gamma, T_inf));
 
-    return fmin(delta_t_CFL, delta_t_r);
+    max_allowed_norm_delta_time = fmin(delta_t_CFL, delta_t_r);
+
+    if (flags & CONST_DELTA_TIME) {
+        if ((const_norm_delta_time > max_allowed_norm_delta_time)) {
+            if (flags & IMPLICIT_SW) {
+                if ((const_norm_delta_time > delta_t_r)) {
+                    printf("[Warning] dt might be too big\n");
+                    printf("          const dt         -> %g\n", const_norm_delta_time);
+                    printf("          max allowed dt r -> %g\n", delta_t_r);
+                }
+            } else {
+                printf("[Warning] dt might be too big\n");
+                printf("          const dt           -> %g\n", const_norm_delta_time);
+                printf("          max allowed dt r   -> %g\n", delta_t_r);
+                printf("          max allowed dt CFL -> %g\n", delta_t_CFL);
+            }
+        }
+        return const_norm_delta_time;
+    } else {
+        return max_allowed_norm_delta_time;
+    }
 }
 
 void calc_T_matrix_at_i(Mat2D T_matrix, Mat2D Q, double gamma, int i)
@@ -1018,6 +1046,11 @@ double calc_delta_Q_implicit_steger_warming(Mat2D delta_Q, Mat2D Q, Mat2D work_3
     }
 
     return mat2D_calc_norma(delta_Q);
+}
+
+double calc_delta_Q_explicit_roe()
+{
+    return 0;
 }
 
 /* 3x3 block tri-diagonal matrix solver 

@@ -34,19 +34,22 @@ int main(void)
     MAT2D_AT(m1, 1, 1) = 7;
     MAT2D_AT(m1, 1, 2) = 8;
 
-    MAT2D_PRINT(m1);
-    print_array(m1.elements, ni*nj);
+    // MAT2D_PRINT(m1);
+    // print_array(m1.elements, ni*nj);
      
     /* ---------------------------------------- */
     double *a1 = (double *)calloc(ni*nj, sizeof(double));
     print_array(a1, ni*nj);
 
     a1[offset2d(0, 0, ni, nj)] = 1;
-    a1[offset2d(0, 1, ni, nj)] = 2;
-    a1[offset2d(0, 2, ni, nj)] = 3;
-    a1[offset2d(1, 0, ni, nj)] = 6;
-    a1[offset2d(1, 1, ni, nj)] = 7;
+    a1[offset2d(1, 0, ni, nj)] = 2;
+    a1[offset2d(2, 0, ni, nj)] = 3;
+    a1[offset2d(0, 1, ni, nj)] = 4;
+    a1[offset2d(1, 1, ni, nj)] = 5;
+    a1[offset2d(2, 1, ni, nj)] = 6;
+    a1[offset2d(0, 2, ni, nj)] = 7;
     a1[offset2d(1, 2, ni, nj)] = 8;
+    a1[offset2d(2, 2, ni, nj)] = 9;
     print_array(a1, ni*nj);
 
     return 0;

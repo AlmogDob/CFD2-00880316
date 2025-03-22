@@ -1,0 +1,2 @@
+N, x_min, x_max, Re_inf, M_inf, CFL, scheme, gamma, Pr_inf, R_specific, T_inf, iterations, final_time
+100, 0.2, 1, 10000, 0.9, 0.5, IMPLICIT SW, 1.4, 0.71, 287, 288.15, 1000, 0

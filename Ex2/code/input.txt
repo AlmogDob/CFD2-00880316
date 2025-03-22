@@ -1,5 +1,5 @@
 N
-101
+100
 
 x_min
 0.2
@@ -14,7 +14,7 @@ M_inf
 0.9
 
 CFL
-0.1
+0.5
 
 scheme
 IMPLICIT_SW
@@ -36,6 +36,9 @@ T_inf
 
 iterations
 1e3
+
+norm_delta_time
+0
 
 final_time
 0
