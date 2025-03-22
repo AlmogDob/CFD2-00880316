@@ -40,6 +40,7 @@ double calc_norm_mu(double norm_T, double gamma, double T_inf);
 double calc_norm_kappa(double norm_T, double gamma, double T_inf);
 double calc_norm_energy(double gamma, double norm_rho, double norm_u, double norm_p);
 double calc_norm_p(double gamma, double norm_rho, double norm_u, double norm_e);
+double calc_norm_total_enthalpy_at_i(Mat2D Q, double gamma, int i);
 double calc_norm_T(Mat2D Q, double gamma, int i);
 double calc_norm_delta_t(Mat2D Q, double gamma, double R_specific, double T_inf, double norm_delta_x, double const_norm_delta_time, double CFL, int N, t_flag flags);
 void calc_T_matrix_at_i(Mat2D T_matrix, Mat2D Q, double gamma, int i);
@@ -52,7 +53,7 @@ void calc_norm_R_matrix_at_i(Mat2D norm_R, Mat2D Q, double gamma, double T_inf, 
 double initialize_Q(char *init_conditions_file, Mat2D Q, double gamma, int N);
 void apply_BC(Mat2D Q, int N);
 void calc_vector_of_E(Mat2D E, Mat2D Q, double gamma, int N);
-void calc_vector_of_tilde_norm_E_at_half(Mat2D tilde_norm_E, Mat2D Q, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double gamma, double epsilon, int N);
+void calc_vector_of_tilde_norm_E_at_half_sw(Mat2D tilde_norm_E, Mat2D Q, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double gamma, double epsilon, int N);
 void calc_vector_of_norm_V1_at_half(Mat2D V1, Mat2D Q, double gamma, double Pr_inf, double T_inf, double norm_delta_x, int N);
 double calc_delta_Q_implicit_steger_warming(Mat2D delta_Q, Mat2D Q, Mat2D work_3_Np2_mat1, Mat2D work_3_Np1_mat1, Mat2D work_3_Np1_mat2, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double *work_Np2_3_3_array1, double *work_Np2_3_3_array2, double *work_Np2_3_3_array3, double *work_3_Np2_array1, double gamma, double epsilon, double M_inf, double Re_inf, double Pr_inf, double c_v, double T_inf, double norm_delta_t, double  norm_delta_x, int N);
 int btri3s(double *a, double *b, double *c, double *f, int kd, int ks, int ke);
@@ -500,6 +501,16 @@ double calc_norm_p(double gamma, double norm_rho, double norm_u, double norm_e)
     return (gamma - 1) * (norm_e - 0.5 * norm_rho * norm_u * norm_u);
 }
 
+double calc_norm_total_enthalpy_at_i(Mat2D Q, double gamma, int i)
+{
+    double norm_rho = MAT2D_AT(Q, 0, i);
+    double norm_u = MAT2D_AT(Q, 1, i) / norm_rho;
+    double norm_e = MAT2D_AT(Q, 2, i);
+    double norm_p = calc_norm_p(gamma, norm_rho, norm_u, norm_e);
+
+    return (norm_e + norm_p) / norm_rho;
+}
+
 double calc_norm_T(Mat2D Q, double gamma, int i)
 {
     double norm_rho = MAT2D_AT(Q, 0, i);
@@ -658,6 +669,107 @@ void calc_A_plus_or_minus_at_i(Mat2D Q, Mat2D norm_A, Mat2D work_3_3_mat1, Mat2D
     mat2D_dot(norm_A, norm_T, m_temp);
 }
 
+void calc_lambda_ave_pm_matrix_at_i(Mat2D lambda_pm_matrix, Mat2D Q, double gamma, char sign, int i, double epsilon)
+{
+    double norm_rho_i, norm_u_i, norm_tot_H_i, norm_rho_ip1, norm_u_ip1, norm_tot_H_ip1, ave_norm_rho, ave_norm_u, ave_norm_tot_H, ave_norm_a, R;
+
+    norm_rho_i   = MAT2D_AT(Q, 0, i);
+    norm_u_i     = MAT2D_AT(Q, 1, i) / norm_rho_i;
+    norm_tot_H_i = calc_norm_total_enthalpy_at_i(Q, gamma, i);
+
+    norm_rho_ip1   = MAT2D_AT(Q, 0, i+1);
+    norm_u_ip1     = MAT2D_AT(Q, 1, i+1) / norm_rho_ip1;
+    norm_tot_H_ip1 = calc_norm_total_enthalpy_at_i(Q, gamma, i+1);
+
+    R = sqrt(norm_rho_ip1 / norm_rho_i);
+
+    ave_norm_rho   = R * norm_rho_i;
+    ave_norm_u     = (norm_u_i + R * norm_u_ip1) / (1 + R);
+    ave_norm_tot_H = (norm_tot_H_i + R * norm_tot_H_ip1) / (1 + R);
+
+    ave_norm_a = sqrt((gamma - 1) * (ave_norm_tot_H - 0.5 * ave_norm_u * ave_norm_u));
+    
+    mat2D_identity_mat(lambda_pm_matrix);
+    mat2D_mult(lambda_pm_matrix, ave_norm_u);
+    MAT2D_AT(lambda_pm_matrix, 1, 1) += ave_norm_a;
+    MAT2D_AT(lambda_pm_matrix, 2, 2) -= ave_norm_a;
+
+    for (int i = 0; i < 3; i++) {
+        if ('p' == sign) {
+            MAT2D_AT(lambda_pm_matrix, i, i) = (MAT2D_AT(lambda_pm_matrix, i, i) + sqrt(MAT2D_AT(lambda_pm_matrix, i, i) * MAT2D_AT(lambda_pm_matrix, i, i) + epsilon * epsilon)) / 2;
+        } else if ('m' == sign) {
+            MAT2D_AT(lambda_pm_matrix, i, i) = (MAT2D_AT(lambda_pm_matrix, i, i) - sqrt(MAT2D_AT(lambda_pm_matrix, i, i) * MAT2D_AT(lambda_pm_matrix, i, i) + epsilon * epsilon)) / 2;
+        }
+    }
+}
+
+void calc_T_matrix_roe_at_i(Mat2D T_matrix, Mat2D Q, double gamma, int i)
+{
+    double norm_rho_i, norm_u_i, norm_tot_H_i, norm_rho_ip1, norm_u_ip1, norm_tot_H_ip1, ave_norm_rho, ave_norm_u, ave_norm_tot_H, ave_norm_a, R;
+
+    norm_rho_i   = MAT2D_AT(Q, 0, i);
+    norm_u_i     = MAT2D_AT(Q, 1, i) / norm_rho_i;
+    norm_tot_H_i = calc_norm_total_enthalpy_at_i(Q, gamma, i);
+
+    norm_rho_ip1   = MAT2D_AT(Q, 0, i+1);
+    norm_u_ip1     = MAT2D_AT(Q, 1, i+1) / norm_rho_ip1;
+    norm_tot_H_ip1 = calc_norm_total_enthalpy_at_i(Q, gamma, i+1);
+
+    R = sqrt(norm_rho_ip1 / norm_rho_i);
+
+    ave_norm_rho   = R * norm_rho_i;
+    ave_norm_u     = (norm_u_i + R * norm_u_ip1) / (1 + R);
+    ave_norm_tot_H = (norm_tot_H_i + R * norm_tot_H_ip1) / (1 + R);
+
+    ave_norm_a = sqrt((gamma - 1) * (ave_norm_tot_H - 0.5 * ave_norm_u * ave_norm_u));
+
+    MAT2D_AT(T_matrix, 0, 0) = 1;
+    MAT2D_AT(T_matrix, 0, 1) = ave_norm_rho / 2 / ave_norm_a;
+    MAT2D_AT(T_matrix, 0, 2) = - ave_norm_rho / 2 / ave_norm_a;
+    MAT2D_AT(T_matrix, 1, 0) = ave_norm_u;
+    MAT2D_AT(T_matrix, 1, 1) = ave_norm_rho / 2 / ave_norm_a * (ave_norm_u + ave_norm_a);
+    MAT2D_AT(T_matrix, 1, 2) = - ave_norm_rho / 2 / ave_norm_a * (ave_norm_u - ave_norm_a);
+    MAT2D_AT(T_matrix, 2, 0) = ave_norm_u * ave_norm_u / 2;
+    MAT2D_AT(T_matrix, 2, 1) = ave_norm_rho / 2 / ave_norm_a * (ave_norm_tot_H + ave_norm_u * ave_norm_a);
+    MAT2D_AT(T_matrix, 2, 2) = - ave_norm_rho / 2 / ave_norm_a * (ave_norm_tot_H - ave_norm_u * ave_norm_a);
+}
+
+void calc_T_inverse_roe_matrix_at_i(Mat2D T_inverse_matrix, Mat2D Q, double gamma, int i)
+{
+    double norm_rho_i, norm_u_i, norm_tot_H_i, norm_rho_ip1, norm_u_ip1, norm_tot_H_ip1, ave_norm_rho, ave_norm_u, ave_norm_tot_H, ave_norm_a, R;
+
+    norm_rho_i   = MAT2D_AT(Q, 0, i);
+    norm_u_i     = MAT2D_AT(Q, 1, i) / norm_rho_i;
+    norm_tot_H_i = calc_norm_total_enthalpy_at_i(Q, gamma, i);
+
+    norm_rho_ip1   = MAT2D_AT(Q, 0, i+1);
+    norm_u_ip1     = MAT2D_AT(Q, 1, i+1) / norm_rho_ip1;
+    norm_tot_H_ip1 = calc_norm_total_enthalpy_at_i(Q, gamma, i+1);
+
+    R = sqrt(norm_rho_ip1 / norm_rho_i);
+
+    ave_norm_rho   = R * norm_rho_i;
+    ave_norm_u     = (norm_u_i + R * norm_u_ip1) / (1 + R);
+    ave_norm_tot_H = (norm_tot_H_i + R * norm_tot_H_ip1) / (1 + R);
+
+    ave_norm_a = sqrt((gamma - 1) * (ave_norm_tot_H - 0.5 * ave_norm_u * ave_norm_u));
+
+    MAT2D_AT(T_inverse_matrix, 0, 0) = 1 - (gamma - 1) / 2 * ave_norm_u * ave_norm_u / ave_norm_a / ave_norm_a;
+    MAT2D_AT(T_inverse_matrix, 0, 1) = (gamma - 1) * ave_norm_u * ave_norm_u / ave_norm_a / ave_norm_a;
+    MAT2D_AT(T_inverse_matrix, 0, 2) = - (gamma - 1) / ave_norm_a / ave_norm_a;
+    MAT2D_AT(T_inverse_matrix, 1, 0) = 1 / ave_norm_rho / ave_norm_a * ((gamma - 1) * ave_norm_u * ave_norm_u - ave_norm_u * ave_norm_a);
+    MAT2D_AT(T_inverse_matrix, 1, 1) = 1 / ave_norm_rho / ave_norm_a * (ave_norm_a - (gamma - 1) * ave_norm_u);
+    MAT2D_AT(T_inverse_matrix, 1, 2) = (gamma - 1) / ave_norm_rho / ave_norm_a;
+    MAT2D_AT(T_inverse_matrix, 2, 0) = - 1 / ave_norm_rho / ave_norm_a * ((gamma - 1) * ave_norm_u * ave_norm_u + ave_norm_u * ave_norm_a);
+    MAT2D_AT(T_inverse_matrix, 2, 1) = 1 / ave_norm_rho / ave_norm_a * (ave_norm_a + (gamma - 1) * ave_norm_u);
+    MAT2D_AT(T_inverse_matrix, 2, 2) = - (gamma - 1) / ave_norm_rho / ave_norm_a;
+}
+
+calc_A_roe_at_ip_half(Mat2D A_at_ip_half, Mat2D Q, double gamma, int i) 
+{
+    ;
+}
+
 void calc_norm_P_minus_Rx_matrix_at_i(Mat2D norm_P_minus_Rx, Mat2D Q, double norm_delta_x, double gamma, double T_inf, int i)
 {
     double d_norm_mu_d_norm_x, norm_u_i, norm_T_i, norm_T_ipm1, norm_rho;
@@ -808,7 +920,7 @@ void calc_vector_of_E(Mat2D E, Mat2D Q, double gamma, int N)
     }
 }
 
-void calc_vector_of_tilde_norm_E_at_half(Mat2D tilde_norm_E, Mat2D Q, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double gamma, double epsilon, int N)
+void calc_vector_of_tilde_norm_E_at_half_sw(Mat2D tilde_norm_E, Mat2D Q, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double gamma, double epsilon, int N)
 {
     Mat2D norm_A, Q_index, temp_3_by_1, E_at_index;
 
@@ -869,6 +981,11 @@ void calc_vector_of_norm_V1_at_half(Mat2D V1, Mat2D Q, double gamma, double Pr_i
     }
 } 
 
+void calc_vector_of_tilde_norm_E_at_half_roe()
+{
+    ;
+}
+
 double calc_delta_Q_explicit_steger_warming(Mat2D delta_Q, Mat2D Q, Mat2D work_3_Np1_mat1, Mat2D work_3_Np1_mat2, Mat2D work_3_3_mat1, Mat2D work_3_3_mat2, Mat2D work_3_3_mat3, Mat2D work_3_3_mat4, Mat2D work_3_3_mat5, Mat2D work_3_1_mat1, Mat2D work_3_1_mat2, Mat2D work_3_1_mat3, double gamma, double epsilon, double M_inf, double Re_inf, double Pr_inf, double T_inf, double norm_delta_t, double  norm_delta_x, int N)
 {
     Mat2D tilde_norm_E, V1, norm_T, norm_inverse_T, norm_lambda, norm_A, m_temp, Q_index, temp_3_by_1, E_at_index, tilde_norm_E_at_half, V1_at_half, temp_3_1;
@@ -884,7 +1001,7 @@ double calc_delta_Q_explicit_steger_warming(Mat2D delta_Q, Mat2D Q, Mat2D work_3
     temp_3_by_1    = work_3_1_mat2;
     E_at_index     = work_3_1_mat3;
 
-    calc_vector_of_tilde_norm_E_at_half(tilde_norm_E, Q, norm_T, norm_inverse_T, norm_lambda, norm_A, m_temp, Q_index, temp_3_by_1, E_at_index, gamma, epsilon, N);
+    calc_vector_of_tilde_norm_E_at_half_sw(tilde_norm_E, Q, norm_T, norm_inverse_T, norm_lambda, norm_A, m_temp, Q_index, temp_3_by_1, E_at_index, gamma, epsilon, N);
     calc_vector_of_norm_V1_at_half(V1, Q, gamma, Pr_inf, T_inf, norm_delta_x, N);
 
     tilde_norm_E_at_half = work_3_1_mat1;
